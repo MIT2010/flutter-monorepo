@@ -43,7 +43,14 @@ melos:
       run: melos exec --dir-exists=test -- fvm flutter test
       description: "Jalankan test di package yang punya folder test/ (fvm flutter test bekerja untuk package pure-Dart maupun Flutter)"
     gen:
-      run: melos exec --order-dependents --depends-on=build_runner -- fvm dart run build_runner build --delete-conflicting-outputs
+      # `fvm flutter pub run` here, not `fvm dart run` — dart-lang/sdk#62808
+      # (open): `dart run` doesn't set FLUTTER_ROOT/PUB_ENVIRONMENT, so pub
+      # can't resolve `sdk: flutter` deps for any package that needs the
+      # Flutter SDK (feature_home, authentication, design_system, mobile),
+      # failing with "Because X requires the Flutter SDK, version solving
+      # failed." See ADR-008 — this masked itself on dev machines with an
+      # ambient FLUTTER_ROOT already set, only surfaced on a clean CI runner.
+      run: melos exec --order-dependents --depends-on="build_runner" -- fvm flutter pub run build_runner build --delete-conflicting-outputs
       description: "Jalankan codegen (freezed, injectable, json_serializable) di package yang butuh, urut dependency graph (core sebelum shared) supaya micro-package injectable core selalu fresh sebelum shared membacanya"
     clean:
       run: melos exec -- fvm flutter clean
