@@ -20,6 +20,10 @@ workspace:
   - packages/authentication
   - packages/feature_home
 
+# ADR-006: always invoke these as `fvm exec melos run <name>`, never bare
+# `melos run <name>` — the scripts below call plain `flutter`/`dart` on
+# purpose (see ADR-006), so the SDK they resolve to depends entirely on
+# how the *outer* melos process was launched.
 melos:
   scripts:
     analyze:
@@ -34,3 +38,11 @@ melos:
     gen:
       run: melos exec --order-dependents --depends-on=build_runner -- dart run build_runner build --delete-conflicting-outputs
       description: "Jalankan codegen (freezed, injectable, json_serializable) di package yang butuh, urut dependency graph (core sebelum shared) supaya micro-package injectable core selalu fresh sebelum shared membacanya"
+    run:dev:web:
+      run: >
+        cd apps/mobile &&
+        fvm flutter run
+        --flavor dev
+        -t lib/main_dev.dart
+        -d chrome
+      description: "Jalankan app di mode development"

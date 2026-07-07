@@ -4,6 +4,8 @@
 > Corrections applied vs. the original brief (see chat message for full reasoning):
 > `dartz` → hand-rolled `Result<F,S>` sealed class · `hive` → `hive_ce` · UseCase is optional for trivial CRUD · docs consolidated from 12 files to 4.
 
+> **Every command in this repo goes through FVM (ADR-006):** `fvm flutter ...`, `fvm dart ...`, or `fvm exec melos run ...` — never bare `flutter`/`dart`/`melos`. See [README.md](README.md) for setup.
+
 ---
 
 ## 1. Architecture Philosophy
@@ -981,5 +983,8 @@ Deliberately **not** built now, because YAGNI — but the architecture leaves ro
 
 **ADR-005 — Use freezed 3.x syntax: `abstract class` / `sealed class`, no `.when()`/`.whenOrNull()`.**
 *Context:* Original draft of this document used freezed 2.x syntax (`class X with _$X`, `.whenOrNull()` in listeners). Freezed 3.0 (current stable: 3.2.5) made this a breaking change: single-constructor classes must be declared `abstract class`, multi-constructor union types (like Bloc states) must be declared `sealed class`, and `.when()`/`.map()`-family methods are removed in favor of Dart 3's native `switch` pattern matching. *Decision:* All freezed models and states in this document (and in code Claude Code generates from it) use the 3.x syntax and native pattern matching. *Status:* Accepted — corrected after the `authentication` package stage, before any freezed code was written for it.
+
+**ADR-006 — Enforce FVM for every command; pin Flutter to an exact version, not a channel.**
+*Context (2026-07-07):* An audit found `.fvmrc` present but set to `"flutter": "stable"` — a channel alias, not a fixed version — and every `flutter`/`dart`/`melos` command run in earlier stages used the machine's ambient global Flutter install with no `fvm` prefix at all. Both happened to resolve to the same build (3.44.4, revision `ad70ec4617`), so nothing broke yet, but purely by coincidence: the two are independent SDK checkouts that could silently diverge the moment either one is upgraded on its own. Separately, `packages/core` and `packages/authentication` had `freezed` pinned to a prerelease `^4.0.0-dev.3` (paired with a mismatched `freezed_annotation ^3.0.0`) — against this project's own no-prerelease-dependency rule. Correcting that to stable `freezed ^3.2.5` then collided with `injectable_generator ^3.1.0`, whose `lean_builder ^1.2.0` requires `analyzer ^13.0.0` — outside freezed 3.2.5's `<13.0.0` ceiling. *Decision:* `.fvmrc` is hard-pinned to an exact version (`3.44.4`) rather than a channel. Every local command goes through `fvm flutter`, `fvm dart`, or `fvm exec melos run <name>` — never bare `flutter`/`dart`/`melos` (see [README.md](README.md)). `freezed` is pinned to `^3.2.5` with `freezed_annotation ^3.1.0` everywhere it's used, and `injectable_generator` is pinned to `^3.0.0` (not `^3.1.0`) across every package so its `lean_builder`/`analyzer` requirement stays compatible with freezed. `.github/workflows/ci.yaml` reads the same `.fvmrc` via `kuhnroyal/flutter-fvm-config-action`, before the analyze/test steps, so CI, local dev, and any future teammate's machine all resolve to the identical pinned SDK. *Status:* Accepted.
 
 *(Add new entries here, dated, every time a future-you would otherwise wonder "why did I do it this way." This is the single document that makes the 30-minute test possible in year five.)*

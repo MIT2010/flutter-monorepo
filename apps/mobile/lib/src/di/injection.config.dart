@@ -14,7 +14,7 @@ import 'package:authentication/src/di/authentication_module.module.dart'
 import 'package:core/src/di/core_module.module.dart' as _i363;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
-import 'package:shared/src/di/shared_module.module.dart' as _i364;
+import 'package:shared/src/di/shared_module.module.dart' as _i363;
 
 extension GetItInjectableX on _i174.GetIt {
   // initializes the registration of main-scope dependencies inside of GetIt
@@ -24,7 +24,7 @@ extension GetItInjectableX on _i174.GetIt {
   }) async {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     await _i363.CorePackageModule().init(gh);
-    await _i364.SharedPackageModule().init(gh);
+    await _i363.SharedPackageModule().init(gh);
     await _i352.AuthenticationPackageModule().init(gh);
     return this;
   }

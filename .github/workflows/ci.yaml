@@ -1,0 +1,22 @@
+name: CI
+on: [pull_request]
+jobs:
+  analyze_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Reads .fvmrc and exposes its value so the next step installs the
+      # exact same Flutter version local dev is pinned to (ADR-006) —
+      # this must run before any analyze/test step below.
+      - uses: kuhnroyal/flutter-fvm-config-action@v3
+        id: fvm-config-action
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.fvm-config-action.outputs.FLUTTER_VERSION }}
+          channel: ${{ steps.fvm-config-action.outputs.FLUTTER_CHANNEL }}
+      - run: dart pub global activate melos
+      - run: flutter pub get
+      - run: melos run gen
+      - run: melos run analyze
+      - run: melos run format
+      - run: melos run test
