@@ -1,0 +1,36 @@
+name: flutter_starter_kit_workspace
+publish_to: none
+
+environment:
+  sdk: ^3.12.2
+
+dev_dependencies:
+  # Pinned to the 7.x line (not the newer ^8.1.0) because melos 8.x bumped
+  # its cli_util dependency to ^0.5.0, which conflicts with
+  # flutter_launcher_icons' cli_util ^0.4.1 (apps/mobile) once both land in
+  # the same pub workspace resolution — melos is dev-tooling only, never
+  # imported by app code, so pinning it down a major is low-risk.
+  melos: ^7.0.0
+
+workspace:
+  - apps/mobile
+  - packages/core
+  - packages/design_system
+  - packages/shared
+  - packages/authentication
+  - packages/feature_home
+
+melos:
+  scripts:
+    analyze:
+      run: melos exec -- dart analyze
+      description: "Analyze semua package"
+    format:
+      run: melos exec -- dart format --set-exit-if-changed .
+      description: "Cek format semua package"
+    test:
+      run: melos exec --dir-exists=test --no-flutter -- dart test && melos exec --dir-exists=test --flutter -- flutter test
+      description: "Jalankan test: `dart test` utk package pure-Dart (core), `flutter test` utk package Flutter"
+    gen:
+      run: melos exec --order-dependents --depends-on=build_runner -- dart run build_runner build --delete-conflicting-outputs
+      description: "Jalankan codegen (freezed, injectable, json_serializable) di package yang butuh, urut dependency graph (core sebelum shared) supaya micro-package injectable core selalu fresh sebelum shared membacanya"

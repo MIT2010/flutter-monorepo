@@ -1,0 +1,11 @@
+
+# FVM Version Cache
+.fvm/
+
+# Dart/Pub workspace resolution cache (root-level; each package's own
+# .dart_tool/ is already covered by its own generated .gitignore)
+.dart_tool/
+
+# IntelliJ related
+*.iml
+.idea/

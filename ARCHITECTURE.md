@@ -1,0 +1,985 @@
+# The Solo-Sustainable Flutter Starter Kit
+### Architecture designed to be understood in under 30 minutes, five years from now
+
+> Corrections applied vs. the original brief (see chat message for full reasoning):
+> `dartz` → hand-rolled `Result<F,S>` sealed class · `hive` → `hive_ce` · UseCase is optional for trivial CRUD · docs consolidated from 12 files to 4.
+
+---
+
+## 1. Architecture Philosophy
+
+Three beliefs drive every decision below:
+
+1. **A solo developer's real enemy is not "bad code," it's re-learning your own project.** Every abstraction has to pay rent in reduced re-learning time, or it gets cut, no matter how "enterprise" it looks.
+2. **Architecture should be evolutionary, not predictive.** We don't build a plugin system for analytics providers because we might switch someday — we build a *thin interface* because swapping is cheap insurance, not speculative infrastructure. There's a difference: an interface is one file; a plugin system is twenty.
+3. **Boring technology, boring structure.** Every package in this kit was chosen because it is still being merged into in 2026, not because it's clever. Cleverness is a liability when you're the only one who has to remember it in 2031.
+
+**The 30-minute test:** if a competent Flutter dev can't open this repo cold and explain where a bug fix for "wrong price on checkout screen" belongs within 30 minutes, the architecture has failed, regardless of how many SOLID principles it name-drops.
+
+---
+
+## 2. Why This Architecture (and why not others)
+
+| Alternative considered | Why rejected for *this* brief |
+|---|---|
+| Single-app, no monorepo, no packages | Fails the "scale to enterprise without refactor" requirement — moving code into packages later means rewriting every import and re-testing everything at once. Packages from day one cost ~1 extra day of Melos setup and save weeks later. |
+| MVVM without Clean Architecture layers | Faster to start, but domain logic leaks into ViewModels within 2–3 features. You'd be doing a bigger rewrite at feature #15 than the extra layer costs at feature #1. |
+| Riverpod + no Bloc | Genuinely competitive (see the audit above). Rejected only because of the explicit regulated-industry requirement (fintech/health/gov) where an explicit, replayable event log is a real compliance asset, not a preference. |
+| GetX | Rejected outright. As of 2026 it has a documented single-maintainer bottleneck and growing incompatibility with recent Flutter SDKs — the opposite of a 5–10 year bet. |
+| Full DDD (aggregates, value objects, domain events, CQRS) | Overkill. "Practical DDD" here means: rich models instead of anemic ones, and a ubiquitous language in naming — not event sourcing for a to-do list. |
+
+---
+
+## 3. Monorepo Structure
+
+```
+flutter_starter_kit/
+├── apps/
+│   └── mobile/                  # the actual shippable app (Android/iOS/Web/Desktop)
+├── packages/
+│   ├── core/                    # Result, Failure, UseCase, Env, Logger, Connectivity, Extensions
+│   ├── design_system/           # tokens, themes, reusable widgets
+│   ├── shared/                  # cross-feature glue: router, DI root, app-level services
+│   ├── authentication/          # feature package
+│   ├── feature_home/
+│   ├── feature_profile/
+│   └── feature_settings/
+├── melos.yaml
+├── analysis_options.yaml
+└── README.md
+```
+
+**Rule for creating a new package (answers "do NOT split unnecessarily"):**
+A folder becomes a **package** only when at least one of these is true:
+- It will be reused by 2+ features (`design_system`, `core`).
+- It needs an independently versioned release boundary (a package you might publish or share across apps later).
+- It needs isolated unit tests that shouldn't rebuild the whole app.
+
+Otherwise it stays a **folder inside a feature**. This is why `authentication` is a top-level package (used by routing guards *and* every feature that reads "current user") but something like a one-off "confetti animation on checkout success" stays inside `feature_home/lib/src/widgets/`.
+
+---
+
+## 4. Folder Tree (inside one feature package)
+
+```
+feature_home/
+├── lib/
+│   ├── feature_home.dart                # single public export barrel
+│   └── src/
+│       ├── data/
+│       │   ├── datasources/
+│       │   │   ├── home_remote_datasource.dart
+│       │   │   └── home_local_datasource.dart
+│       │   ├── models/
+│       │   │   └── home_item_model.dart      # freezed + json_serializable, extends domain entity
+│       │   └── repositories/
+│       │       └── home_repository_impl.dart
+│       ├── domain/
+│       │   ├── entities/
+│       │   │   └── home_item.dart            # freezed, no json, no Flutter import
+│       │   ├── repositories/
+│       │   │   └── home_repository.dart      # abstract contract
+│       │   └── usecases/
+│       │       └── get_home_feed_usecase.dart # ONLY if real orchestration exists
+│       └── presentation/
+│           ├── cubit/
+│           │   ├── home_cubit.dart
+│           │   └── home_state.dart
+│           ├── pages/
+│           │   └── home_page.dart
+│           └── widgets/
+│               └── home_item_card.dart
+├── test/
+│   ├── data/
+│   ├── domain/
+│   └── presentation/
+└── pubspec.yaml
+```
+
+**The dependency rule (Clean Architecture, enforced by import direction only — no lint plugin needed for a solo dev):**
+`presentation → domain ← data`. Domain never imports Flutter, Dio, or Hive. This single rule is what keeps business logic testable without a simulator, five years in.
+
+---
+
+## 5. Package Responsibilities
+
+| Package | Owns | Never contains |
+|---|---|---|
+| `core` | `Result`, `Failure`, `UseCase<T,P>`, `ApiClient`, interceptors, `Logger`, `Env`, `Connectivity`, extensions, validators, formatters | Any UI, any feature-specific model |
+| `design_system` | Color/typography/spacing tokens, `AppTheme`, buttons, inputs, cards, dialogs, responsive breakpoints | Business logic, network calls |
+| `shared` | `AppRouter` (go_router config), the DI composition root, `FeatureFlags`, `Analytics`/`CrashReporter`/`RemoteConfig` interfaces | Feature-specific screens |
+| `authentication` | Login/register/token refresh domain + data + minimal UI, `AuthGuard` | Screens unrelated to identity |
+| `feature_*` | One bounded product area | Direct imports from another `feature_*` (features talk through `shared` or `core`, never to each other) |
+
+---
+
+## 6. Dependency Graph
+
+```
+                 ┌────────────┐
+                 │   apps/mobile   │  (composition root, main.dart)
+                 └───────┬────────┘
+                         │ depends on all features + shared
+        ┌────────────────┼─────────────────┐
+        ▼                ▼                 ▼
+  feature_home     feature_profile   feature_settings
+        │                │                 │
+        └────────┬───────┴────────┬────────┘
+                  ▼                ▼
+           authentication      shared
+                  │                │
+                  └───────┬────────┘
+                           ▼
+                  design_system   core
+                           │        │
+                           └───┬────┘
+                          (leaf packages, zero
+                           internal dependencies)
+```
+
+`core` and `design_system` are leaves — they depend on nothing else in the repo. That's what makes them safe to reuse in your *next* Flutter project by literally copying the two folders.
+
+---
+
+## 7. Layer Responsibilities
+
+- **Presentation** — widgets + Cubit/Bloc. Renders state, dispatches events/calls Cubit methods. Zero business logic, zero direct repository calls except the explicitly-allowed trivial-CRUD shortcut (see §21).
+- **Domain** — entities (freezed, pure Dart), repository *contracts* (abstract classes), UseCases for orchestration. This layer defines what the app does, not how.
+- **Data** — repository *implementations*, remote/local datasources, DTO models (freezed + json_serializable) that map to domain entities. This layer defines how, and is the only layer allowed to throw exceptions (everything above catches and converts to `Failure`).
+
+---
+
+## 8. Data Flow
+
+```
+Widget → Cubit.method() → UseCase (if real logic) → Repository (interface)
+   → RepositoryImpl → RemoteDataSource (Dio) / LocalDataSource (Hive/secure storage)
+   ← Either<Failure, Model> ← Repository converts Model → Entity
+   ← Cubit emits new State ← Widget rebuilds via BlocBuilder
+```
+
+Every arrow going *right* can throw or fail; every arrow going *left* is a `Result`. The boundary where exceptions become `Result` is always the repository implementation — that's the one place you need to remember when debugging "why did my UI never show an error."
+
+---
+
+## 9. Authentication Flow
+
+```
+App start
+  → AuthCubit checks SecureStorage for refresh token
+  → valid?  → AuthState.authenticated(user) → router redirects to /home
+  → invalid/none → AuthState.unauthenticated() → router redirects to /login
+
+Login screen
+  → LoginCubit.submit(email, password)
+  → AuthRepository.login() → Dio POST /auth/login
+  → success → store access+refresh token in flutter_secure_storage
+            → AuthCubit.emit(authenticated)
+  → failure → LoginState.error(Failure) → shown inline, never a dialog for form errors
+
+Token refresh (interceptor-level, invisible to features)
+  → Dio interceptor catches 401 → pauses queued requests
+  → calls /auth/refresh once → replays queued requests → if refresh also fails, force logout
+```
+
+---
+
+## 10. API Flow
+
+```
+Feature Repository
+   → ApiClient.get('/endpoint')          (core package, one Dio instance app-wide)
+      → LoggingInterceptor (dev only)
+      → AuthInterceptor (attaches Bearer token)
+      → RetryInterceptor (idempotent GETs only, exponential backoff, max 3)
+      → RefreshTokenInterceptor (on 401)
+      → ConnectivityInterceptor (fails fast with NetworkFailure if offline, skips a dead 30s timeout)
+   → DioException → mapped to typed Failure (ServerFailure, TimeoutFailure, NetworkFailure...)
+   → Either<Failure, Response> returned to repository
+```
+
+---
+
+## 11. Offline Flow
+
+```
+Repository.getData()
+  1. Try RemoteDataSource
+     success → write-through to LocalDataSource (cache) → return Right(data)
+     failure (network) → fall back to LocalDataSource → return Right(cachedData) tagged isStale:true
+     failure (server 4xx/5xx) → return Left(Failure) — don't silently serve stale data on a real server error
+  2. Mutations while offline → written to an OfflineQueue (Hive box) with status pending
+  3. ConnectivityListener (core) → on reconnect, flushes OfflineQueue FIFO, one item at a time,
+     each success removes it from the queue, each failure keeps it and stops the flush (no silent data loss)
+```
+
+This shape is decided **now** (repository already returns "stale" metadata, a queue box already exists in `core`) precisely so that turning on offline-first for one feature later needs zero refactor — only new local datasource logic.
+
+---
+
+## 12. Dependency Injection Flow
+
+```
+main.dart
+  → WidgetsFlutterBinding.ensureInitialized()
+  → await configureDependencies(env: Env.current)   // injectable-generated
+  → runApp(App())
+
+Generated by injectable:
+  @module → external deps (Dio instance, SharedPreferences, Hive boxes)
+  @LazySingleton → ApiClient, Logger, repositories
+  @Injectable → UseCases, Cubits (factory — fresh instance per screen)
+  @Environment('dev'|'staging'|'prod') → swaps AnalyticsService implementation etc.
+```
+
+No manual `getIt.registerLazySingleton(...)` calls anywhere in feature code — you annotate a class, run `dart run build_runner build`, done.
+
+---
+
+## 13. Routing Flow
+
+```
+GoRouter(
+  redirect: (context, state) => AuthGuard.redirect(context, state),  // checks AuthCubit state
+  routes: [
+    ShellRoute(                       // persistent bottom nav
+      builder: (_, __, child) => AppShell(child: child),
+      routes: [
+        GoRoute(path: '/home', ...),
+        GoRoute(path: '/profile', ...),
+      ],
+    ),
+    GoRoute(path: '/login', ...),
+    GoRoute(path: '/settings/:section', ...),   // nested + deep-linkable
+  ],
+  errorBuilder: (_, __) => NotFoundPage(),
+)
+
+RoleGuard: wraps redirect logic — checks AuthCubit.state.user.role against route metadata
+  (a simple `extra: {'roles': ['admin']}` on GoRoute, checked in the same redirect function —
+   no need for a separate guard framework)
+```
+
+---
+
+## 14. Feature Template (what `mason make feature` generates)
+
+```
+feature_<name>/
+  lib/feature_<name>.dart
+  lib/src/data/...
+  lib/src/domain/...
+  lib/src/presentation/...
+  test/...
+  pubspec.yaml   (pre-wired: core, design_system dependencies)
+  melos.yaml entry auto-added
+```
+
+One brick, one command, ~15 files, all correctly wired to the DI graph via `@injectable` stubs — this is the entire point of Mason here: not "generate everything," but eliminate the 20 minutes of folder/pubspec/import boilerplate every new feature otherwise costs.
+
+---
+
+## 15. Core Package
+
+```dart
+// packages/core/lib/src/result/result.dart
+sealed class Result<F, S> {
+  const Result();
+}
+
+final class Ok<F, S> extends Result<F, S> {
+  final S value;
+  const Ok(this.value);
+}
+
+final class Err<F, S> extends Result<F, S> {
+  final F failure;
+  const Err(this.failure);
+}
+
+extension ResultX<F, S> on Result<F, S> {
+  T fold<T>(T Function(F failure) onError, T Function(S value) onSuccess) => switch (this) {
+        Ok(value: final v) => onSuccess(v),
+        Err(failure: final f) => onError(f),
+      };
+
+  bool get isOk => this is Ok<F, S>;
+  bool get isErr => this is Err<F, S>;
+}
+```
+
+```dart
+// packages/core/lib/src/error/failure.dart
+sealed class Failure {
+  final String message;
+  const Failure(this.message);
+}
+
+final class ServerFailure extends Failure {
+  final int? statusCode;
+  const ServerFailure(super.message, {this.statusCode});
+}
+
+final class NetworkFailure extends Failure {
+  const NetworkFailure() : super('No internet connection');
+}
+
+final class CacheFailure extends Failure {
+  const CacheFailure(super.message);
+}
+
+final class ValidationFailure extends Failure {
+  const ValidationFailure(super.message);
+}
+
+final class UnauthorizedFailure extends Failure {
+  const UnauthorizedFailure() : super('Session expired');
+}
+```
+
+```dart
+// packages/core/lib/src/usecase/usecase.dart
+abstract class UseCase<Type, Params> {
+  Future<Result<Failure, Type>> call(Params params);
+}
+
+class NoParams {
+  const NoParams();
+}
+```
+
+```dart
+// packages/core/lib/src/network/api_client.dart
+@lazySingleton
+class ApiClient {
+  final Dio _dio;
+
+  ApiClient(this._dio);
+
+  Future<Result<Failure, T>> get<T>(
+    String path, {
+    Map<String, dynamic>? query,
+    required T Function(dynamic json) parser,
+  }) async {
+    try {
+      final response = await _dio.get(path, queryParameters: query);
+      return Ok(parser(response.data));
+    } on DioException catch (e) {
+      return Err(_mapDioError(e));
+    }
+  }
+
+  // post/put/delete/multipart follow the same shape.
+
+  Failure _mapDioError(DioException e) => switch (e.type) {
+        DioExceptionType.connectionTimeout ||
+        DioExceptionType.receiveTimeout =>
+          const NetworkFailure(),
+        DioExceptionType.badResponse when e.response?.statusCode == 401 =>
+          const UnauthorizedFailure(),
+        DioExceptionType.badResponse => ServerFailure(
+            e.response?.data['message'] ?? 'Server error',
+            statusCode: e.response?.statusCode,
+          ),
+        _ => const NetworkFailure(),
+      };
+}
+```
+
+Also included in `core` (kept intentionally thin, not shown in full to avoid bloating this document):
+`Env` (compile-time `--dart-define` reader), `AppLogger` (wraps `logger` package with named channels: api/bloc/nav/repo), `ConnectivityService` (wraps `connectivity_plus` + `internet_connection_checker_plus`), `Validator`/`Formatter` extensions, `Pagination<T>` model, `ApiResponse<T>` envelope.
+
+---
+
+## 16. Design System
+
+```dart
+// packages/design_system/lib/src/tokens/app_colors.dart
+class AppColors {
+  const AppColors._();
+  static const primary = Color(0xFF2D6CDF);
+  static const surface = Color(0xFFFFFFFF);
+  static const error = Color(0xFFD32F2F);
+  // dark-mode counterparts kept in AppColorsDark, selected by AppTheme
+}
+
+// packages/design_system/lib/src/tokens/app_spacing.dart
+class AppSpacing {
+  const AppSpacing._();
+  static const xs = 4.0, sm = 8.0, md = 16.0, lg = 24.0, xl = 32.0;
+}
+```
+
+```dart
+// packages/design_system/lib/src/theme/app_theme.dart
+class AppTheme {
+  static ThemeData light() => ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
+        // dynamic color: wrap MaterialApp with DynamicColorBuilder at app level,
+        // fall back to this static scheme when the platform doesn't support it
+      );
+
+  static ThemeData dark() => ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppColors.primary,
+          brightness: Brightness.dark,
+        ),
+      );
+}
+```
+
+Responsive layout: a single `Breakpoints` class (`mobile < 600 < tablet < 1024 < desktop`) plus one `AdaptiveLayout` widget that swaps between provided `mobile`/`tablet`/`desktop` builders. No responsive *framework* dependency — this is ~50 lines and every dev can read all of it.
+
+Buttons/inputs/cards/dialogs/bottom sheets: each is one file, wraps a Material 3 widget with the design tokens applied, exposes the same named-parameter API as its Material counterpart so it never feels like a foreign DSL.
+
+---
+
+## 17. Shared Package
+
+Owns things that are cross-cutting but *not* generic enough for `core` (i.e., they know about the app's concept of "user" or "feature," `core` does not):
+
+```dart
+// packages/shared/lib/src/router/app_router.dart
+@lazySingleton
+class AppRouter {
+  final AuthCubit authCubit;
+  AppRouter(this.authCubit);
+
+  late final router = GoRouter(
+    refreshListenable: GoRouterRefreshStream(authCubit.stream),
+    redirect: _redirect,
+    routes: _routes,
+  );
+
+  String? _redirect(BuildContext context, GoRouterState state) {
+    final loggedIn = authCubit.state is Authenticated;
+    final loggingIn = state.matchedLocation == '/login';
+    if (!loggedIn && !loggingIn) return '/login';
+    if (loggedIn && loggingIn) return '/home';
+    return null;
+  }
+
+  // ...routes defined via feature-exposed route lists, so feature_home
+  // contributes its own GoRoute objects instead of shared knowing about home's screens.
+}
+```
+
+```dart
+// packages/shared/lib/src/analytics/analytics_service.dart
+abstract class AnalyticsService {
+  Future<void> logEvent(String name, {Map<String, Object?>? params});
+  Future<void> setUserId(String? id);
+}
+
+// Default no-op so the app runs before you've picked a provider:
+@LazySingleton(as: AnalyticsService)
+class NoopAnalyticsService implements AnalyticsService {
+  @override
+  Future<void> logEvent(String name, {Map<String, Object?>? params}) async {}
+  @override
+  Future<void> setUserId(String? id) async {}
+}
+
+// Later: @Environment('prod') class FirebaseAnalyticsService implements AnalyticsService {...}
+// Business logic calls `analyticsService.logEvent(...)` and never knows which provider is live.
+```
+
+`CrashReporter` and `RemoteConfig` follow the identical no-op-first-interface pattern.
+
+---
+
+## 18. Example Login Feature — the running example for §18–24
+
+Folder: `packages/authentication/`. We'll trace one feature through every layer.
+
+**Domain entity:**
+```dart
+// domain/entities/user.dart
+// NOTE: freezed 3.x requires `abstract class` for single-constructor classes
+// (plain `class X with _$X` no longer compiles — see ADR-005).
+@freezed
+abstract class User with _$User {
+  const factory User({
+    required String id,
+    required String email,
+    required String role,
+  }) = _User;
+}
+```
+
+**Domain repository contract:**
+```dart
+// domain/repositories/auth_repository.dart
+abstract class AuthRepository {
+  Future<Result<Failure, User>> login({required String email, required String password});
+  Future<Result<Failure, void>> logout();
+  Future<User?> getCachedUser();
+}
+```
+
+---
+
+## 19. Example API Integration
+
+```dart
+// data/datasources/auth_remote_datasource.dart
+@injectable
+class AuthRemoteDataSource {
+  final ApiClient _client;
+  AuthRemoteDataSource(this._client);
+
+  Future<Result<Failure, UserModel>> login(String email, String password) {
+    return _client.post(
+      '/auth/login',
+      data: {'email': email, 'password': password},
+      parser: (json) => UserModel.fromJson(json),
+    );
+  }
+}
+```
+
+```dart
+// data/models/user_model.dart
+@freezed
+abstract class UserModel with _$UserModel {
+  const UserModel._();
+  const factory UserModel({
+    required String id,
+    required String email,
+    required String role,
+    required String accessToken,
+    required String refreshToken,
+  }) = _UserModel;
+
+  factory UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
+
+  User toEntity() => User(id: id, email: email, role: role);
+}
+```
+
+---
+
+## 20. Repository Example
+
+```dart
+// data/repositories/auth_repository_impl.dart
+@LazySingleton(as: AuthRepository)
+class AuthRepositoryImpl implements AuthRepository {
+  final AuthRemoteDataSource _remote;
+  final SecureTokenStorage _tokenStorage;   // core, wraps flutter_secure_storage
+
+  AuthRepositoryImpl(this._remote, this._tokenStorage);
+
+  @override
+  Future<Result<Failure, User>> login({required String email, required String password}) async {
+    final result = await _remote.login(email, password);
+    return result.fold(
+      (failure) => Err(failure),
+      (model) async {
+        await _tokenStorage.save(access: model.accessToken, refresh: model.refreshToken);
+        return Ok(model.toEntity());
+      } as S Function(UserModel), // (illustrative — in real code, await before returning)
+    );
+  }
+
+  @override
+  Future<Result<Failure, void>> logout() async {
+    await _tokenStorage.clear();
+    return const Ok(null);
+  }
+
+  @override
+  Future<User?> getCachedUser() => _tokenStorage.getCachedUser();
+}
+```
+
+---
+
+## 21. UseCase Example — and when to skip it
+
+```dart
+// domain/usecases/login_usecase.dart
+// Justified here: orchestrates repository call + (future) analytics + (future) biometric prompt.
+@injectable
+class LoginUseCase implements UseCase<User, LoginParams> {
+  final AuthRepository _repository;
+  final AnalyticsService _analytics;
+
+  LoginUseCase(this._repository, this._analytics);
+
+  @override
+  Future<Result<Failure, User>> call(LoginParams params) async {
+    final result = await _repository.login(email: params.email, password: params.password);
+    if (result.isOk) await _analytics.logEvent('login_success');
+    return result;
+  }
+}
+
+class LoginParams {
+  final String email;
+  final String password;
+  const LoginParams({required this.email, required this.password});
+}
+```
+
+**The explicit skip rule:** a feature like "get the app's current build number" or "toggle a boolean preference" does **not** get a UseCase. The Cubit calls the repository directly:
+```dart
+// Allowed shortcut — no UseCase, because there is no orchestration to name:
+class SettingsCubit extends Cubit<SettingsState> {
+  final SettingsRepository _repository;
+  SettingsCubit(this._repository) : super(SettingsInitial());
+
+  Future<void> toggleDarkMode() async {
+    final result = await _repository.setDarkMode(!state.isDarkMode);
+    result.fold(
+      (f) => emit(state.copyWith(error: f.message)),
+      (_) => emit(state.copyWith(isDarkMode: !state.isDarkMode)),
+    );
+  }
+}
+```
+If this Cubit ever grows a second dependency or a business rule ("can't enable analytics opt-out below age 13"), *that's* the signal to promote it to a UseCase — not before.
+
+---
+
+## 22. Bloc Example
+
+```dart
+// presentation/cubit/login_state.dart
+// NOTE: freezed 3.x requires `sealed class` for union types with multiple
+// factory constructors (see ADR-005) — plain `class` no longer compiles here.
+@freezed
+sealed class LoginState with _$LoginState {
+  const factory LoginState.initial() = LoginInitial;
+  const factory LoginState.loading() = LoginLoading;
+  const factory LoginState.success(User user) = LoginSuccess;
+  const factory LoginState.failure(Failure failure) = LoginFailureState;
+}
+```
+
+```dart
+// presentation/cubit/login_cubit.dart
+@injectable
+class LoginCubit extends Cubit<LoginState> {
+  final LoginUseCase _loginUseCase;
+  LoginCubit(this._loginUseCase) : super(const LoginState.initial());
+
+  Future<void> submit({required String email, required String password}) async {
+    emit(const LoginState.loading());
+    final result = await _loginUseCase(LoginParams(email: email, password: password));
+    result.fold(
+      (failure) => emit(LoginState.failure(failure)),
+      (user) => emit(LoginState.success(user)),
+    );
+  }
+}
+```
+
+---
+
+## 23. UI Example
+
+```dart
+// presentation/pages/login_page.dart
+class LoginPage extends StatelessWidget {
+  const LoginPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => getIt<LoginCubit>(),
+      child: Scaffold(
+        body: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: BlocConsumer<LoginCubit, LoginState>(
+            // NOTE: freezed 3.x removed .when()/.whenOrNull() in favor of
+            // Dart 3's native sealed-class pattern matching (see ADR-005).
+            listener: (context, state) {
+              switch (state) {
+                case LoginSuccess():
+                  context.go('/home');
+                case LoginFailureState(:final failure):
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text(failure.message)));
+                case LoginInitial():
+                case LoginLoading():
+                  break;
+              }
+            },
+            builder: (context, state) => Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AppTextField(label: 'Email', controller: _emailController),
+                const SizedBox(height: AppSpacing.sm),
+                AppTextField(label: 'Password', obscure: true, controller: _passwordController),
+                const SizedBox(height: AppSpacing.md),
+                AppButton(
+                  label: 'Login',
+                  loading: state is LoginLoading,
+                  onPressed: () => context.read<LoginCubit>().submit(
+                        email: _emailController.text,
+                        password: _passwordController.text,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+```
+
+No `if (state is LoginLoading) CircularProgressIndicator()` scattered logic — `AppButton` (design_system) owns its own loading-spinner-replaces-label behavior, so every screen gets consistent loading UI for free.
+
+---
+
+## 24. Local Cache Example
+
+```dart
+// packages/core/lib/src/storage/secure_token_storage.dart
+@lazySingleton
+class SecureTokenStorage {
+  final FlutterSecureStorage _storage;
+  SecureTokenStorage(this._storage);
+
+  Future<void> save({required String access, required String refresh}) async {
+    await _storage.write(key: 'access_token', value: access);
+    await _storage.write(key: 'refresh_token', value: refresh);
+  }
+
+  Future<String?> get accessToken => _storage.read(key: 'access_token');
+  Future<void> clear() => _storage.deleteAll();
+}
+```
+
+**When to use which local storage — the rule, not just the tool list:**
+
+| Storage | Use for | Never use for |
+|---|---|---|
+| `flutter_secure_storage` | Tokens, refresh tokens, anything an attacker profits from reading off a rooted device | Large objects (it's slow at scale — encrypted keychain/keystore reads aren't free) |
+| `shared_preferences` | Small, non-sensitive flags: theme mode, onboarding-seen, locale | Structured/relational data, anything security-sensitive |
+| `hive_ce` (not `hive`) | Structured local cache that needs to survive restarts and be queried (offline feed cache, draft forms) | Secrets (Hive boxes are unencrypted by default; use `HiveAesCipher` only if you must, and still prefer secure_storage for real secrets) |
+
+---
+
+## 25. Feature Flag Example
+
+```dart
+// packages/shared/lib/src/flags/feature_flags.dart
+abstract class FeatureFlags {
+  bool isEnabled(String key);
+}
+
+@LazySingleton(as: FeatureFlags)
+class LocalFeatureFlags implements FeatureFlags {
+  // Backed today by a local JSON asset / compile-time map.
+  // Swapping to Firebase Remote Config later means implementing this interface once —
+  // zero changes anywhere flags are *read*.
+  final Map<String, bool> _flags;
+  LocalFeatureFlags(this._flags);
+
+  @override
+  bool isEnabled(String key) => _flags[key] ?? false;
+}
+
+// Usage anywhere in feature code:
+if (getIt<FeatureFlags>().isEnabled('new_checkout_flow')) { ... }
+```
+
+---
+
+## 26. Analytics Example
+
+Already shown in §17 (`AnalyticsService`). Usage inside a Cubit:
+```dart
+Future<void> onAddToCart(Product product) async {
+  final result = await _addToCartUseCase(product);
+  if (result.isOk) {
+    await _analytics.logEvent('add_to_cart', params: {'product_id': product.id});
+  }
+}
+```
+Business logic never imports `firebase_analytics`. That import exists in exactly one file: the `prod`-environment implementation.
+
+---
+
+## 27. Crash Reporting Example
+
+```dart
+abstract class CrashReporter {
+  Future<void> recordError(Object error, StackTrace stack, {bool fatal = false});
+  Future<void> setUserId(String? id);
+}
+
+// Wired once, in main.dart:
+FlutterError.onError = (details) => getIt<CrashReporter>().recordError(
+      details.exception, details.stack ?? StackTrace.empty, fatal: true,
+    );
+PlatformDispatcher.instance.onError = (error, stack) {
+  getIt<CrashReporter>().recordError(error, stack, fatal: true);
+  return true;
+};
+```
+Same swap-later pattern: a `NoopCrashReporter` in dev, `FirebaseCrashlyticsReporter` behind `@Environment('prod')`.
+
+---
+
+## 28. Testing Strategy
+
+| Layer | What to test | Realistic solo-dev coverage target |
+|---|---|---|
+| Domain (entities, UseCases) | 100% — pure Dart, no mocking needed, cheapest tests you'll ever write | **95–100%** |
+| Data (repositories, datasources) | Success + each Failure branch, using `mocktail` for Dio/Hive | **75–85%** — diminishing returns past "every branch hit once" |
+| Bloc/Cubit | `bloc_test` — given state X, when event Y, expect states [Z] | **80%+** on Cubits with real logic; skip exhaustive tests on pass-through Cubits (§21) |
+| Widget | Critical interactive flows only (login form validation, checkout button states) | **Cover the 20% of screens that touch money or auth**, not all of them |
+| Golden | Design-system components only (`AppButton`, `AppCard` states) — not full pages, which churn too often to be worth golden-diffing | Every design_system widget, ~10 golden files total |
+| Integration | One "happy path" end-to-end per critical journey (login → home → checkout) | 3–5 total, run in CI on every release branch push, not every commit (too slow for solo iteration speed) |
+
+A solo developer chasing 100% everywhere is a common trap — the ROI curve inverts hard past "domain 100%, data ~80%, everything else risk-weighted."
+
+---
+
+## 29. CI/CD Pipeline
+
+```yaml
+# .github/workflows/ci.yaml
+name: CI
+on: [pull_request]
+jobs:
+  analyze_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: kuhnroyal/flutter-fvm-config-action@v3   # reads .fvmrc
+      - uses: subosito/flutter-action@v2
+        with: { flutter-version-file: .fvmrc }
+      - run: dart pub global activate melos
+      - run: melos bootstrap
+      - run: melos run analyze          # flutter analyze across all packages
+      - run: melos run format-check     # dart format --set-exit-if-changed
+      - run: melos run test             # flutter test --coverage across all packages
+```
+
+```yaml
+# .github/workflows/release.yaml — triggered on tag push (semantic version)
+name: Release
+on:
+  push:
+    tags: ['v*.*.*']
+jobs:
+  build_release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: melos bootstrap
+      - run: flutter build appbundle --release --flavor prod -t apps/mobile/lib/main_prod.dart
+      # iOS build step requires macOS runner + signing secrets — omitted here, documented in RELEASE.md
+```
+
+Conventional Commits (`feat:`, `fix:`, `chore:`) drive automatic changelog + semantic version bump via `melos version` — no manual version bumping across packages.
+
+---
+
+## 30. Release Strategy
+
+- **Flavors:** `dev` / `staging` / `prod`, each with its own `main_<flavor>.dart` entrypoint, app icon badge, and `--dart-define` API base URL. Never a hardcoded URL — `Env.current.apiBaseUrl` always.
+- **Release cadence for a solo dev:** ship `staging` builds continuously (every merge to `main` via CI → internal testers), promote to `prod` manually, weekly-or-slower. Don't automate prod releases until you have a team big enough to want to lose that control point.
+- **Rollback plan:** keep the previous prod `.aab`/`.ipa` artifact in CI storage for 90 days; a broken release is a re-upload of the previous artifact, not a git revert + rebuild under pressure.
+
+---
+
+## 31. Versioning Strategy
+
+- **App version:** SemVer (`MAJOR.MINOR.PATCH+BUILD`) in `pubspec.yaml`, bumped by `melos version` from Conventional Commits.
+- **Package versions (internal):** path-dependency during development (fast iteration, no publish step), switched to pinned git/pub versions only if a package is ever extracted for reuse in another project.
+- **API versioning:** the backend's concern, but the app pins to `/v1/` explicitly in `Env` — an API version bump is a config change, not a code change.
+
+---
+
+## 32. Scaling Strategy (1 → 100 Features)
+
+| Feature count | What changes |
+|---|---|
+| 1–10 | Exactly this kit. One `shared` package, one `core`, features added one at a time. |
+| 10–30 | Group related features into sub-monorepo "domains" if navigation between them gets tangled (e.g. `feature_checkout`, `feature_cart`, `feature_payment` might share a `commerce_shared` package). Still one app. |
+| 30–60 | Consider splitting `apps/mobile` into `apps/mobile` + `apps/desktop` only if the UX genuinely diverges enough to need different shells — not by default, since Flutter's responsive layer already handles most of this in one app. |
+| 60–100 | This is team territory, not solo. At this size, feature packages get their own CI pipelines (`melos run test --scope=feature_x`), and a second developer's onboarding is measured in the same "30-minute test," per feature, not per repo. |
+
+The folder structure and dependency direction never change across this table — that's the entire point of deciding it up front.
+
+---
+
+## 33. Long-Term Maintenance Strategy
+
+- **Quarterly dependency audit:** `melos exec -- flutter pub outdated`, budget half a day per quarter. Don't auto-upgrade on a schedule shorter than that — churn has a cost too.
+- **Flutter stable channel only**, upgraded within 2–4 weeks of a new stable release, never on release day (let the ecosystem's plugins catch up first).
+- **ADRs (Architecture Decision Records)** live as dated entries at the bottom of this file (§ADR Log below) — every "why did we do it this way" question gets answered by one file, not by archaeology through git blame.
+- **The abandonment-risk check** (this document's whole opening argument) — re-run it yearly for every non-Flutter-team-maintained dependency (Hive-family, DI codegen, HTTP client). A dependency going quiet for 12+ months with open unaddressed issues is your cue to plan a swap before it's forced.
+
+---
+
+## 34. Common Mistakes
+
+1. **Adding a UseCase for every single Cubit method** "because Clean Architecture says so" — re-read §21.
+2. **Business logic creeping into `didChangeDependencies` or `initState`** because "it's just this one screen" — it's never just one screen five features later.
+3. **Catching exceptions in the presentation layer** instead of the repository — breaks the one invariant (`Result` only, above data layer) that makes error handling predictable.
+4. **Global `BlocProvider` at the app root for feature-scoped Cubits** — leaks memory and state across navigation; scope Cubits to the route/page that needs them.
+5. **Committing generated files** (`*.g.dart`, `*.freezed.dart`) inconsistently — pick one policy (commit them, for a solo dev, so CI doesn't need a build step just to run analyze) and apply it repo-wide via `.gitignore` review, not per-package.
+6. **Treating `hive`/`isar` as permanent** without knowing their maintenance status — see the opening audit.
+
+---
+
+## 35. Trade-Off Analysis
+
+| Decision | You gain | You pay |
+|---|---|---|
+| Clean Architecture layers | Testability, swappable data sources, survives 5+ years without a rewrite | More files per feature, ~20% more typing per CRUD screen |
+| flutter_bloc over Riverpod | Explicit, auditable event trail (regulatory value) | More boilerplate per feature than Riverpod would cost |
+| get_it + injectable (codegen DI) | No manual wiring, environment-based swapping | A build_runner step in your dev loop; generated-file diffs in PRs |
+| Monorepo + Melos | Reuse-ready, enforced package boundaries | Slightly slower `pub get` across packages; one more tool to learn on day 1 |
+| Result/Failure over exceptions | Compiler-enforced error handling, no forgotten try/catch | More verbose call sites (`result.fold(...)` everywhere) |
+
+---
+
+## 36. Best Practices
+
+- Effective Dart + strict lints (`analysis_options.yaml` extends `package:lints/recommended.yaml` plus explicit `avoid_dynamic_calls`, `prefer_relative_imports` off in favor of package imports for clarity across packages).
+- No widget over ~150 lines — if `build()` is scrolling, extract a private widget class (not a private method — private *classes* get their own `const` optimization and their own golden tests).
+- Every `Failure` message is written for a human end user or logged separately for a developer — never leak a raw exception `.toString()` into a SnackBar.
+- Feature packages never import each other directly — communication goes through `shared` (router extras, DI-resolved services) or `core` (shared value types).
+
+---
+
+## 37. Future Improvements
+
+Deliberately **not** built now, because YAGNI — but the architecture leaves room without a rewrite:
+
+- **Code push / hot patch** for critical bug fixes without app store review — evaluate only if release cadence becomes a real business bottleneck.
+- **Modular feature delivery** (deferred components / dynamic feature modules) — only relevant past the "60–100 features" scale row in §32.
+- **GraphQL instead of REST** — `ApiClient` already isolates the network shape behind repository interfaces; swapping Dio+REST for a GraphQL client touches only `data/datasources`, never `domain` or `presentation`.
+- **Full offline-first sync engine** (CRDT-based or otherwise) — the queue-and-flush design in §11 is the seed; a real conflict-resolution engine is only worth building once a feature genuinely needs concurrent multi-device edits.
+
+---
+
+## ADR Log
+
+**ADR-001 — Reject `dartz`, use hand-rolled `Result<F,S>`.**
+*Context:* Spec required `Either<Failure, Success>` via dartz. *Decision:* dartz is unmaintained since ~2016 (evidenced by community forks `dart3z`, `dartz_plus`); Dart 3 sealed classes + pattern matching give the same safety with zero dependency. *Status:* Accepted.
+
+**ADR-002 — Reject original `hive`/`hive_flutter`, use `hive_ce`/`hive_ce_flutter`.**
+*Context:* Original Hive author moved on to Isar, then Isar stalled too; a community fork (Hive CE) now carries maintenance. *Decision:* pin to the CE packages from day one rather than migrating under pressure later. *Status:* Accepted.
+
+**ADR-003 — Keep flutter_bloc over Riverpod.**
+*Context:* Riverpod is the lower-boilerplate 2026 default for greenfield apps; Bloc remains the stronger fit for audited/regulated domains (fintech, healthcare, government — this project's explicit targets). *Decision:* Bloc, revisit if the product's compliance requirements change. *Status:* Accepted, documented as reversible.
+
+**ADR-004 — UseCase layer is optional, not mandatory, per Cubit method.**
+*Context:* A UseCase wrapping a single pass-through repository call adds a file and a test with no behavioral value. *Decision:* UseCases required only for real orchestration/business rules; trivial CRUD may call the repository directly from the Cubit. *Status:* Accepted.
+
+**ADR-005 — Use freezed 3.x syntax: `abstract class` / `sealed class`, no `.when()`/`.whenOrNull()`.**
+*Context:* Original draft of this document used freezed 2.x syntax (`class X with _$X`, `.whenOrNull()` in listeners). Freezed 3.0 (current stable: 3.2.5) made this a breaking change: single-constructor classes must be declared `abstract class`, multi-constructor union types (like Bloc states) must be declared `sealed class`, and `.when()`/`.map()`-family methods are removed in favor of Dart 3's native `switch` pattern matching. *Decision:* All freezed models and states in this document (and in code Claude Code generates from it) use the 3.x syntax and native pattern matching. *Status:* Accepted — corrected after the `authentication` package stage, before any freezed code was written for it.
+
+*(Add new entries here, dated, every time a future-you would otherwise wonder "why did I do it this way." This is the single document that makes the 30-minute test possible in year five.)*
