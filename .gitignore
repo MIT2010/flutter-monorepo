@@ -9,3 +9,36 @@
 # IntelliJ related
 *.iml
 .idea/
+
+# VS Code — same convention as the generated Flutter/Dart .gitignores:
+# launch/task configs may be worth sharing, so this isn't force-ignored.
+#.vscode/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Test coverage output (flutter test --coverage / dart test --coverage)
+coverage/
+*.lcov
+
+# Local secrets. This project passes config via --dart-define (see
+# README), never .env files, but this is a safety net in case one gets
+# added later.
+.env
+.env.*
+
+# Log files
+*.log
+
+# Defense-in-depth: any package added later that doesn't yet have its own
+# generated .gitignore still gets its build output ignored.
+build/
+
+# Claude Code local runtime state — machine-specific, never shared.
+# .claude/launch.json stays tracked; it's the dev-server config other
+# contributors need.
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+.claude/scheduled_tasks.json
