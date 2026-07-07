@@ -23,9 +23,18 @@ jobs:
       # resolves, stop the whole pipeline here instead of silently falling
       # through to analyze/test/gen against the wrong SDK.
       - run: fvm dart run tool/verify_fvm.dart
-      - run: dart pub global activate melos
       - run: fvm flutter pub get
-      - run: melos run gen
-      - run: melos run analyze
-      - run: melos run format
-      - run: melos run test
+      # ADR-008 follow-up: `melos` is NOT globally activated here. That would
+      # run it under the bootstrap Dart SDK above, which has no Flutter
+      # awareness at all — melos's own internal workspace resolution then
+      # hits dart-lang/sdk#62808 immediately (before ever reaching the
+      # scripts below), since packages like feature_home need the Flutter
+      # SDK. `melos` is already a pinned dev_dependency of the root
+      # workspace, resolved by `fvm flutter pub get` above — running it via
+      # `fvm flutter pub run melos` puts melos's *entire* process tree
+      # (not just the `gen` script's own command) under `flutter`'s
+      # Flutter-aware environment.
+      - run: fvm flutter pub run melos run gen
+      - run: fvm flutter pub run melos run analyze
+      - run: fvm flutter pub run melos run format
+      - run: fvm flutter pub run melos run test
