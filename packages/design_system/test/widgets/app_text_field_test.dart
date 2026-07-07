@@ -24,9 +24,7 @@ void main() {
       expect(changed, 'user@example.com');
     });
 
-    testWidgets('shows an error message when errorText is set', (
-      tester,
-    ) async {
+    testWidgets('shows an error message when errorText is set', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -41,9 +39,7 @@ void main() {
     testWidgets('obscures text when obscure is true', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: AppTextField(label: 'Password', obscure: true),
-          ),
+          home: Scaffold(body: AppTextField(label: 'Password', obscure: true)),
         ),
       );
 

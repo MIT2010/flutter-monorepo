@@ -41,9 +41,7 @@ ResponseBody _jsonBody(Map<String, dynamic> json, int statusCode) {
 void main() {
   group('ApiClient', () {
     test('get() returns Ok and parses a successful body', () async {
-      final dio = _buildDio(
-        (options) async => _jsonBody({'id': 1}, 200),
-      );
+      final dio = _buildDio((options) async => _jsonBody({'id': 1}, 200));
       final client = ApiClient(dio);
 
       final result = await client.get<int>(
@@ -86,22 +84,25 @@ void main() {
       expect((result as Err<Failure, Map>).failure, isA<UnauthorizedFailure>());
     });
 
-    test('maps a 500 response to ServerFailure with the server message', () async {
-      final dio = _buildDio(
-        (options) async => _jsonBody({'message': 'db down'}, 500),
-      );
-      final client = ApiClient(dio);
+    test(
+      'maps a 500 response to ServerFailure with the server message',
+      () async {
+        final dio = _buildDio(
+          (options) async => _jsonBody({'message': 'db down'}, 500),
+        );
+        final client = ApiClient(dio);
 
-      final result = await client.get<Map>(
-        '/thing',
-        parser: (json) => json as Map,
-      );
+        final result = await client.get<Map>(
+          '/thing',
+          parser: (json) => json as Map,
+        );
 
-      expect(result.isErr, isTrue);
-      final failure = (result as Err<Failure, Map>).failure as ServerFailure;
-      expect(failure.message, 'db down');
-      expect(failure.statusCode, 500);
-    });
+        expect(result.isErr, isTrue);
+        final failure = (result as Err<Failure, Map>).failure as ServerFailure;
+        expect(failure.message, 'db down');
+        expect(failure.statusCode, 500);
+      },
+    );
 
     test('falls back to a generic message when the body has none', () async {
       final dio = _buildDio((options) async => _jsonBody({}, 503));

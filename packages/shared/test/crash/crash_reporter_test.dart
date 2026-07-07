@@ -7,7 +7,11 @@ void main() {
 
     test('recordError completes without throwing', () async {
       await expectLater(
-        reporter.recordError(Exception('boom'), StackTrace.current, fatal: true),
+        reporter.recordError(
+          Exception('boom'),
+          StackTrace.current,
+          fatal: true,
+        ),
         completes,
       );
     });

@@ -7,11 +7,8 @@ part 'api_response.g.dart';
 /// `{success, message, data}` shape.
 @Freezed(genericArgumentFactories: true)
 abstract class ApiResponse<T> with _$ApiResponse<T> {
-  const factory ApiResponse({
-    required bool success,
-    String? message,
-    T? data,
-  }) = _ApiResponse<T>;
+  const factory ApiResponse({required bool success, String? message, T? data}) =
+      _ApiResponse<T>;
 
   factory ApiResponse.fromJson(
     Map<String, dynamic> json,

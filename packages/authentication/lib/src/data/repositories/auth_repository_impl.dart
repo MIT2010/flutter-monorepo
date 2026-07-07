@@ -23,18 +23,15 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     final result = await _remote.login(email, password);
-    return result.fold(
-      (failure) async => Err(failure),
-      (model) async {
-        await _tokenStorage.saveTokens(
-          access: model.accessToken,
-          refresh: model.refreshToken,
-        );
-        final user = model.toEntity();
-        await _tokenStorage.saveUser(user);
-        return Ok(user);
-      },
-    );
+    return result.fold((failure) async => Err(failure), (model) async {
+      await _tokenStorage.saveTokens(
+        access: model.accessToken,
+        refresh: model.refreshToken,
+      );
+      final user = model.toEntity();
+      await _tokenStorage.saveUser(user);
+      return Ok(user);
+    });
   }
 
   @override

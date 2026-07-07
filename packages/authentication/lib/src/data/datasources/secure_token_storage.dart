@@ -36,7 +36,10 @@ class SecureTokenStorage implements TokenProvider {
   Future<String?> get refreshToken => _storage.read(key: _refreshTokenKey);
 
   @override
-  Future<void> saveTokens({required String access, required String refresh}) async {
+  Future<void> saveTokens({
+    required String access,
+    required String refresh,
+  }) async {
     await _storage.write(key: _accessTokenKey, value: access);
     await _storage.write(key: _refreshTokenKey, value: refresh);
   }
@@ -47,7 +50,11 @@ class SecureTokenStorage implements TokenProvider {
   Future<void> saveUser(User user) {
     return _storage.write(
       key: _cachedUserKey,
-      value: jsonEncode({'id': user.id, 'email': user.email, 'role': user.role}),
+      value: jsonEncode({
+        'id': user.id,
+        'email': user.email,
+        'role': user.role,
+      }),
     );
   }
 

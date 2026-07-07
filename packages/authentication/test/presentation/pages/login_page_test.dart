@@ -64,9 +64,7 @@ void main() {
     expect(find.text('Login'), findsOneWidget);
   });
 
-  testWidgets('tapping login submits the entered credentials', (
-    tester,
-  ) async {
+  testWidgets('tapping login submits the entered credentials', (tester) async {
     whenListen(
       cubit,
       const Stream<LoginState>.empty(),

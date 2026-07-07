@@ -51,11 +51,7 @@ class ApiClient {
     required T Function(dynamic json) parser,
   }) async {
     try {
-      final response = await _dio.put(
-        path,
-        data: data,
-        queryParameters: query,
-      );
+      final response = await _dio.put(path, data: data, queryParameters: query);
       return Ok(parser(response.data));
     } on DioException catch (e) {
       return Err(_mapDioError(e));
@@ -107,8 +103,7 @@ class ApiClient {
     return switch (e.type) {
       DioExceptionType.connectionTimeout ||
       DioExceptionType.receiveTimeout ||
-      DioExceptionType.sendTimeout =>
-        const NetworkFailure(),
+      DioExceptionType.sendTimeout => const NetworkFailure(),
       DioExceptionType.badResponse when e.response?.statusCode == 401 =>
         const UnauthorizedFailure(),
       DioExceptionType.badResponse => ServerFailure(

@@ -31,22 +31,25 @@ class _CountingAdapter implements HttpClientAdapter {
 
 void main() {
   group('RetryInterceptor', () {
-    test('retries idempotent GETs on connection errors until success', () async {
-      final adapter = _CountingAdapter(2);
-      final dio = Dio()..httpClientAdapter = adapter;
-      dio.interceptors.add(
-        RetryInterceptor(
-          dio,
-          maxRetries: 3,
-          baseDelay: const Duration(milliseconds: 1),
-        ),
-      );
+    test(
+      'retries idempotent GETs on connection errors until success',
+      () async {
+        final adapter = _CountingAdapter(2);
+        final dio = Dio()..httpClientAdapter = adapter;
+        dio.interceptors.add(
+          RetryInterceptor(
+            dio,
+            maxRetries: 3,
+            baseDelay: const Duration(milliseconds: 1),
+          ),
+        );
 
-      final response = await dio.get('https://api.test/thing');
+        final response = await dio.get('https://api.test/thing');
 
-      expect(response.statusCode, 200);
-      expect(adapter.callCount, 3);
-    });
+        expect(response.statusCode, 200);
+        expect(adapter.callCount, 3);
+      },
+    );
 
     test('gives up after maxRetries and rethrows', () async {
       final adapter = _CountingAdapter(10);

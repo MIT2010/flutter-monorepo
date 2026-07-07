@@ -39,9 +39,7 @@ void main() {
     expect(find.text('tablet'), findsOneWidget);
   });
 
-  testWidgets('renders the desktop builder on a wide viewport', (
-    tester,
-  ) async {
+  testWidgets('renders the desktop builder on a wide viewport', (tester) async {
     tester.view.physicalSize = const Size(1200, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);

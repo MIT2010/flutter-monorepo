@@ -16,7 +16,10 @@ void main() {
 
   test('saveTokens writes both the access and refresh token', () async {
     when(
-      () => storage.write(key: any(named: 'key'), value: any(named: 'value')),
+      () => storage.write(
+        key: any(named: 'key'),
+        value: any(named: 'value'),
+      ),
     ).thenAnswer((_) async {});
 
     await tokenStorage.saveTokens(access: 'access-1', refresh: 'refresh-1');
@@ -52,11 +55,16 @@ void main() {
   test('saveUser then getCachedUser round-trips the user', () async {
     String? stored;
     when(
-      () => storage.write(key: 'cached_user', value: any(named: 'value')),
+      () => storage.write(
+        key: 'cached_user',
+        value: any(named: 'value'),
+      ),
     ).thenAnswer((invocation) async {
       stored = invocation.namedArguments[#value] as String;
     });
-    when(() => storage.read(key: 'cached_user')).thenAnswer((_) async => stored);
+    when(
+      () => storage.read(key: 'cached_user'),
+    ).thenAnswer((_) async => stored);
 
     const user = User(id: '1', email: 'a@example.com', role: 'admin');
     await tokenStorage.saveUser(user);

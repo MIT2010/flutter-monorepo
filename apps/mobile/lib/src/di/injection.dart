@@ -5,6 +5,7 @@
 import 'package:authentication/src/di/authentication_module.module.dart';
 import 'package:core/core.dart';
 import 'package:core/src/di/core_module.module.dart';
+import 'package:feature_home/src/di/feature_home_module.module.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared/shared.dart' hide configureDependencies;
 import 'package:shared/src/di/shared_module.module.dart';
@@ -25,9 +26,17 @@ import 'injection.config.dart';
     ExternalModule(CorePackageModule),
     ExternalModule(SharedPackageModule),
     ExternalModule(AuthenticationPackageModule),
+    ExternalModule(FeatureHomePackageModule),
   ],
 )
 Future<void> configureDependencies({required Env env}) async {
+  // `shared` registers a no-op `UnauthenticatedAuthSession` as `AuthSession`
+  // so it stays constructible before `authentication` exists (see
+  // `auth_session.dart`); `authentication`'s `AuthSessionAdapter` registers
+  // under the same interface, listed after `shared` above, specifically to
+  // supersede it. Without this, the second registration would assert
+  // instead of overriding the first.
+  getIt.allowReassignment = true;
   getIt.registerSingleton<Env>(env);
   await getIt.init(environment: env.flavor.name);
 }

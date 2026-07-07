@@ -7,7 +7,11 @@ import 'package:injectable/injectable.dart';
 ///     );
 /// ```
 abstract class CrashReporter {
-  Future<void> recordError(Object error, StackTrace stack, {bool fatal = false});
+  Future<void> recordError(
+    Object error,
+    StackTrace stack, {
+    bool fatal = false,
+  });
   Future<void> setUserId(String? id);
 }
 

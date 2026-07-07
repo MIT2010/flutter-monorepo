@@ -12,6 +12,7 @@
 import 'package:authentication/src/di/authentication_module.module.dart'
     as _i352;
 import 'package:core/src/di/core_module.module.dart' as _i363;
+import 'package:feature_home/src/di/feature_home_module.module.dart' as _i342;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:shared/src/di/shared_module.module.dart' as _i363;
@@ -26,6 +27,7 @@ extension GetItInjectableX on _i174.GetIt {
     await _i363.CorePackageModule().init(gh);
     await _i363.SharedPackageModule().init(gh);
     await _i352.AuthenticationPackageModule().init(gh);
+    await _i342.FeatureHomePackageModule().init(gh);
     return this;
   }
 }

@@ -20,10 +20,7 @@ class NotFoundPage extends StatelessWidget {
             children: [
               const Text('Page not found'),
               const SizedBox(height: AppSpacing.md),
-              AppButton(
-                label: 'Go home',
-                onPressed: () => context.go('/home'),
-              ),
+              AppButton(label: 'Go home', onPressed: () => context.go('/home')),
             ],
           ),
         ),

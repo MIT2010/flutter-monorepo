@@ -16,6 +16,8 @@ dependencies:
     path: ../../packages/core
   design_system:
     path: ../../packages/design_system
+  feature_home:
+    path: ../../packages/feature_home
   shared:
     path: ../../packages/shared
   flutter:
@@ -33,7 +35,9 @@ dev_dependencies:
   flutter_native_splash: ^2.4.8
   flutter_test:
     sdk: flutter
+  hive_ce_flutter: ^2.3.4
   injectable_generator: ^3.0.0
+  path_provider_platform_interface: ^2.1.3
 
 flutter:
   uses-material-design: true

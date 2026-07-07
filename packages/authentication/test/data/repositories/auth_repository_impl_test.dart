@@ -51,7 +51,10 @@ void main() {
       expect(result.isOk, isTrue);
       expect((result as Ok<Failure, User>).value.id, '1');
       verify(
-        () => tokenStorage.saveTokens(access: 'access-123', refresh: 'refresh-456'),
+        () => tokenStorage.saveTokens(
+          access: 'access-123',
+          refresh: 'refresh-456',
+        ),
       ).called(1);
       verify(() => tokenStorage.saveUser(any())).called(1);
     });
@@ -67,7 +70,10 @@ void main() {
       );
 
       expect(result.isErr, isTrue);
-      expect((result as Err<Failure, User>).failure, isA<UnauthorizedFailure>());
+      expect(
+        (result as Err<Failure, User>).failure,
+        isA<UnauthorizedFailure>(),
+      );
       verifyNever(
         () => tokenStorage.saveTokens(
           access: any(named: 'access'),

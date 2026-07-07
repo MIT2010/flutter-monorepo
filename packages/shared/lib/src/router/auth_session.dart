@@ -11,7 +11,10 @@ class AuthSessionStatus {
   final bool isAuthenticated;
   final List<String> roles;
 
-  const AuthSessionStatus({required this.isAuthenticated, this.roles = const []});
+  const AuthSessionStatus({
+    required this.isAuthenticated,
+    this.roles = const [],
+  });
 
   static const unauthenticated = AuthSessionStatus(isAuthenticated: false);
 }

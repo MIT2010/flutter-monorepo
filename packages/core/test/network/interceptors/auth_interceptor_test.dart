@@ -15,7 +15,10 @@ class _FakeTokenProvider implements TokenProvider {
   Future<String?> get refreshToken async => null;
 
   @override
-  Future<void> saveTokens({required String access, required String refresh}) async {}
+  Future<void> saveTokens({
+    required String access,
+    required String refresh,
+  }) async {}
 
   @override
   Future<void> clear() async {}
@@ -57,7 +60,10 @@ void main() {
 
       await dio.get('https://api.test/thing');
 
-      expect(adapter.lastOptions!.headers.containsKey('Authorization'), isFalse);
+      expect(
+        adapter.lastOptions!.headers.containsKey('Authorization'),
+        isFalse,
+      );
     });
   });
 }

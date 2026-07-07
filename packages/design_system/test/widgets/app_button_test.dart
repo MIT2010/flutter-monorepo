@@ -11,10 +11,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: AppButton(
-              label: 'Login',
-              onPressed: () => tapped = true,
-            ),
+            body: AppButton(label: 'Login', onPressed: () => tapped = true),
           ),
         ),
       );
@@ -56,9 +53,7 @@ void main() {
         ),
       );
 
-      final button = tester.widget<ElevatedButton>(
-        find.byType(ElevatedButton),
-      );
+      final button = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
       expect(button.onPressed, isNull);
 
       await tester.tap(find.byType(AppButton));

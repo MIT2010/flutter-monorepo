@@ -18,39 +18,42 @@ void main() {
     dataSource = AuthRemoteDataSource(client);
   });
 
-  test('login posts to /auth/login with the given credentials and parses the body', () async {
-    const model = UserModel(
-      id: '1',
-      email: 'a@example.com',
-      role: 'admin',
-      accessToken: 'access-1',
-      refreshToken: 'refresh-1',
-    );
+  test(
+    'login posts to /auth/login with the given credentials and parses the body',
+    () async {
+      const model = UserModel(
+        id: '1',
+        email: 'a@example.com',
+        role: 'admin',
+        accessToken: 'access-1',
+        refreshToken: 'refresh-1',
+      );
 
-    when(
-      () => client.post<UserModel>(
-        '/auth/login',
-        data: any(named: 'data'),
-        parser: any(named: 'parser'),
-      ),
-    ).thenAnswer((invocation) async {
-      final parser =
-          invocation.namedArguments[#parser] as UserModel Function(dynamic);
-      return Ok(parser(model.toJson()));
-    });
+      when(
+        () => client.post<UserModel>(
+          '/auth/login',
+          data: any(named: 'data'),
+          parser: any(named: 'parser'),
+        ),
+      ).thenAnswer((invocation) async {
+        final parser =
+            invocation.namedArguments[#parser] as UserModel Function(dynamic);
+        return Ok(parser(model.toJson()));
+      });
 
-    final result = await dataSource.login('a@example.com', 'secret');
+      final result = await dataSource.login('a@example.com', 'secret');
 
-    expect(result.isOk, isTrue);
-    expect((result as Ok<Failure, UserModel>).value, model);
+      expect(result.isOk, isTrue);
+      expect((result as Ok<Failure, UserModel>).value, model);
 
-    final captured = verify(
-      () => client.post<UserModel>(
-        '/auth/login',
-        data: captureAny(named: 'data'),
-        parser: any(named: 'parser'),
-      ),
-    ).captured.single;
-    expect(captured, {'email': 'a@example.com', 'password': 'secret'});
-  });
+      final captured = verify(
+        () => client.post<UserModel>(
+          '/auth/login',
+          data: captureAny(named: 'data'),
+          parser: any(named: 'parser'),
+        ),
+      ).captured.single;
+      expect(captured, {'email': 'a@example.com', 'password': 'secret'});
+    },
+  );
 }

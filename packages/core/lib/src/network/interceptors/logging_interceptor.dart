@@ -21,9 +21,7 @@ class LoggingInterceptor extends Interceptor {
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     if (enabled) {
-      _logger.api(
-        '<-- ${response.statusCode} ${response.requestOptions.uri}',
-      );
+      _logger.api('<-- ${response.statusCode} ${response.requestOptions.uri}');
     }
     handler.next(response);
   }

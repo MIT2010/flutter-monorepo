@@ -35,10 +35,7 @@ void main() {
       );
 
       final json = page.toJson((item) => item);
-      final decoded = Pagination<int>.fromJson(
-        json,
-        (item) => item as int,
-      );
+      final decoded = Pagination<int>.fromJson(json, (item) => item as int);
 
       expect(decoded, page);
     });

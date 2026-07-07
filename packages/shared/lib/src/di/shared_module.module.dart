@@ -20,7 +20,7 @@ const String _staging = 'staging';
 const String _prod = 'prod';
 
 class SharedPackageModule extends _i526.MicroPackageModule {
-// initializes the registration of main-scope dependencies inside of GetIt
+  // initializes the registration of main-scope dependencies inside of GetIt
   @override
   _i687.FutureOr<void> init(_i526.GetItHelper gh) {
     final registerModule = _$RegisterModule();
@@ -35,17 +35,18 @@ class SharedPackageModule extends _i526.MicroPackageModule {
       registerFor: {_staging},
     );
     gh.lazySingleton<_i760.AnalyticsService>(
-        () => _i760.NoopAnalyticsService());
+      () => _i760.NoopAnalyticsService(),
+    );
     gh.lazySingleton<_i767.AppRouter>(
-        () => _i767.AppRouter(gh<_i1.AuthSession>()));
+      () => _i767.AppRouter(gh<_i1.AuthSession>()),
+    );
     gh.lazySingleton<_i378.FeatureFlags>(
       () => registerModule.prodFeatureFlags(),
       registerFor: {_prod},
     );
-    gh.lazySingleton<_i361.Dio>(() => registerModule.dio(
-          gh<_i494.AppLogger>(),
-          gh<_i494.Env>(),
-        ));
+    gh.lazySingleton<_i361.Dio>(
+      () => registerModule.dio(gh<_i494.AppLogger>(), gh<_i494.Env>()),
+    );
   }
 }
 

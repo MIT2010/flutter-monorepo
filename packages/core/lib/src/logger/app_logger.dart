@@ -25,13 +25,8 @@ class AppLogger {
     LogChannel channel = LogChannel.repo,
     Object? error,
     StackTrace? stackTrace,
-  }) => _log(
-    message,
-    channel,
-    level: 1000,
-    error: error,
-    stackTrace: stackTrace,
-  );
+  }) =>
+      _log(message, channel, level: 1000, error: error, stackTrace: stackTrace);
 
   /// Convenience shortcut used by [LoggingInterceptor].
   void api(String message) => i(message, channel: LogChannel.api);
