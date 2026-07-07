@@ -5,17 +5,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # Reads .fvmrc and exposes its value so the next step installs the
-      # exact same Flutter version local dev is pinned to (ADR-006) —
-      # this must run before any analyze/test step below.
-      - uses: kuhnroyal/flutter-fvm-config-action@v3
-        id: fvm-config-action
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ steps.fvm-config-action.outputs.FLUTTER_VERSION }}
-          channel: ${{ steps.fvm-config-action.outputs.FLUTTER_CHANNEL }}
+      # Bootstrap-only Dart SDK — its version is irrelevant, it exists solely
+      # to run `dart pub global activate fvm`. This replaces the old
+      # two-mechanism setup (flutter-fvm-config-action + flutter-action
+      # installing Flutter independently, which only *happened* to match the
+      # fvm pin) with a single source of truth: `.fvmrc`, read only by fvm.
+      # Every analyze/test/gen step below runs through the SDK `fvm install`
+      # fetches from that file, never this bootstrap one (ADR-006).
+      - uses: dart-lang/setup-dart@v1
+      - run: dart pub global activate fvm
+      - run: echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+      - run: fvm install
+      # Hard gate: if the pinned version isn't genuinely the one fvm
+      # resolves, stop the whole pipeline here instead of silently falling
+      # through to analyze/test/gen against the wrong SDK.
+      - run: fvm dart run tool/verify_fvm.dart
       - run: dart pub global activate melos
-      - run: flutter pub get
+      - run: fvm flutter pub get
       - run: melos run gen
       - run: melos run analyze
       - run: melos run format
