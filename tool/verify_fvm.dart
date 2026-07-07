@@ -72,8 +72,7 @@ Future<void> main() async {
     final raw = result.stdout.toString();
     final jsonStart = raw.indexOf('{');
     if (jsonStart == -1) throw const FormatException('no JSON object found');
-    versionInfo =
-        jsonDecode(raw.substring(jsonStart)) as Map<String, dynamic>;
+    versionInfo = jsonDecode(raw.substring(jsonStart)) as Map<String, dynamic>;
   } on FormatException catch (e) {
     stderr.writeln(
       'Tidak bisa membaca output "fvm flutter --version --machine": $e\n'
