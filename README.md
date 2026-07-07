@@ -19,6 +19,12 @@ melos run doctor                # verifies the pin actually took effect
 this repo. If it doesn't, fix that first — nothing downstream is trustworthy
 until it does.
 
+**Generated code (`*.freezed.dart`, `*.g.dart`, `*.config.dart`,
+`*.module.dart`) isn't committed** (ADR-007) — run `melos run get` then
+`melos run gen` right after cloning, or nothing will compile yet. The one
+exception is hive_ce's `*.g.yaml` schema-migration files, which *are*
+committed (see the `gen` row below).
+
 **`melos run <anything>` is already safe** — every script body calls
 `fvm flutter`/`fvm dart` internally, so the pinned SDK is used even if you
 never type `fvm` yourself. But **ad-hoc commands outside melos scripts**
@@ -42,7 +48,7 @@ already baked in (see Prerequisites above).
 | `analyze` | `dart analyze` on every package | Before committing/pushing; CI runs it too |
 | `format` | `dart format --set-exit-if-changed` on every package | Before committing; CI runs it too |
 | `test` | `flutter test` on every package that has a `test/` folder | Before committing/pushing; CI runs it too |
-| `gen` | Codegen (freezed/json_serializable/injectable), ordered so `core` rebuilds before packages that depend on it | After changing any `@freezed`/`@injectable`/`@JsonSerializable` class |
+| `gen` | Codegen (freezed/json_serializable/injectable/hive_ce), ordered so `core` rebuilds before packages that depend on it | Right after cloning (its output isn't committed — ADR-007) and after changing any `@freezed`/`@injectable`/`@JsonSerializable`/`@GenerateAdapters` class |
 | `clean` | `flutter clean` on every package, through the pinned SDK | When the build feels stale/corrupted, or before a fresh `get` |
 | `upgrade` | `flutter pub upgrade` — bumps deps to the newest version still allowed by `pubspec.yaml` constraints | Deliberately, never as a reflex — see `outdated` first |
 | `outdated` | `flutter pub outdated` — reports packages with newer versions outside current constraints, doesn't change anything | Every quarter per §33 of ARCHITECTURE.md (Long-Term Maintenance Strategy) — **read each package's changelog before acting on this, never auto-upgrade blind** |
