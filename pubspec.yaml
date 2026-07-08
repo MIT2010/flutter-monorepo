@@ -52,14 +52,16 @@ melos:
       # failed." See ADR-008 — this masked itself on dev machines with an
       # ambient FLUTTER_ROOT already set, only surfaced on a clean CI runner.
       #
-      # `&& fvm dart format .` afterward: injectable's micro-package module
-      # output (*_module.module.dart) isn't quite `dart format`-clean the
-      # moment build_runner writes it — every fresh `gen` needs one format
-      # pass to converge, or the separate `format` check (--set-exit-if-
-      # changed, meant to gate hand-written code) fails on generated files
-      # nobody hand-maintains. Formatting right after generating means the
-      # check step downstream always sees already-clean output.
-      run: melos exec --order-dependents --depends-on="build_runner" -- fvm flutter pub run build_runner build --delete-conflicting-outputs && fvm dart format .
+      # `&& fvm dart format packages apps tool` afterward: injectable's
+      # micro-package module output (*_module.module.dart) isn't quite
+      # `dart format`-clean the moment build_runner writes it — every fresh
+      # `gen` needs one format pass to converge, or the separate `format`
+      # check (--set-exit-if-changed, meant to gate hand-written code) fails
+      # on generated files nobody hand-maintains. Explicit source roots
+      # instead of `.` because `.` would also descend into
+      # bricks/feature/__brick__/, whose mustache templates aren't valid
+      # Dart — dart format dies on them (caught by ADR-009's throwaway test).
+      run: melos exec --order-dependents --depends-on="build_runner" -- fvm flutter pub run build_runner build --delete-conflicting-outputs && fvm dart format packages apps tool
       description: "Jalankan codegen (freezed, injectable, json_serializable) di package yang butuh, urut dependency graph (core sebelum shared) supaya micro-package injectable core selalu fresh sebelum shared membacanya"
     clean:
       run: melos exec -- fvm flutter clean

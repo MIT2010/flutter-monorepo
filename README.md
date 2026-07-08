@@ -57,3 +57,26 @@ already baked in (see Prerequisites above).
 
 `--flavor dev|staging|prod` pairs with `-t apps/mobile/lib/main_<flavor>.dart`
 — see §30 of ARCHITECTURE.md for the full flavor story.
+
+## Scaffolding a new feature (`mason make feature`)
+
+```bash
+dart pub global activate mason_cli   # once, if you don't have it yet
+mason get                            # once per clone (reads mason.yaml)
+mason make feature --feature_name=settings -o .
+fvm flutter pub get                  # the hook already added it to workspace:
+melos run gen
+```
+
+The brick generates the **minimal proven slice** (§14, ADR-009): entity →
+repository contract + impl → remote datasource → Cubit → page → test
+skeleton, pre-wired to `core`/`design_system`/`shared`, and the post-gen
+hook adds the package to the root `workspace:` list automatically.
+
+**It deliberately does NOT generate** a UseCase or local caching — those
+are per-feature manual decisions, not boilerplate (§21/ADR-004 and §11):
+`feature_profile`'s `UpdateProfileUseCase` is the reference for a justified
+UseCase, `feature_home` for the offline-cache flow. Wiring into
+`apps/mobile` (pubspec dependency, `GoRoute`, the generated
+`Feature<Name>PackageModule` in `injection.dart`) also stays manual — see
+[bricks/feature/README.md](bricks/feature/README.md).

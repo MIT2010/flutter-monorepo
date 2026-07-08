@@ -56,6 +56,11 @@ build/
 # field, so this stays tracked against the project's own "ignore
 # everything generated" instruction.
 
+# Mason's local brick cache — machine state, not source. mason.yaml,
+# bricks/, and mason-lock.json (if present) DO stay committed; only this
+# cache directory is ignored.
+.mason/
+
 # Claude Code local runtime state — machine-specific, never shared.
 # .claude/launch.json stays tracked; it's the dev-server config other
 # contributors need.
