@@ -1,6 +1,7 @@
 import 'package:authentication/authentication.dart';
 import 'package:design_system/design_system.dart';
 import 'package:feature_home/feature_home.dart';
+import 'package:feature_profile/feature_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared/shared.dart';
@@ -26,4 +27,5 @@ class App extends StatelessWidget {
 final _routes = <RouteBase>[
   GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
   GoRoute(path: '/home', builder: (context, state) => const HomePage()),
+  GoRoute(path: '/profile', builder: (context, state) => const ProfilePage()),
 ];

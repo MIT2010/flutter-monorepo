@@ -18,6 +18,8 @@ dependencies:
     path: ../../packages/design_system
   feature_home:
     path: ../../packages/feature_home
+  feature_profile:
+    path: ../../packages/feature_profile
   shared:
     path: ../../packages/shared
   flutter:

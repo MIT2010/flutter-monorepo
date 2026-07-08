@@ -37,7 +37,11 @@ NOT generated — deliberate manual decisions per feature:
   reference for when it isn't.
 - **Local cache / offline flow** — only when the feature needs it (§11).
   `feature_home` is the reference implementation.
-- **Route + composition-root wiring** — add the `GoRoute` in
-  `apps/mobile/lib/src/app.dart` and the generated
-  `Feature<Name>PackageModule` to `apps/mobile/lib/src/di/injection.dart`
-  yourself, plus the `feature_<name>` dependency in apps/mobile's pubspec.
+- **Route + composition-root wiring** — the four `apps/mobile` edits that
+  make the feature actually reachable (pubspec dependency, `ExternalModule`
+  in `injection.dart`, `GoRoute` in `app.dart`, and a UI entry point to
+  navigate to it). This is a **mandatory separate step**, not optional
+  polish: a package that's green in CI but not wired in is invisible to
+  users. See **ADR-010** in the root ARCHITECTURE.md — it's the step most
+  likely to be skipped precisely because everything else already looks
+  "done."

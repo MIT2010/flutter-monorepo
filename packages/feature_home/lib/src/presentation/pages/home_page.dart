@@ -35,6 +35,16 @@ class HomeView extends StatelessWidget {
         title: const Text('Home'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.person),
+            tooltip: 'Profile',
+            // Navigation by route string, not by importing feature_profile —
+            // features never depend on each other directly (§5); the route
+            // table in apps/mobile is the only place that knows both.
+            // `push`, not `go`: keeps /home on the stack so the profile
+            // page gets a back button for free.
+            onPressed: () => context.push('/profile'),
+          ),
+          IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Log out',
             onPressed: () async {

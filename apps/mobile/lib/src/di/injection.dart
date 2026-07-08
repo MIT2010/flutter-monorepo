@@ -6,6 +6,7 @@ import 'package:authentication/src/di/authentication_module.module.dart';
 import 'package:core/core.dart';
 import 'package:core/src/di/core_module.module.dart';
 import 'package:feature_home/src/di/feature_home_module.module.dart';
+import 'package:feature_profile/src/di/feature_profile_module.module.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared/shared.dart' hide configureDependencies;
 import 'package:shared/src/di/shared_module.module.dart';
@@ -27,6 +28,7 @@ import 'injection.config.dart';
     ExternalModule(SharedPackageModule),
     ExternalModule(AuthenticationPackageModule),
     ExternalModule(FeatureHomePackageModule),
+    ExternalModule(FeatureProfilePackageModule),
   ],
 )
 Future<void> configureDependencies({required Env env}) async {
