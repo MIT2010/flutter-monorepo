@@ -3,7 +3,7 @@
 This is one of the four docs the project is designed around
 ([ARCHITECTURE.md](ARCHITECTURE.md) for the design and ADRs,
 [README.md](README.md) for setup and day-to-day commands,
-[MIGRATION.md](MIGRATION.md) for porting legacy code, and this file for how
+[docs/MIGRATION_PLAYBOOK.md](docs/MIGRATION_PLAYBOOK.md) for porting legacy code, and this file for how
 to work in the repo). Read the README's Prerequisites first — nothing here
 works until FVM is set up and `melos run doctor` prints `FVM OK`.
 
@@ -177,7 +177,7 @@ When it genuinely is a package:
 ## 7. Migrating legacy code
 
 If your feature is a **port of an existing app's screen** rather than net-new,
-read [MIGRATION.md](MIGRATION.md) first. It's the same "add a feature" flow
+read [docs/MIGRATION_PLAYBOOK.md](docs/MIGRATION_PLAYBOOK.md) first. It's the same "add a feature" flow
 as §4 above, but with the extra step of classifying the old code
 (core/design_system/shared/feature) and re-expressing its behavior — not
 copying its structure — in this kit's patterns.

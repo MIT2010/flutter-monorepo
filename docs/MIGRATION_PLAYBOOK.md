@@ -2,7 +2,7 @@
 
 This is a **permanent, repeatable** guide — it gets used once per feature
 for the whole 10–30 screen migration, not once total. Read
-[ARCHITECTURE.md](ARCHITECTURE.md) first for the target design; this
+[../ARCHITECTURE.md](../ARCHITECTURE.md) first for the target design; this
 document is only about getting *old* code into it, one feature at a time.
 
 The migration is **feature-by-feature and incremental**. The legacy app
@@ -21,8 +21,8 @@ file layout, base classes, or helpers — you are re-expressing the same
 *behavior* in this kit's patterns. If a step feels like "copy the old file
 and tweak imports," stop: that smuggles the old architecture in. The
 reference for what the output should look like is
-[`packages/feature_profile`](packages/feature_profile) (simple CRUD) and
-[`packages/feature_home`](packages/feature_home) (CRUD + offline cache).
+[`packages/feature_profile`](../packages/feature_profile) (simple CRUD) and
+[`packages/feature_home`](../packages/feature_home) (CRUD + offline cache).
 Open one of those side-by-side while migrating.
 
 ---
@@ -120,11 +120,11 @@ a `Result`; it never catches an exception.
   to `Result<Failure, Entity>`, the Cubit does
   `result.fold((failure) => emit(Error(failure)), (data) => emit(Loaded(data)))`.
 - Old ad-hoc error strings → typed `Failure` subclasses from
-  [`packages/core/lib/src/error/failure.dart`](packages/core/lib/src/error/failure.dart):
+  [`packages/core/lib/src/error/failure.dart`](../packages/core/lib/src/error/failure.dart):
   `ServerFailure(message, statusCode)`, `NetworkFailure`, `CacheFailure`,
   `ValidationFailure`, `UnauthorizedFailure`. The UI shows `failure.message`.
 - `Result`/`Ok`/`Err` and `.fold`/`.isOk`/`.isErr` live in
-  [`packages/core/lib/src/result/result.dart`](packages/core/lib/src/result/result.dart)
+  [`packages/core/lib/src/result/result.dart`](../packages/core/lib/src/result/result.dart)
   (§21, ADR-001 — hand-rolled, not `dartz`). Import `package:core/core.dart`
   directly in the Cubit even if the repository already pulls it in — `.fold`
   is an extension method and needs the extension in scope (§15).
@@ -190,7 +190,61 @@ lets `apps/mobile`'s composition root discover the feature's registrations
 
 ---
 
-## 3. Definition of "done" for one migrated feature
+## 3. Sensitive data during migration
+
+Not every feature touches sensitive data, but when one does, the migration
+is the highest-risk moment for it — it's exactly the point where "copy the
+field into a slightly different model" quietly drops a protection the old
+code had. Run this checklist on every feature that touches auth tokens,
+PII, payment data, health data, biometrics, or anything else you wouldn't
+want in a support-ticket screenshot.
+
+- **Inventory before moving anything.** List every sensitive field the
+  feature reads or writes (tokens, passwords, PII, payment instruments,
+  biometric templates, session identifiers). If a field doesn't show up in
+  this list, don't assume it's clean — grep the old code for where it's
+  stored/logged/sent, then decide.
+- **Storage tier must not downgrade.** Map each field to the kit's
+  storage-choice table (§24 ARCHITECTURE.md): secrets → secure-storage-backed
+  storage (`SecureTokenStorage` or its equivalent), non-sensitive flags →
+  `shared_preferences`, structured non-secret cache → `hive_ce`. If the old
+  app kept something in platform Keychain/Keystore-backed secure storage,
+  the migrated version must land in the same tier — not in an unencrypted
+  Hive box or `SharedPreferences`, even temporarily "to get it working."
+- **Transit stays at least as strong.** Confirm the migrated datasource
+  still goes through TLS-only endpoints and any certificate pinning the old
+  HTTP client had configured — pinning is easy to silently drop when
+  re-wiring interceptors onto `core`'s `ApiClient`.
+- **Logging doesn't leak what the old app redacted.** Check the legacy
+  logging interceptor for what it excluded (tokens, passwords, full card
+  numbers, etc.) and make sure the migrated `AppLogger`/`LoggingInterceptor`
+  redacts at least the same fields — dev-only logging is still a leak if a
+  crash log or device log capture ships it.
+- **Lifecycle: cleared when the old code cleared it.** If logout, session
+  expiry, or account deletion wiped a field in the old app, the migrated
+  `SecureTokenStorage.clear()` (or feature-specific equivalent) must wipe
+  the same field. A field that lingers post-logout because it moved to a
+  different storage class you forgot to clear is a regression, not a wash.
+- **Third-party SDKs inherit the same bar.** If a legacy feature fed data to
+  analytics/crash reporting automatically (a stack trace with a request
+  body, a default PII field), the migrated `AnalyticsService`/
+  `CrashReporter` implementation needs equivalent-or-better redaction — not
+  "whatever the new SDK defaults to," which may capture more than the old
+  one did.
+- **Treat any downgrade as a blocker, not a follow-up.** For a
+  regulated-domain app (ADR-003's fintech/health/gov framing), a
+  sensitive-data handling gap found during migration review stops that
+  feature's "done" checklist (§4 below) until it's fixed — it doesn't ship
+  as a TODO.
+
+This checklist is deliberately generic — it names *what* to verify, not any
+one app's fields. Which data is actually sensitive, and which regulations
+apply, is a per-project decision (typically made during the Tahap-1-style
+audit) applied here feature by feature.
+
+---
+
+## 4. Definition of "done" for one migrated feature
 
 A feature is **not** migrated when it compiles. It's migrated when all of
 these hold — the same bar `feature_profile` had to clear, including
@@ -228,7 +282,7 @@ coverage to cut over."
 
 ---
 
-## 4. Suggested order across the whole migration
+## 5. Suggested order across the whole migration
 
 - **Pilot first:** the feature with the fewest dependencies on other
   features and the least shared state — ideally a simple CRUD screen on par
@@ -251,15 +305,15 @@ the whole effort.
 
 ---
 
-## 5. See also
+## 6. See also
 
-- [ARCHITECTURE.md](ARCHITECTURE.md) — the target design and every ADR
+- [../ARCHITECTURE.md](../ARCHITECTURE.md) — the target design and every ADR
   referenced above (esp. §21/ADR-004 UseCases, ADR-005 freezed, ADR-007
   generated files, ADR-010 wiring).
-- [CONTRIBUTING.md](CONTRIBUTING.md) — conventions, code standards, and how
+- [../CONTRIBUTING.md](../CONTRIBUTING.md) — conventions, code standards, and how
   to add a feature/package (a migrated feature follows the exact same
   "add a feature" flow once its old code is classified).
-- [`packages/feature_profile`](packages/feature_profile) — the reference
+- [`packages/feature_profile`](../packages/feature_profile) — the reference
   for a migrated simple CRUD feature.
-- [`packages/feature_home`](packages/feature_home) — the reference when a
+- [`packages/feature_home`](../packages/feature_home) — the reference when a
   migrated feature genuinely needs offline caching.
