@@ -19,6 +19,40 @@ melos run doctor                # verifies the pin actually took effect
 this repo. If it doesn't, fix that first — nothing downstream is trustworthy
 until it does.
 
+### Bootstrapping a new project from this kit — mandatory first step
+
+If you're using this kit **as the starting point for a new project** (not
+just exploring the kit itself), do this **before writing any feature
+code** — not as a fix-it-later item (ADR-011):
+
+1. **Replace every platform's placeholder identifier**
+   (`com.example.mobile`) with your real one:
+   - Android: `namespace` and `applicationId` in
+     `apps/mobile/android/app/build.gradle.kts`, and move
+     `apps/mobile/android/app/src/main/kotlin/com/example/mobile/MainActivity.kt`
+     to match the new package path (updating its `package` declaration).
+   - iOS + macOS: `PRODUCT_BUNDLE_IDENTIFIER` in
+     `apps/mobile/ios/Runner.xcodeproj/project.pbxproj` and
+     `apps/mobile/macos/Runner/Configs/AppInfo.xcconfig` +
+     `apps/mobile/macos/Runner.xcodeproj/project.pbxproj`.
+   - Linux: `APPLICATION_ID` in `apps/mobile/linux/CMakeLists.txt`.
+2. **Prefix every key in
+   `packages/authentication/lib/src/data/datasources/secure_token_storage.dart`**
+   (`access_token`, `refresh_token`, `cached_user`) with the same
+   identifier, pattern `com.<nama-app>.mobile.` — **this is the step that
+   actually matters on Windows** (ADR-011): `flutter_secure_storage_windows`
+   stores every key as a Windows Credential Manager entry named *literally*
+   after the key, with no per-app namespace at all. Two different projects
+   bootstrapped from this kit on the same Windows account, both left
+   unprefixed, will silently share the same login session. Step 1 alone
+   doesn't fix this on Windows — bundle identifiers only matter for
+   Android/iOS/macOS's OS-level sandboxing.
+
+Skipping this is easy to miss because nothing fails — the app still runs,
+tests still pass, and the bleed only shows up as "why am I already logged
+in" the first time you run two kit-bootstrapped projects side by side on
+the same machine.
+
 **Generated code (`*.freezed.dart`, `*.g.dart`, `*.config.dart`,
 `*.module.dart`) isn't committed** (ADR-007) — run `melos run get` then
 `melos run gen` right after cloning, or nothing will compile yet. The one
