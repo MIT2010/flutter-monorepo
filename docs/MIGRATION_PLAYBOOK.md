@@ -220,6 +220,14 @@ want in a support-ticket screenshot.
   numbers, etc.) and make sure the migrated `AppLogger`/`LoggingInterceptor`
   redacts at least the same fields — dev-only logging is still a leak if a
   crash log or device log capture ships it.
+- **Check whether the old interceptor prints raw bodies at all, not just
+  what it redacts.** A surprising number of hand-rolled Dio/http
+  interceptors log the entire request/response body unconditionally
+  (`logger.d('Data: ${response.data}')` and similar) with no redaction
+  logic whatsoever — there's nothing to "match," because the old app never
+  excluded anything. This is a distinct check from the bullet above: don't
+  just diff redacted-field lists, confirm the old interceptor redacts
+  *anything at all* before trusting its behavior as a baseline.
 - **Lifecycle: cleared when the old code cleared it.** If logout, session
   expiry, or account deletion wiped a field in the old app, the migrated
   `SecureTokenStorage.clear()` (or feature-specific equivalent) must wipe
