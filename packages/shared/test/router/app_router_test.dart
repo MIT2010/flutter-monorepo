@@ -52,6 +52,22 @@ final _standaloneRoutes = <RouteBase>[
   ),
 ];
 
+/// The shape most real apps built from this kit actually register — no
+/// route for `/` at all (ADR-012). `AppRouter` is never given an explicit
+/// `initialLocation` by any documented setup here, so `GoRouter` defaults
+/// to `/` on cold start; this fixture is what exposes the bug the fixture
+/// above (which happens to register a `/` route) can't catch.
+final _standaloneRoutesWithoutRoot = <RouteBase>[
+  GoRoute(
+    path: '/login',
+    builder: (context, state) => const Scaffold(body: Text('login-page')),
+  ),
+  GoRoute(
+    path: '/home',
+    builder: (context, state) => const Scaffold(body: Text('home-page')),
+  ),
+];
+
 final _roleGuardedRoutes = <RouteBase>[
   GoRoute(
     path: '/home',
@@ -140,6 +156,46 @@ void main() {
 
       expect(find.text('Page not found'), findsOneWidget);
     });
+
+    testWidgets(
+      'sends an authenticated user to /home when landing on the default '
+      'initialLocation (/) and no route registers it (ADR-012) — the exact '
+      'situation on every cold start once a session is restored from disk, '
+      'for any app built from this kit that never gives AppRouter an '
+      'explicit initialLocation and never registers a GoRoute for "/" '
+      'itself',
+      (tester) async {
+        final appRouter = AppRouter(
+          _FakeAuthSession(const AuthSessionStatus(isAuthenticated: true)),
+        )..standaloneRoutes = _standaloneRoutesWithoutRoot;
+
+        await tester.pumpWidget(
+          MaterialApp.router(routerConfig: appRouter.router),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('home-page'), findsOneWidget);
+        expect(find.text('Page not found'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'still falls back to NotFoundPage for a genuinely unmatched route '
+      'that is not "/" — the fix above must not swallow real 404s',
+      (tester) async {
+        final appRouter = AppRouter(
+          _FakeAuthSession(const AuthSessionStatus(isAuthenticated: true)),
+        )..standaloneRoutes = _standaloneRoutesWithoutRoot;
+
+        await tester.pumpWidget(
+          MaterialApp.router(routerConfig: appRouter.router),
+        );
+        appRouter.router.go('/nowhere');
+        await tester.pumpAndSettle();
+
+        expect(find.text('Page not found'), findsOneWidget);
+      },
+    );
   });
 
   group('AppRouter role guard', () {
