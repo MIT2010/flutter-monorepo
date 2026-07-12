@@ -1,0 +1,10 @@
+# Copy this file to `key.properties` (same folder, gitignored) and fill in
+# real values — see RELEASE.md "Android signing" for how to generate the
+# keystore itself. `key.properties` is what `app/build.gradle.kts` reads to
+# build the real release signingConfig; without it, `melos run build:*`
+# refuses to produce a release artifact (`tool/verify_signing.dart`) rather
+# than silently signing with the debug key.
+storePassword=<the keystore's own password>
+keyPassword=<the release key's password inside that keystore>
+keyAlias=<the alias you gave the release key when generating it>
+storeFile=<absolute path to the .jks/.keystore file — keep the keystore itself outside this repo>

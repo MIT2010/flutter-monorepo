@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:shared/shared.dart' hide configureDependencies;
 
 import 'src/app.dart';
 import 'src/di/injection.dart';
@@ -17,5 +18,6 @@ Future<void> main() async {
     '--dart-define=FLAVOR=staging (got ${Env.current.flavor.name}).',
   );
   await configureDependencies(env: Env.current);
+  wireCrashReporting(getIt<CrashReporter>());
   runApp(const App());
 }

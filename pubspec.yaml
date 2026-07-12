@@ -84,3 +84,12 @@ melos:
     run:prod:
       run: melos exec --scope="mobile" -- fvm flutter run --flavor prod -t lib/main_prod.dart
       description: "Jalankan app flavor production -- HATI-HATI, biasanya connect ke API production asli, bukan untuk uji coba sembarangan"
+    build:dev:
+      run: fvm dart run tool/verify_signing.dart android && melos exec --scope="mobile" -- fvm flutter build appbundle --flavor dev -t lib/main_dev.dart
+      description: "Build .aab Android flavor dev -- RELEASE.md. Berhenti dengan pesan jelas (bukan gagal senyap/salah tanda tangan) kalau apps/mobile/android/key.properties belum ada"
+    build:staging:
+      run: fvm dart run tool/verify_signing.dart android && melos exec --scope="mobile" -- fvm flutter build appbundle --flavor staging -t lib/main_staging.dart
+      description: "Build .aab Android flavor staging -- RELEASE.md. Sama gate signing seperti build:dev"
+    build:prod:
+      run: fvm dart run tool/verify_signing.dart android && melos exec --scope="mobile" -- fvm flutter build appbundle --flavor prod -t lib/main_prod.dart
+      description: "Build .aab Android flavor prod -- RELEASE.md. Sama gate signing seperti build:dev. iOS build (.ipa) belum ada script melos-nya -- perlu macOS/Xcode, lihat RELEASE.md"

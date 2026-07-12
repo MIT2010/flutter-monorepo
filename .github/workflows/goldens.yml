@@ -1,0 +1,31 @@
+name: Regenerate goldens
+on:
+  workflow_dispatch:
+# Manual-trigger-only, deliberately not on push/PR: this job's whole job is
+# to PRODUCE a new golden baseline, not to gate anything. Runs on the same
+# `ubuntu-latest` runner as `ci.yaml`'s `analyze_test` job on purpose — a
+# golden file baked on a contributor's own Windows/macOS machine renders
+# text with different font/anti-aliasing than the Linux runner CI actually
+# compares against on every push, so a locally-generated baseline looks
+# fine on `flutter test --update-goldens` and then fails on the very next
+# CI run for reasons that have nothing to do with the widget itself. See
+# CONTRIBUTING.md §6 "Regenerating golden files" for the full workflow this
+# job is one half of.
+jobs:
+  update_goldens:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+      - run: dart pub global activate fvm
+      - run: echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+      - run: fvm install
+      - run: fvm dart run tool/verify_fvm.dart
+      - run: echo "$(fvm flutter --version --machine | jq -r '.flutterRoot')/bin" >> "$GITHUB_PATH"
+      - run: fvm flutter pub get
+      - run: fvm flutter test test/golden --update-goldens
+        working-directory: packages/design_system
+      - uses: actions/upload-artifact@v4
+        with:
+          name: design-system-goldens
+          path: packages/design_system/test/golden/goldens/*.png

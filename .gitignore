@@ -29,6 +29,15 @@ coverage/
 .env
 .env.*
 
+# Real Android release signing (RELEASE.md, §30 of ARCHITECTURE.md) —
+# `key.properties.example` is the committed template; the real file it's
+# copied to is project-specific and never shared. The keystore itself
+# (whatever path key.properties points at) should live outside this repo
+# entirely, but this is a safety net in case someone drops it in-tree.
+apps/mobile/android/key.properties
+*.jks
+*.keystore
+
 # Log files
 *.log
 

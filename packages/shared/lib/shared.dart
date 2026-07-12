@@ -5,6 +5,7 @@ library;
 
 export 'src/analytics/analytics_service.dart';
 export 'src/crash/crash_reporter.dart';
+export 'src/crash/wire_crash_reporting.dart';
 export 'src/di/app_environment.dart';
 export 'src/di/injection.dart';
 export 'src/di/register_module.dart';

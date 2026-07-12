@@ -1,7 +1,14 @@
 # Flutter Starter Kit
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the full design (package
-boundaries, dependency rules, testing strategy, ADRs).
+Four documents, each with a distinct job:
+- **README.md** (this file) — get a clone running.
+- [ARCHITECTURE.md](ARCHITECTURE.md) — the full design (package
+  boundaries, dependency rules, testing strategy, ADRs) and *why*.
+- [CONTRIBUTING.md](CONTRIBUTING.md) — day-to-day conventions for adding
+  code (naming, adding a feature/package, commits).
+- [RELEASE.md](RELEASE.md) — the *how* of actually shipping a build:
+  signing setup, `melos run build:*`, versioning, rollback. Every step in
+  it has been run for real at least once, not just described.
 
 ## Prerequisites
 
@@ -88,6 +95,7 @@ already baked in (see Prerequisites above).
 | `outdated` | `flutter pub outdated` — reports packages with newer versions outside current constraints, doesn't change anything | Every quarter per §33 of ARCHITECTURE.md (Long-Term Maintenance Strategy) — **read each package's changelog before acting on this, never auto-upgrade blind** |
 | `run:dev` / `run:staging` / `run:prod` | Runs `apps/mobile` with the matching flavor and entry point | Manual testing per environment — **`run:prod` talks to the real production API, don't use it for casual testing** |
 | `run:dev:web` | Same as `run:dev` but forced to Chrome | Quick web-target smoke testing |
+| `build:dev` / `build:staging` / `build:prod` | Builds an Android `.aab` for the matching flavor — refuses to run (clear TODO message, before Gradle even starts) if `apps/mobile/android/key.properties` doesn't exist yet | Cutting a real release — see [RELEASE.md](RELEASE.md) for signing setup and the full runbook |
 
 `--flavor dev|staging|prod` pairs with `-t apps/mobile/lib/main_<flavor>.dart`
 — see §30 of ARCHITECTURE.md for the full flavor story.
