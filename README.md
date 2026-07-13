@@ -12,14 +12,30 @@ Four documents, each with a distinct job:
 
 ## Prerequisites
 
-This repo **requires** [FVM](https://fvm.app/) — it is not optional tooling,
-it's enforced (see ADR-006). Right after cloning, and before running
-anything else:
+This repo **requires** [FVM](https://fvm.app/) and [Melos](https://melos.invertase.dev/)
+— neither is optional tooling (FVM is enforced, see ADR-006; Melos runs
+every script in the "Common tasks" table below). Right after cloning, and
+before running anything else:
 
 ```bash
-dart pub global activate fvm    # once, if you don't have it yet
-fvm use <versi-di-.fvmrc> --pin # installs + pins the exact SDK from .fvmrc
-melos run doctor                # verifies the pin actually took effect
+dart pub global activate fvm      # once, if you don't have it yet
+fvm use <versi-di-.fvmrc>         # installs + activates the exact SDK from .fvmrc
+                                   # (no --pin here: that flag resolves a *channel*
+                                   # like "stable"/"beta" to a real version; .fvmrc
+                                   # already names an exact version, so passing --pin
+                                   # against it fails with "Cannot pin a version that
+                                   # is not in dev, beta or stable channels")
+dart pub global activate melos    # once, if you don't have it yet
+```
+
+Both `dart pub global activate` calls put their executables in your Dart
+pub cache's `bin/` folder — confirm it's on `PATH` (`melos --version`
+should print something, not "command not found"; if it doesn't, add
+`$HOME/.pub-cache/bin` — or on Windows, `%APPDATA%\Pub\Cache\bin` — to
+your shell's `PATH` and reopen the terminal). Then:
+
+```bash
+melos run doctor   # verifies the FVM pin actually took effect
 ```
 
 `melos run doctor` must print `FVM OK` before you touch anything else in

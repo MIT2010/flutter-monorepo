@@ -23,6 +23,16 @@ Desktop.ini
 coverage/
 *.lcov
 
+# Flutter golden-test diff artifacts, auto-written on any local
+# `matchesGoldenFile` mismatch (isolatedDiff/maskedDiff/masterImage/
+# testImage per failing case) — debug output for the person running the
+# test locally, never part of the committed golden baseline itself.
+# Expect these locally on any non-Linux machine: the committed goldens
+# under test/golden/goldens/ are Linux-CI-generated on purpose (see
+# CONTRIBUTING.md "Regenerating golden files"), so a Windows/macOS local
+# run legitimately produces small pixel diffs CI won't see.
+**/test/golden/failures/
+
 # Local secrets. This project passes config via --dart-define (see
 # README), never .env files, but this is a safety net in case one gets
 # added later.

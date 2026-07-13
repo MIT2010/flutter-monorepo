@@ -59,6 +59,53 @@ A folder becomes a **package** only when at least one of these is true:
 
 Otherwise it stays a **folder inside a feature**. This is why `authentication` is a top-level package (used by routing guards *and* every feature that reads "current user") but something like a one-off "confetti animation on checkout success" stays inside `feature_home/lib/src/widgets/`.
 
+**"Extract once" — the timing question the rule above doesn't answer.**
+"Reused by 2+ features" tells you *whether* something belongs in
+`shared`/`design_system` eventually; it doesn't tell you *when* to make
+the move, and guessing wrong in either direction has a real cost —
+extracting speculatively for a single current consumer builds an
+abstraction shaped by a sample size of one (it will be wrong about what's
+actually generic), while waiting too long leaves a second feature copying
+code that's already proven itself. Two valid answers, not one, depending
+on what you're looking at:
+
+- **Generic by design from day one.** If the capability's own shape
+  doesn't reference any one feature's domain at all — it would read
+  identically if written for a completely different feature — extract it
+  immediately, even with only one confirmed consumer today. A
+  schema-driven dynamic-form renderer that's handed a JSON shape and an
+  endpoint string doesn't become *more* generic by waiting for a second
+  caller to prove it; it already is.
+- **Self-contained until a second real consumer forces the
+  generalization.** If the capability's shape is still feature-flavored —
+  you're not sure yet which parts are incidental to this one use case and
+  which are load-bearing — keep it inside the feature that needs it.
+  Promote it only once a second real consumer exists to prove the
+  boundary you'd draw, not a hypothetical future one.
+
+*Context:* this two-path split, and the examples below, come from
+migrating a legacy app (`akujamin-v2`) into a project bootstrapped from
+this kit — nine features migrated, three extraction decisions made along
+the way, all landing on the same reasoning independently re-derived each
+time before it was written down as a rule:
+- `form_input` (a server-driven dynamic form schema renderer) was
+  extracted to `shared`/`design_system` on day one, before its second
+  real consumer existed — generic-by-design.
+- The websocket reconnect/backoff logic needed by a realtime chat feature
+  was deliberately kept self-contained inside that one feature's own
+  package, specifically because its exact shape wasn't yet proven to
+  generalize — promoted only once a second feature's own websocket usage
+  became the second real consumer.
+- The ML Kit-based camera/proctoring wrapper (`CameraGateway`, the same
+  one §7's gateway principle above uses as its example) stayed
+  self-contained until a second feature's selfie-capture flow became its
+  second real consumer, at which point it moved to `shared`.
+
+Same underlying question asked of three different capabilities, two
+different correct answers depending on what the question revealed about
+each one — that's the point of naming it as one principle instead of
+three separate ad-hoc calls.
+
 ---
 
 ## 4. Folder Tree (inside one feature package)
@@ -148,6 +195,51 @@ feature_home/
 - **Presentation** — widgets + Cubit/Bloc. Renders state, dispatches events/calls Cubit methods. Zero business logic, zero direct repository calls except the explicitly-allowed trivial-CRUD shortcut (see §21).
 - **Domain** — entities (freezed, pure Dart), repository *contracts* (abstract classes), UseCases for orchestration. This layer defines what the app does, not how.
 - **Data** — repository *implementations*, remote/local datasources, DTO models (freezed + json_serializable) that map to domain entities. This layer defines how, and is the only layer allowed to throw exceptions (everything above catches and converts to `Failure`).
+
+### Gateways never silently substitute
+
+A **gateway** — a data-layer abstraction over something outside your own
+code that can genuinely fail in more than one distinguishable way (a
+device capability, a hardware sensor, a third-party SDK) — earns a
+stricter rule than "return `Result` on failure." It must never *guess* a
+substitute for what the caller actually asked for and proceed as if
+nothing happened. If a caller requests the front camera and it's
+unavailable, the honest response is a distinguishable failure — not
+silently opening whatever camera happens to be first in the device's
+list and hoping the caller doesn't notice. Concretely: `Result<Failure,
+void>` (or whichever success type fits) paired with an enum naming *why*
+it failed, not a single generic `Failure`, so a caller can react
+differently to "permission denied" than to "no camera on this device" —
+those need different UI, not the same generic error string.
+
+*Context:* found while migrating a legacy app (`akujamin-v2`) into a
+project bootstrapped from this kit. The old app's camera datasource fell
+back to `cameras.first` whenever the requested lens direction wasn't
+found (`cameras.firstWhere(..., orElse: () => cameras.first)`) — for a
+proctoring feature specifically, this meant silently analyzing the
+*wrong* camera's feed with nobody the wiser, not just a cosmetic bug.
+`packages/shared`'s `CameraGateway.initialize()` there returns
+`Result<Failure, void>` with a `CameraFailureReason` enum
+(`noCameraOnDevice` / `requestedLensNotFound` / `permissionDenied` /
+`captureFailed`) instead, and its own test suite proves the wrong camera
+is never even opened (`verifyNever` on the datasource call, not just an
+assertion on the returned `Failure` — see §28's "proving a negative"
+technique below). The same shape showed up again, independently, in that
+project's OCR-based form-field extraction: a dropdown value with no
+confident match, or a date string that doesn't match the expected
+pattern, returns `null` (left for manual entry) instead of guessing —
+never `orElse: () => options.first` or a blind string-reversal heuristic.
+Two unrelated features, two unrelated bugs in the app being migrated,
+the same fix shape both times — that repetition is what makes this a
+principle worth naming here rather than a one-off note in that project's
+own migration log.
+
+This is a data-layer rule, not a domain-layer one — the gateway's own
+implementation is where the substitution temptation lives (a plausible
+fallback is usually *right there*, one line away); the abstract contract
+just has to expose enough failure detail for a caller to tell "device
+doesn't have this" apart from "device has this but it's temporarily
+unavailable" apart from "the user said no."
 
 ---
 
@@ -843,6 +935,51 @@ Same swap-later pattern: a `NoopCrashReporter` in dev, `FirebaseCrashlyticsRepor
 
 A solo developer chasing 100% everywhere is a common trap — the ROI curve inverts hard past "domain 100%, data ~80%, everything else risk-weighted."
 
+### Proving a regression is real, not just fixed
+
+Coverage percentage answers "did a test run"; it doesn't answer "would
+this test actually have caught the bug it's supposedly guarding." A test
+that passes both before and after a fix was never exercising the bug in
+the first place — it's decoration, not a regression guard. Three
+techniques, each for a different way "the test passed" can lie to you:
+
+- **Assert something did *not* happen, not just that the result looks
+  right.** A wrong-but-plausible code path can still produce a
+  right-looking output by coincidence (or because a mock silently
+  returned a sensible-looking default). `verifyNever(() =>
+  wrongDependency.wasCalled())` catches the case where the *right*
+  answer came from the *wrong* path — a stronger claim than "the returned
+  `Failure`'s type was correct," since that alone doesn't rule out the
+  requested-but-unavailable resource having been silently opened anyway
+  before the failure was manufactured.
+- **A controllable fake clock for anything time-based**, instead of a
+  real `Future.delayed`/`Timer` and a slow, flaky test. Inject a clock
+  the test can `advance(Duration)` deterministically — grace periods,
+  debounce windows, exponential-backoff timing all become instant and
+  reliable to assert on, instead of either genuinely waiting (slow) or
+  not being tested at all (worse).
+- **Revert the fix and re-run the test that's supposed to prove it.** The
+  strongest form of "this test actually tests the bug": write the test
+  first, confirm it fails against the pre-fix code for the *right*
+  reason, apply the fix, confirm it passes, and — for anything
+  non-obvious — temporarily revert the fix once more to confirm the test
+  goes red again. A test that stays green either way was never coupled to
+  the bug it claims to guard.
+
+*Context:* all three were used, independently re-derived, while migrating
+a legacy app (`akujamin-v2`) into a project bootstrapped from this kit.
+`CameraGateway`'s own test suite (§7 above) uses `verifyNever` to prove
+the wrong camera is never opened, not just that the right `Failure`
+comes back. `feature_test`'s proctoring cubit uses a hand-rolled fake
+clock to prove its 2-second grace-period/10-second violation-threshold
+logic deterministically, without a slow real-time test. ADR-012 below is
+the canonical revert-and-reconfirm example: a test proving an
+authenticated user landing on `/` gets redirected to `/home` was written
+and confirmed red against the pre-fix router before the fix existed, then
+green after — and, in the downstream project, re-confirmed end to end
+with a real (non-mocked) restored session, red with the fix reverted,
+green with it restored.
+
 ---
 
 ## 29. CI/CD Pipeline
@@ -967,6 +1104,83 @@ Deliberately **not** built now, because YAGNI — but the architecture leaves ro
 
 ---
 
+## 38. Security
+
+A numbered section of its own, added later than the rest of this
+document (see the ADR log's most recent entries) — not because security
+was an afterthought in the individual decisions above (§9's token
+handling, §24's storage-tier table, §7's exception→`Result` boundary all
+predate this section and don't repeat here), but because there was
+nowhere that named "here's how you review a feature for sensitive-data
+handling" as a repeatable checklist *before* a real migration project
+using this kit developed one under pressure and proved it out feature by
+feature.
+
+This checklist runs on any feature — new or migrated — that touches auth
+tokens, PII, payment data, health data, biometrics, or anything else you
+wouldn't want in a support-ticket screenshot. It's not a migration-only
+concern: a brand-new feature in a brand-new project can get every one of
+these wrong just as easily as a rushed migration can.
+
+- **Inventory.** List every sensitive field the feature reads or writes
+  (tokens, passwords, PII, payment instruments, biometric templates,
+  session identifiers) before writing the data layer that touches them —
+  a field that never makes this list doesn't get a deliberate storage/
+  transit/lifecycle decision, it gets whatever the first draft happened
+  to do.
+- **Storage tier.** Map each field to §24's storage-choice table: secrets
+  → secure-storage-backed storage (`SecureTokenStorage` or its
+  equivalent), non-sensitive flags → `shared_preferences`, structured
+  non-secret cache → `hive_ce`. Getting this wrong "temporarily to get it
+  working" is exactly how a token ends up in an unencrypted Hive box
+  permanently — nobody schedules a follow-up to fix storage tier once the
+  feature demoes correctly.
+- **Transit and logging.** Confirm the datasource goes through TLS-only
+  endpoints and any certificate pinning `core`'s `ApiClient` has
+  configured — pinning is easy to silently drop when wiring a new
+  interceptor. Confirm `AppLogger`/`LoggingInterceptor`'s redaction list
+  actually covers this feature's sensitive fields, and — separately —
+  confirm no ad-hoc `print`/`debugPrint`/one-off logger call anywhere in
+  the feature's code bypasses that redaction, even temporarily for
+  debugging. These are two different failure modes, not one: a redaction
+  list can be complete and still get bypassed by a single forgotten debug
+  print in a Cubit.
+- **Lifecycle.** Enumerate every path that should invalidate the field —
+  logout, session expiry, account deletion — explicitly, and confirm
+  storage's own `clear()` (or feature-specific equivalent) genuinely
+  reaches it. A field that lingers because it moved to a different
+  storage class nobody remembered to include in `clear()` is a real gap,
+  not a hypothetical one — verify this against a real (non-mocked)
+  storage backing, not a mock whose `clear()` call you're only confirming
+  was *invoked*.
+- **Third-party SDKs inherit the same bar.** If a feature feeds data to
+  analytics/crash reporting (`AnalyticsService`/`CrashReporter`, §26/§27),
+  confirm what gets attached automatically (a stack trace with a request
+  body, a default PII field) meets the same redaction bar as everything
+  else on this list — "whatever the SDK defaults to" is not a deliberate
+  decision.
+- **Treat a downgrade as a blocker, not a follow-up.** For a
+  regulated-domain app (ADR-003's fintech/health/gov framing especially,
+  but not exclusively), a sensitive-data gap found during review stops
+  that feature's done checklist until it's fixed — it doesn't ship as a
+  TODO.
+
+This checklist is deliberately generic — it names *what* to verify, not
+any one app's fields or any one project's regulatory scope. Which data is
+sensitive, and which regulations apply, is a per-project decision made
+once (typically during initial architecture/compliance review) and
+applied here feature by feature.
+
+`docs/MIGRATION_PLAYBOOK.md`'s own sensitive-data section points back
+here for the checklist itself, and adds only what's genuinely
+migration-specific on top: comparing the migrated storage tier/logging/
+lifecycle behavior against what the *old* app actually did, so a
+migration doesn't silently downgrade protection the old code already had
+— a comparison a new project has no equivalent for, since there's no old
+app to diff against.
+
+---
+
 ## ADR Log
 
 **ADR-001 — Reject `dartz`, use hand-rolled `Result<F,S>`.**
@@ -1016,5 +1230,8 @@ Deliberately **not** built now, because YAGNI — but the architecture leaves ro
 
 **ADR-012 — `AppRouter._redirect` must send an authenticated user landing on `/` to `/home`; GoRouter's default `initialLocation` was an unhandled case.**
 *Context (2026-07-11):* Discovered while migrating a legacy app (`akujamin-v2`, the same project ADR-011 came from) — every user who logged in, fully closed the app, and reopened it landed on `NotFoundPage` instead of the home screen, on a feature that had already shipped and been through real login/logout QA. Root cause, confirmed by reading `go_router`'s own source (not guessed): `GoRouter` defaults `initialLocation` to `/` whenever the caller doesn't set one explicitly, and this kit's own `AppRouter` — in every app built from it, checked directly — never registers a `GoRoute` for `/` and never passes an explicit `initialLocation`. `_redirect`'s existing rules handled exactly two cases: "not logged in, not already on `/login`" → send to `/login`, and "logged in, on `/login`" → send to `/home`. Neither covers "logged in, on `/`, and no route matches `/`" — so that case fell all the way through, returned `null` (no redirect), and `GoRouter` rendered its `errorBuilder` (`NotFoundPage`) instead. The session restore itself (`AuthCubit._restoreCachedSession()` reading `SecureTokenStorage`) was never the problem — only where the router sends an already-restored session on the app's own default landing location. *Decision:* `_redirect` gained one narrowly-scoped rule, checked after the existing two and before the role guard: `if (loggedIn && state.topRoute == null && state.uri.path == '/') return '/home';`. Scoped specifically to `/` (via `state.uri.path`, not `state.matchedLocation`, since the latter can differ once nothing matches) rather than every unmatched location, so a genuinely bad deep link elsewhere still shows `NotFoundPage` — a real regression test (`still falls back to NotFoundPage for a genuinely unmatched route that is not "/"`) confirms the fix doesn't swallow that case. **Test-first, both here and in the downstream project**: a test using a route fixture with no `/` route (matching what a real app built from this kit actually registers) and an authenticated session was written and confirmed to fail against the pre-fix code before the fix was written, then confirmed green after — `packages/shared`'s test count: 27 → 29. `akujamin-v2` additionally verified this end to end with a real, non-mocked `SecureTokenStorage`-backed session written before the only `configureDependencies()` call in a dedicated test, a fresh `App()` boot, and zero manual navigation calls — confirmed red with the fix reverted, green with it restored, so the integration-level test is proven to exercise the actual bug rather than something adjacent to it (see that project's own `MIGRATION_LOG.md`, permanent finding #5). *Status:* Accepted. Unlike ADR-011, this needed no bootstrap-checklist entry in README — it's a template code fix, not a per-project customization step, so every project bootstrapped from this kit going forward starts with it already in place.
+
+**ADR-013 — Crystallized three recurring patterns from `akujamin-v2`'s migration into general principles (§7, §3, §28), and added a general Security section (§38) previously only expressed as a migration-specific checklist.**
+*Context (2026-07-12):* A production-readiness audit of this kit (golden tests, release runbook, Analytics/CrashReporter — see the golden-test/`RELEASE.md`/`InMemoryAnalyticsService` work landed the same day) also asked whether patterns discovered nine features into `akujamin-v2`'s migration were genuinely repeatable principles this kit's own documentation should state, or one-off decisions that only look similar in hindsight. Each candidate was checked against its actual source before being written down here, not accepted on a name match: (1) the gateway-honest-failure shape (§7) appeared independently in `CameraGateway`'s lens-selection fix *and*, separately, in that project's OCR form-field normalization — two unrelated old-app bugs, the same fix shape both times, with the migration's own code comments and test names already cross-referencing them as "the same class of bug" before this ADR existed; (2) "extract once" (§3) was already a named rule-of-thumb in that project's own `MIGRATION_LOG.md`, applied consistently across three independent extraction decisions (`form_input`, websocket reconnect logic, `CameraGateway`), but had never been stated in *this* kit's own architecture doc, only downstream; (3) the three regression-proof testing techniques (§28) recurred across at least three different packages in that project (`verifyNever` in the camera gateway's tests, a fake clock in the proctoring cubit's tests, revert-and-reconfirm in the router fix ADR-012 already documents) — a genuine repeated discipline, not a single test file's habit. The sensitive-data checklist (now §38) was the fourth candidate: already mature (five real migrated features' worth of QA docs used it successfully), but permanently trapped in migration-specific phrasing ("compared to what the old app did") that has no referent for a brand-new project with no old app to diff against. *Decision:* §7 and §28 gained new subsections (existing sections, no renumbering — every other section's number stays exactly what every other doc in this repo already cites it as); §3 gained an explicit named principle with worked examples; §38 is a genuinely new section, appended at the end (after §37, before the ADR log) rather than inserted earlier in numeric order, specifically to avoid renumbering every section after it and breaking the ~15 existing `§N` cross-references across `CONTRIBUTING.md`, `docs/MIGRATION_PLAYBOOK.md`, `README.md`, `RELEASE.md`, and `bricks/feature/README.md` — section numbers are treated as stable identifiers once cited elsewhere, the same reasoning that keeps ADR numbers sequential-and-never-renumbered. `docs/MIGRATION_PLAYBOOK.md`'s own §3 was rewritten to point at the new §38 for the general checklist instead of duplicating it, keeping only what's genuinely migration-specific (the old-app comparison bullets) locally. *Status:* Accepted. A fourth candidate pattern (whether `bricks/feature`'s generated repository skeleton should scaffold a failure-reason enum the way `CameraGateway` does) was deliberately **not** acted on — see the same day's audit notes: the brick's own "stay minimal until a pattern is proven, not guessed" reasoning (ADR-009) is exactly why a pattern proven only in a downstream project, not yet in this kit's own principles until this ADR, shouldn't be baked into generated code yet either.
 
 *(Add new entries here, dated, every time a future-you would otherwise wonder "why did I do it this way." This is the single document that makes the 30-minute test possible in year five.)*

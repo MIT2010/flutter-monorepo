@@ -192,29 +192,26 @@ lets `apps/mobile`'s composition root discover the feature's registrations
 
 ## 3. Sensitive data during migration
 
-Not every feature touches sensitive data, but when one does, the migration
-is the highest-risk moment for it — it's exactly the point where "copy the
-field into a slightly different model" quietly drops a protection the old
-code had. Run this checklist on every feature that touches auth tokens,
-PII, payment data, health data, biometrics, or anything else you wouldn't
-want in a support-ticket screenshot.
+The general checklist — inventory, storage tier, transit/logging,
+lifecycle, third-party SDKs — now lives in **§38 (Security) of
+ARCHITECTURE.md**, generalized so it applies to any feature (new or
+migrated), not just migration work. Run that checklist in full on every
+migrated feature that touches auth tokens, PII, payment data, health
+data, biometrics, or anything else you wouldn't want in a
+support-ticket screenshot. What follows here is only what's genuinely
+*additional* for a migration specifically — comparisons against the old
+app that a new project has no equivalent for.
 
-- **Inventory before moving anything.** List every sensitive field the
-  feature reads or writes (tokens, passwords, PII, payment instruments,
-  biometric templates, session identifiers). If a field doesn't show up in
-  this list, don't assume it's clean — grep the old code for where it's
-  stored/logged/sent, then decide.
-- **Storage tier must not downgrade.** Map each field to the kit's
-  storage-choice table (§24 ARCHITECTURE.md): secrets → secure-storage-backed
-  storage (`SecureTokenStorage` or its equivalent), non-sensitive flags →
-  `shared_preferences`, structured non-secret cache → `hive_ce`. If the old
-  app kept something in platform Keychain/Keystore-backed secure storage,
-  the migrated version must land in the same tier — not in an unencrypted
-  Hive box or `SharedPreferences`, even temporarily "to get it working."
-- **Transit stays at least as strong.** Confirm the migrated datasource
-  still goes through TLS-only endpoints and any certificate pinning the old
-  HTTP client had configured — pinning is easy to silently drop when
-  re-wiring interceptors onto `core`'s `ApiClient`.
+Not every feature touches sensitive data, but when one does, the
+migration is the highest-risk moment for it — it's exactly the point
+where "copy the field into a slightly different model" quietly drops a
+protection the old code had.
+
+- **Storage tier must not downgrade.** §38's storage-tier mapping applies
+  as-is, plus this: if the old app kept something in platform
+  Keychain/Keystore-backed secure storage, the migrated version must land
+  in the *same* tier — not in an unencrypted Hive box or
+  `SharedPreferences`, even temporarily "to get it working."
 - **Logging doesn't leak what the old app redacted.** Check the legacy
   logging interceptor for what it excluded (tokens, passwords, full card
   numbers, etc.) and make sure the migrated `AppLogger`/`LoggingInterceptor`
@@ -233,7 +230,7 @@ want in a support-ticket screenshot.
   `SecureTokenStorage.clear()` (or feature-specific equivalent) must wipe
   the same field. A field that lingers post-logout because it moved to a
   different storage class you forgot to clear is a regression, not a wash.
-- **Third-party SDKs inherit the same bar.** If a legacy feature fed data to
+- **Third-party SDKs must not regress.** If a legacy feature fed data to
   analytics/crash reporting automatically (a stack trace with a request
   body, a default PII field), the migrated `AnalyticsService`/
   `CrashReporter` implementation needs equivalent-or-better redaction — not
@@ -243,7 +240,9 @@ want in a support-ticket screenshot.
   regulated-domain app (ADR-003's fintech/health/gov framing), a
   sensitive-data handling gap found during migration review stops that
   feature's "done" checklist (§4 below) until it's fixed — it doesn't ship
-  as a TODO.
+  as a TODO. Same rule §38 states for new projects; restated here because
+  it's easy to wave off a migration-found gap as "the old app already had
+  this problem," which is not a reason to ship it forward.
 
 This checklist is deliberately generic — it names *what* to verify, not any
 one app's fields. Which data is actually sensitive, and which regulations

@@ -52,7 +52,7 @@ melos:
       # failed." See ADR-008 — this masked itself on dev machines with an
       # ambient FLUTTER_ROOT already set, only surfaced on a clean CI runner.
       #
-      # `&& fvm dart format packages apps tool` afterward: injectable's
+      # The trailing `fvm dart format packages apps tool` pass: injectable's
       # micro-package module output (*_module.module.dart) isn't quite
       # `dart format`-clean the moment build_runner writes it — every fresh
       # `gen` needs one format pass to converge, or the separate `format`
@@ -61,7 +61,23 @@ melos:
       # instead of `.` because `.` would also descend into
       # bricks/feature/__brick__/, whose mustache templates aren't valid
       # Dart — dart format dies on them (caught by ADR-009's throwaway test).
-      run: melos exec --order-dependents --depends-on="build_runner" -- fvm flutter pub run build_runner build --delete-conflicting-outputs && fvm dart format packages apps tool
+      #
+      # `A && (B || echo ...)`, not a plain `A && B`: if codegen (A) fails,
+      # this must still fail the whole script immediately, unchanged from
+      # before. But if A succeeds and only the trailing format pass (B)
+      # hits its own unrelated problem (e.g. a very long/deep file path on
+      # Windows), that must not report as "gen failed" when the actual
+      # codegen fully succeeded — the parenthesized `(B || echo ...)`
+      # always exits 0 once A has already succeeded, so a format-only
+      # hiccup prints a clear, distinct warning instead of masking a real
+      # success as a failure. The separate `melos run format` step (which
+      # genuinely gates CI via --set-exit-if-changed) still catches any
+      # real leftover-unformatted-file problem afterward — this doesn't
+      # weaken that check, it just stops attributing a *different* problem
+      # to codegen. Uses only `&&`/`||`/parentheses, no `;` — this needs to
+      # run identically whether melos invokes it through a POSIX shell or
+      # Windows' cmd.exe (ADR-006), and `;` isn't a valid cmd.exe separator.
+      run: melos exec --order-dependents --depends-on="build_runner" -- fvm flutter pub run build_runner build --delete-conflicting-outputs && (fvm dart format packages apps tool || echo "post-gen format warning -- codegen succeeded, but the format pass hit its own problem (see output above); this is cosmetic, not a codegen failure -- run 'melos run format' to check for anything genuinely left unformatted")
       description: "Jalankan codegen (freezed, injectable, json_serializable) di package yang butuh, urut dependency graph (core sebelum shared) supaya micro-package injectable core selalu fresh sebelum shared membacanya"
     clean:
       run: melos exec -- fvm flutter clean
