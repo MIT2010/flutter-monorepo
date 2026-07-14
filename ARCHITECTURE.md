@@ -965,8 +965,22 @@ techniques, each for a different way "the test passed" can lie to you:
   non-obvious — temporarily revert the fix once more to confirm the test
   goes red again. A test that stays green either way was never coupled to
   the bug it claims to guard.
+- **Verify request headers/metadata, not just response content.** A test
+  that mocks a repository/datasource at the network boundary (`when(() =>
+  remote.someCall()).thenAnswer(...)`) and asserts on the parsed *response*
+  proves "the endpoint was called and the response was handled" — it says
+  nothing about what was actually *sent*. An interceptor that attaches
+  auth headers, retry markers, or any other request-side metadata can be
+  completely unwired and every one of those tests still passes, because
+  none of them construct a real request through the real Dio pipeline.
+  When request-side correctness is the actual claim (an auth header is
+  present and correctly formatted, a retry marker prevents infinite
+  loops), assert against a fake `HttpClientAdapter`'s recorded
+  `RequestOptions` on the real, DI-wired `Dio` instance — not a mocked
+  repository — and check the literal header value (`'Bearer <token>'`),
+  not just that some `Authorization` key exists.
 
-*Context:* all three were used, independently re-derived, while migrating
+*Context:* all four were used, independently re-derived, while migrating
 a legacy app (`akujamin-v2`) into a project bootstrapped from this kit.
 `CameraGateway`'s own test suite (§7 above) uses `verifyNever` to prove
 the wrong camera is never opened, not just that the right `Failure`
@@ -978,7 +992,13 @@ authenticated user landing on `/` gets redirected to `/home` was written
 and confirmed red against the pre-fix router before the fix existed, then
 green after — and, in the downstream project, re-confirmed end to end
 with a real (non-mocked) restored session, red with the fix reverted,
-green with it restored.
+green with it restored. The header/metadata technique is the newest,
+found the hard way (2026-07-14): `akujamin-v2`'s `AuthInterceptor` was
+never actually attached to the app's real `Dio` instance at all — every
+authenticated request in the shipped app never sent a Bearer token — and
+this went undetected through every feature's own test suite precisely
+because every one of them mocked the network boundary and only ever
+checked response handling, never the request that would have been sent.
 
 ---
 
