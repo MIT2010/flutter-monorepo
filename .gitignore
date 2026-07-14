@@ -33,11 +33,17 @@ coverage/
 # run legitimately produces small pixel diffs CI won't see.
 **/test/golden/failures/
 
-# Local secrets. This project passes config via --dart-define (see
-# README), never .env files, but this is a safety net in case one gets
-# added later.
+# Local secrets. This project passes config via --dart-define-from-file
+# (ADR-014, flavors/*.json — see README), never .env files, but this is a
+# safety net in case one gets added later.
 .env
 .env.*
+
+# Per-flavor config (ADR-014) — real values, gitignored; flavors/*.example.json
+# (committed templates) are the only *.json files under flavors/ that should
+# ever be tracked.
+flavors/*.json
+!flavors/*.example.json
 
 # Real Android release signing (RELEASE.md, §30 of ARCHITECTURE.md) —
 # `key.properties.example` is the committed template; the real file it's

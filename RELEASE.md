@@ -92,6 +92,24 @@ To set up, on a Mac with Xcode:
    — same "stop loudly, not silently" shape as the Android check, but
    this half has not been exercised against a real Xcode build.
 
+**`flutter build ipa` + `--dart-define-from-file` (ADR-014) — verified via
+issue-history research 2026-07-14, not an empirical re-test.**
+[flutter/flutter#142976](https://github.com/flutter/flutter/issues/142976)
+("`--dart-define-from-file` does not work with `flutter build ipa`") was
+closed 2024-05-23, on a comparatively weak resolution (an anecdotal "fixed
+for me after upgrading to 3.19.4" comment, not a cited PR/commit). Checked
+the tracker for any new report of the same symptom since: none found,
+despite two years of `--dart-define-from-file` being in heavy real-world
+use — high confidence it's resolved on this kit's pinned Flutter version
+(3.44.4). But the actual `flavors/*.json` + `--dart-define-from-file`
+combination this kit now uses (ADR-014) has never been run through a real
+`flutter build ipa` here — no macOS/Xcode toolchain available in this
+environment, same constraint as iOS signing above. **First real iOS
+release build from a project using this pattern should confirm
+`String.fromEnvironment` values (`Env.current.apiBaseUrl` etc.) actually
+loaded from the flavor file, not silently fell back to their hardcoded
+defaults**, before trusting this silently on every release after.
+
 ---
 
 ## 2. Building a release artifact

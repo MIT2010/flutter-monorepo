@@ -89,23 +89,31 @@ melos:
       run: fvm flutter pub outdated
       description: "Cek paket yang sudah ada versi lebih baru di luar constraint saat ini -- jalankan tiap kuartal sesuai §33 ARCHITECTURE.md (Long-Term Maintenance Strategy), JANGAN auto-upgrade tanpa baca changelog masing-masing paket dulu"
     run:dev:
-      run: melos exec --scope="mobile" -- fvm flutter run --flavor dev -t lib/main_dev.dart
+      # --dart-define-from-file path is relative to apps/mobile (melos
+      # exec's cwd for --scope=mobile), not the workspace root --
+      # ../../flavors/. ADR-014: one file per flavor instead of
+      # accumulating --dart-define flags. flavors/*.json key names are
+      # packages/core's Env class's actual contract (FLAVOR/API_BASE_URL/
+      # API_VERSION) -- keep them in sync, a mismatch fails silently
+      # (wrong/default config) or crashes main_staging.dart/main_prod.dart's
+      # own FLAVOR assert.
+      run: melos exec --scope="mobile" -- fvm flutter run --flavor dev -t lib/main_dev.dart --dart-define-from-file=../../flavors/development.json
       description: "Jalankan app flavor development"
     run:dev:web:
-      run: melos exec --scope="mobile" -- fvm flutter run --dart-define=FLAVOR=dev -t lib/main_dev.dart -d chrome
+      run: melos exec --scope="mobile" -- fvm flutter run --dart-define-from-file=../../flavors/development.json -t lib/main_dev.dart -d chrome
       description: "Jalankan app di mode development (web/Chrome)"
     run:staging:
-      run: melos exec --scope="mobile" -- fvm flutter run --flavor staging -t lib/main_staging.dart
+      run: melos exec --scope="mobile" -- fvm flutter run --flavor staging -t lib/main_staging.dart --dart-define-from-file=../../flavors/staging.json
       description: "Jalankan app flavor staging"
     run:prod:
-      run: melos exec --scope="mobile" -- fvm flutter run --flavor prod -t lib/main_prod.dart
+      run: melos exec --scope="mobile" -- fvm flutter run --flavor prod -t lib/main_prod.dart --dart-define-from-file=../../flavors/production.json
       description: "Jalankan app flavor production -- HATI-HATI, biasanya connect ke API production asli, bukan untuk uji coba sembarangan"
     build:dev:
-      run: fvm dart run tool/verify_signing.dart android && melos exec --scope="mobile" -- fvm flutter build appbundle --flavor dev -t lib/main_dev.dart
+      run: fvm dart run tool/verify_signing.dart android && melos exec --scope="mobile" -- fvm flutter build appbundle --flavor dev -t lib/main_dev.dart --dart-define-from-file=../../flavors/development.json
       description: "Build .aab Android flavor dev -- RELEASE.md. Berhenti dengan pesan jelas (bukan gagal senyap/salah tanda tangan) kalau apps/mobile/android/key.properties belum ada"
     build:staging:
-      run: fvm dart run tool/verify_signing.dart android && melos exec --scope="mobile" -- fvm flutter build appbundle --flavor staging -t lib/main_staging.dart
+      run: fvm dart run tool/verify_signing.dart android && melos exec --scope="mobile" -- fvm flutter build appbundle --flavor staging -t lib/main_staging.dart --dart-define-from-file=../../flavors/staging.json
       description: "Build .aab Android flavor staging -- RELEASE.md. Sama gate signing seperti build:dev"
     build:prod:
-      run: fvm dart run tool/verify_signing.dart android && melos exec --scope="mobile" -- fvm flutter build appbundle --flavor prod -t lib/main_prod.dart
-      description: "Build .aab Android flavor prod -- RELEASE.md. Sama gate signing seperti build:dev. iOS build (.ipa) belum ada script melos-nya -- perlu macOS/Xcode, lihat RELEASE.md"
+      run: fvm dart run tool/verify_signing.dart android && melos exec --scope="mobile" -- fvm flutter build appbundle --flavor prod -t lib/main_prod.dart --dart-define-from-file=../../flavors/production.json
+      description: "Build .aab Android flavor prod -- RELEASE.md. Sama gate signing seperti build:dev. iOS build (.ipa) belum ada script melos-nya -- perlu macOS/Xcode, lihat RELEASE.md dan ADR-014 (verifikasi flutter/flutter#142976 -- tidak reproducible di versi Flutter yang di-pin, tapi belum diuji ulang secara empiris di sini)"

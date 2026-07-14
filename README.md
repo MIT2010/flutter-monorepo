@@ -70,6 +70,21 @@ code** — not as a fix-it-later item (ADR-011):
    unprefixed, will silently share the same login session. Step 1 alone
    doesn't fix this on Windows — bundle identifiers only matter for
    Android/iOS/macOS's OS-level sandboxing.
+3. **Copy the per-flavor config templates and fill in your project's real
+   values** (ADR-014):
+   ```bash
+   cp flavors/development.example.json flavors/development.json
+   cp flavors/staging.example.json flavors/staging.json
+   cp flavors/production.example.json flavors/production.json
+   # edit each flavors/*.json with your real API_BASE_URL etc.
+   ```
+   The real `flavors/*.json` files are gitignored — they're meant to carry
+   real per-project endpoints/keys, never committed. **Keep each file's
+   keys in sync with `packages/core/lib/src/env/env.dart`'s `Env` class**
+   (`FLAVOR`/`API_BASE_URL`/`API_VERSION`) — a renamed or missing key here
+   fails silently (the app falls back to `Env`'s hardcoded defaults)
+   rather than erroring, except `FLAVOR` itself, which trips
+   `main_staging.dart`/`main_prod.dart`'s own assert if it's ever wrong.
 
 Skipping this is easy to miss because nothing fails — the app still runs,
 tests still pass, and the bleed only shows up as "why am I already logged
@@ -114,7 +129,9 @@ already baked in (see Prerequisites above).
 | `build:dev` / `build:staging` / `build:prod` | Builds an Android `.aab` for the matching flavor — refuses to run (clear TODO message, before Gradle even starts) if `apps/mobile/android/key.properties` doesn't exist yet | Cutting a real release — see [RELEASE.md](RELEASE.md) for signing setup and the full runbook |
 
 `--flavor dev|staging|prod` pairs with `-t apps/mobile/lib/main_<flavor>.dart`
-— see §30 of ARCHITECTURE.md for the full flavor story.
+and `--dart-define-from-file=flavors/<flavor>.json` (ADR-014) — see §30 of
+ARCHITECTURE.md for the full flavor story, and "Bootstrapping a new
+project" above for the JSON file setup this now depends on.
 
 ## Scaffolding a new feature (`mason make feature`)
 
