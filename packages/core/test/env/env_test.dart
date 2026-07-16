@@ -10,12 +10,29 @@ void main() {
       expect(Env.current.isProd, isFalse);
     });
 
-    test('apiUrl pins the base URL to the configured API version', () {
+    test('apiVersion defaults to blank, and apiUrl is just the base URL — a '
+        'version segment is opt-in per backend, not assumed (see '
+        'joinApiUrl, ADR-015)', () {
+      expect(Env.current.apiVersion, isEmpty);
+      expect(Env.current.apiUrl, Env.current.apiBaseUrl);
+    });
+  });
+
+  group('joinApiUrl', () {
+    test('returns the bare base URL when apiVersion is blank', () {
       expect(
-        Env.current.apiUrl,
-        '${Env.current.apiBaseUrl}/${Env.current.apiVersion}',
+        joinApiUrl('https://api.example.com', ''),
+        'https://api.example.com',
       );
-      expect(Env.current.apiUrl, endsWith('/v1'));
+    });
+
+    test('appends the version segment when apiVersion is set — a backend '
+        'that adopts versioning later needs only a flavors/*.json edit, not '
+        'a code change', () {
+      expect(
+        joinApiUrl('https://api.example.com', 'v2'),
+        'https://api.example.com/v2',
+      );
     });
   });
 }

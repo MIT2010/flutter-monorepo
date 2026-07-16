@@ -1,5 +1,5 @@
 {
   "FLAVOR": "staging",
   "API_BASE_URL": "https://api-staging.example.com",
-  "API_VERSION": "v1"
+  "API_VERSION": ""
 }

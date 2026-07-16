@@ -1,5 +1,5 @@
 {
   "FLAVOR": "prod",
   "API_BASE_URL": "https://api.example.com",
-  "API_VERSION": "v1"
+  "API_VERSION": ""
 }
