@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/app_theme_context.dart';
+
 /// Wraps [showModalBottomSheet] with a consistent rounded-top shape (§16).
 class AppBottomSheet {
   const AppBottomSheet._();
@@ -9,11 +11,12 @@ class AppBottomSheet {
     required WidgetBuilder builder,
     bool isScrollControlled = true,
   }) {
+    final radius = context.shape.radiusLg;
     return showModalBottomSheet<T>(
       context: context,
       isScrollControlled: isScrollControlled,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(radius)),
       ),
       builder: builder,
     );

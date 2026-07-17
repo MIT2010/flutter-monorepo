@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../tokens/app_elevation_extension.dart';
+import '../tokens/app_motion_extension.dart';
+import '../tokens/app_semantic_colors.dart';
+import '../tokens/app_shape_extension.dart';
 import '../tokens/app_spacing_extension.dart';
 
 /// `BuildContext` accessors for every `ThemeExtension` this package
@@ -8,6 +12,16 @@ import '../tokens/app_spacing_extension.dart';
 extension AppThemeContext on BuildContext {
   AppSpacingExtension get spacing =>
       _requireExtension<AppSpacingExtension>(this);
+
+  AppSemanticColors get semanticColors =>
+      _requireExtension<AppSemanticColors>(this);
+
+  AppShapeExtension get shape => _requireExtension<AppShapeExtension>(this);
+
+  AppElevationExtension get elevation =>
+      _requireExtension<AppElevationExtension>(this);
+
+  AppMotionExtension get motion => _requireExtension<AppMotionExtension>(this);
 }
 
 /// Every accessor above routes through this instead of a bare `!` so a

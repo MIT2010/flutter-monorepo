@@ -20,6 +20,7 @@ class AppCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAlias,
+      elevation: context.elevation.level1,
       child: InkWell(
         onTap: onTap,
         child: Padding(
