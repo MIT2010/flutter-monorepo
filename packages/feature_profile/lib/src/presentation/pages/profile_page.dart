@@ -78,12 +78,12 @@ class ProfileViewState extends State<ProfileView> {
           ProfileLoading() => const Center(child: CircularProgressIndicator()),
           ProfileError(:final failure) => Center(
             child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: EdgeInsets.all(context.spacing.md),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(failure.message),
-                  const SizedBox(height: AppSpacing.md),
+                  SizedBox(height: context.spacing.md),
                   AppButton(
                     label: 'Coba lagi',
                     onPressed: () => context.read<ProfileCubit>().getProfile(),
@@ -93,25 +93,25 @@ class ProfileViewState extends State<ProfileView> {
             ),
           ),
           ProfileLoaded() || ProfileSaving() => Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: EdgeInsets.all(context.spacing.md),
             child: Column(
               children: [
                 AppTextField(label: 'Name', controller: _nameController),
-                const SizedBox(height: AppSpacing.sm),
+                SizedBox(height: context.spacing.sm),
                 AppTextField(
                   label: 'Email',
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                 ),
-                const SizedBox(height: AppSpacing.sm),
+                SizedBox(height: context.spacing.sm),
                 AppTextField(label: 'Bio', controller: _bioController),
-                const SizedBox(height: AppSpacing.sm),
+                SizedBox(height: context.spacing.sm),
                 AppTextField(
                   label: 'Phone Number',
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                 ),
-                const SizedBox(height: AppSpacing.md),
+                SizedBox(height: context.spacing.md),
                 AppButton(
                   label: 'Save',
                   loading: state is ProfileSaving,

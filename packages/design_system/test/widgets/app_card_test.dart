@@ -6,8 +6,9 @@ void main() {
   group('AppCard', () {
     testWidgets('renders its child', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: AppCard(child: Text('content'))),
+        MaterialApp(
+          theme: AppTheme.light(),
+          home: const Scaffold(body: AppCard(child: Text('content'))),
         ),
       );
 
@@ -18,6 +19,7 @@ void main() {
       var tapped = false;
       await tester.pumpWidget(
         MaterialApp(
+          theme: AppTheme.light(),
           home: Scaffold(
             body: AppCard(onTap: () => tapped = true, child: const Text('x')),
           ),

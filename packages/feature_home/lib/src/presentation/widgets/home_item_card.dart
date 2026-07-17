@@ -23,7 +23,7 @@ class HomeItemCard extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
-          if (item.imageUrl != null) const SizedBox(width: AppSpacing.md),
+          if (item.imageUrl != null) SizedBox(width: context.spacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,7 +32,7 @@ class HomeItemCard extends StatelessWidget {
                   item.title,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-                const SizedBox(height: AppSpacing.xs),
+                SizedBox(height: context.spacing.xs),
                 Text(
                   item.subtitle,
                   style: Theme.of(context).textTheme.bodyMedium,

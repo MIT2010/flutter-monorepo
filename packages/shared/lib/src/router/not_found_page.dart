@@ -14,12 +14,12 @@ class NotFoundPage extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          padding: EdgeInsets.all(context.spacing.lg),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text('Page not found'),
-              const SizedBox(height: AppSpacing.md),
+              SizedBox(height: context.spacing.md),
               AppButton(label: 'Go home', onPressed: () => context.go('/home')),
             ],
           ),

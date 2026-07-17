@@ -64,12 +64,12 @@ class HomeView extends StatelessWidget {
           HomeLoading() => const Center(child: CircularProgressIndicator()),
           HomeError(:final failure) => Center(
             child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: EdgeInsets.all(context.spacing.md),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(failure.message),
-                  const SizedBox(height: AppSpacing.md),
+                  SizedBox(height: context.spacing.md),
                   AppButton(
                     label: 'Coba lagi',
                     onPressed: () => context.read<HomeCubit>().loadFeed(),
@@ -83,10 +83,10 @@ class HomeView extends StatelessWidget {
               if (isStale) const _StaleBanner(),
               Expanded(
                 child: ListView.separated(
-                  padding: const EdgeInsets.all(AppSpacing.md),
+                  padding: EdgeInsets.all(context.spacing.md),
                   itemCount: items.length,
                   separatorBuilder: (_, _) =>
-                      const SizedBox(height: AppSpacing.sm),
+                      SizedBox(height: context.spacing.sm),
                   itemBuilder: (context, index) =>
                       HomeItemCard(item: items[index]),
                 ),
@@ -110,14 +110,14 @@ class _StaleBanner extends StatelessWidget {
     return Container(
       width: double.infinity,
       color: colors.tertiaryContainer,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
+      padding: EdgeInsets.symmetric(
+        horizontal: context.spacing.md,
+        vertical: context.spacing.sm,
       ),
       child: Row(
         children: [
           Icon(Icons.cloud_off, size: 18, color: colors.onTertiaryContainer),
-          const SizedBox(width: AppSpacing.sm),
+          SizedBox(width: context.spacing.sm),
           Expanded(
             child: Text(
               'Data mungkin belum terbaru — menampilkan versi tersimpan terakhir.',

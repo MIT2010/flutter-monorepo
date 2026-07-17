@@ -47,7 +47,7 @@ class LoginViewState extends State<LoginView> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.all(context.spacing.md),
         child: BlocConsumer<LoginCubit, LoginState>(
           listener: (context, state) {
             switch (state) {
@@ -65,13 +65,13 @@ class LoginViewState extends State<LoginView> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               AppTextField(label: 'Email', controller: _emailController),
-              const SizedBox(height: AppSpacing.sm),
+              SizedBox(height: context.spacing.sm),
               AppTextField(
                 label: 'Password',
                 obscure: true,
                 controller: _passwordController,
               ),
-              const SizedBox(height: AppSpacing.md),
+              SizedBox(height: context.spacing.md),
               AppButton(
                 label: 'Login',
                 loading: state is LoginLoading,

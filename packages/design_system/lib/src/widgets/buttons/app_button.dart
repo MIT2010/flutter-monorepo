@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../tokens/app_spacing.dart';
+import '../../theme/app_theme_context.dart';
 
 /// Wraps [ElevatedButton] with the design tokens applied and owns its own
 /// loading-spinner-replaces-label behavior, so every screen gets consistent
@@ -36,7 +36,7 @@ class AppButton extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(icon, size: 18),
-                const SizedBox(width: AppSpacing.xs),
+                SizedBox(width: context.spacing.xs),
                 Text(label),
               ],
             ),

@@ -36,12 +36,12 @@ class {{feature_name.pascalCase()}}View extends StatelessWidget {
             const Center(child: CircularProgressIndicator()),
           {{feature_name.pascalCase()}}Error(:final failure) => Center(
             child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: EdgeInsets.all(context.spacing.md),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(failure.message),
-                  const SizedBox(height: AppSpacing.md),
+                  SizedBox(height: context.spacing.md),
                   AppButton(
                     label: 'Coba lagi',
                     onPressed: () =>

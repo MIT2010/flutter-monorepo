@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 
-import '../../tokens/app_spacing.dart';
+import '../../theme/app_theme_context.dart';
 
 /// Wraps [Card] with the design tokens applied and an optional tap target
 /// (§16).
 class AppCard extends StatelessWidget {
   final Widget child;
-  final EdgeInsetsGeometry padding;
+
+  /// Defaults to `EdgeInsets.all(context.spacing.md)` — `null` rather than
+  /// a literal default because the spacing token now lives on
+  /// `Theme.of(context)`, which isn't available at const-default-value
+  /// evaluation time.
+  final EdgeInsetsGeometry? padding;
   final VoidCallback? onTap;
 
-  const AppCard({
-    super.key,
-    required this.child,
-    this.padding = const EdgeInsets.all(AppSpacing.md),
-    this.onTap,
-  });
+  const AppCard({super.key, required this.child, this.padding, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,10 @@ class AppCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        child: Padding(padding: padding, child: child),
+        child: Padding(
+          padding: padding ?? EdgeInsets.all(context.spacing.md),
+          child: child,
+        ),
       ),
     );
   }

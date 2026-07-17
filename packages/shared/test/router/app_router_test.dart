@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -101,7 +102,10 @@ void main() {
       )..standaloneRoutes = _standaloneRoutes;
 
       await tester.pumpWidget(
-        MaterialApp.router(routerConfig: appRouter.router),
+        MaterialApp.router(
+          theme: AppTheme.light(),
+          routerConfig: appRouter.router,
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -116,7 +120,10 @@ void main() {
         )..standaloneRoutes = _standaloneRoutes;
 
         await tester.pumpWidget(
-          MaterialApp.router(routerConfig: appRouter.router),
+          MaterialApp.router(
+            theme: AppTheme.light(),
+            routerConfig: appRouter.router,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -132,7 +139,10 @@ void main() {
       )..standaloneRoutes = _standaloneRoutes;
 
       await tester.pumpWidget(
-        MaterialApp.router(routerConfig: appRouter.router),
+        MaterialApp.router(
+          theme: AppTheme.light(),
+          routerConfig: appRouter.router,
+        ),
       );
       appRouter.router.go('/login');
       await tester.pumpAndSettle();
@@ -149,7 +159,10 @@ void main() {
       )..standaloneRoutes = _standaloneRoutes;
 
       await tester.pumpWidget(
-        MaterialApp.router(routerConfig: appRouter.router),
+        MaterialApp.router(
+          theme: AppTheme.light(),
+          routerConfig: appRouter.router,
+        ),
       );
       appRouter.router.go('/nowhere');
       await tester.pumpAndSettle();
@@ -170,7 +183,10 @@ void main() {
         )..standaloneRoutes = _standaloneRoutesWithoutRoot;
 
         await tester.pumpWidget(
-          MaterialApp.router(routerConfig: appRouter.router),
+          MaterialApp.router(
+            theme: AppTheme.light(),
+            routerConfig: appRouter.router,
+          ),
         );
         await tester.pumpAndSettle();
 
@@ -188,7 +204,10 @@ void main() {
         )..standaloneRoutes = _standaloneRoutesWithoutRoot;
 
         await tester.pumpWidget(
-          MaterialApp.router(routerConfig: appRouter.router),
+          MaterialApp.router(
+            theme: AppTheme.light(),
+            routerConfig: appRouter.router,
+          ),
         );
         appRouter.router.go('/nowhere');
         await tester.pumpAndSettle();
@@ -209,7 +228,10 @@ void main() {
         )..standaloneRoutes = _roleGuardedRoutes;
 
         await tester.pumpWidget(
-          MaterialApp.router(routerConfig: appRouter.router),
+          MaterialApp.router(
+            theme: AppTheme.light(),
+            routerConfig: appRouter.router,
+          ),
         );
         appRouter.router.go('/admin');
         await tester.pumpAndSettle();
@@ -229,7 +251,10 @@ void main() {
       )..standaloneRoutes = _roleGuardedRoutes;
 
       await tester.pumpWidget(
-        MaterialApp.router(routerConfig: appRouter.router),
+        MaterialApp.router(
+          theme: AppTheme.light(),
+          routerConfig: appRouter.router,
+        ),
       );
       appRouter.router.go('/admin');
       await tester.pumpAndSettle();
@@ -257,7 +282,10 @@ void main() {
             ..shellRoutes = _shellRoutes;
 
       await tester.pumpWidget(
-        MaterialApp.router(routerConfig: appRouter.router),
+        MaterialApp.router(
+          theme: AppTheme.light(),
+          routerConfig: appRouter.router,
+        ),
       );
       appRouter.router.go('/home');
       await tester.pumpAndSettle();
@@ -284,7 +312,10 @@ void main() {
             ..shellRoutes = _shellRoutes;
 
       await tester.pumpWidget(
-        MaterialApp.router(routerConfig: appRouter.router),
+        MaterialApp.router(
+          theme: AppTheme.light(),
+          routerConfig: appRouter.router,
+        ),
       );
       appRouter.router.go('/home');
       await tester.pumpAndSettle();
@@ -311,7 +342,10 @@ void main() {
       'transition AuthSessionAdapter drives after a real login',
       (tester) async {
         await tester.pumpWidget(
-          MaterialApp.router(routerConfig: appRouter.router),
+          MaterialApp.router(
+            theme: AppTheme.light(),
+            routerConfig: appRouter.router,
+          ),
         );
         await tester.pumpAndSettle();
         expect(find.text('login-page'), findsOneWidget);
@@ -335,7 +369,10 @@ void main() {
       (tester) async {
         authSession.setStatus(const AuthSessionStatus(isAuthenticated: true));
         await tester.pumpWidget(
-          MaterialApp.router(routerConfig: appRouter.router),
+          MaterialApp.router(
+            theme: AppTheme.light(),
+            routerConfig: appRouter.router,
+          ),
         );
         appRouter.router.go('/home');
         await tester.pumpAndSettle();
