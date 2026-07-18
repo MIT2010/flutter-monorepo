@@ -175,32 +175,44 @@ When it genuinely is a package:
 ### Regenerating golden files
 
 `packages/design_system/test/golden/` holds the `~10-widget-state` golden
-suite §28 of ARCHITECTURE.md scopes for — design_system components only,
-light and dark, not full pages.
+suite §28 of ARCHITECTURE.md scopes for — design_system components in
+isolation, light and dark. Three feature packages additionally have their
+own `test/golden/` for real *page*-level coverage (proving a screen's
+actual on-screen appearance reflects the design system's tokens, not just
+that the isolated component does): `packages/authentication`
+(`LoginPage`), `packages/feature_home` (`HomePage`),
+`packages/feature_profile` (`ProfilePage`) — added 2026-07-18 alongside
+the design_system token upgrade, when an app-wide token-adoption audit
+found the tokens were fully built and tested but nothing in the running
+app had been touched yet to actually use them.
 
-**`fvm flutter test test/golden --update-goldens` from inside
-`packages/design_system` regenerates them locally — but a baseline
-captured on Windows or macOS reliably fails the very next CI run.** Font
-rendering/anti-aliasing genuinely differs by platform; a golden file only
-means anything when compared against an image taken on the same OS. CI
-(`ci.yaml`) runs on `ubuntu-latest`, so that's the only platform a
-committed golden file is allowed to be baked on.
+**`fvm flutter test test/golden --update-goldens` from inside any of
+those four package directories regenerates that package's goldens
+locally — but a baseline captured on Windows or macOS reliably fails the
+very next CI run.** Font rendering/anti-aliasing genuinely differs by
+platform; a golden file only means anything when compared against an
+image taken on the same OS. CI (`ci.yaml`) runs on `ubuntu-latest`, so
+that's the only platform a committed golden file is allowed to be baked
+on.
 
 The actual regeneration workflow:
 
-1. Change the widget (or add a new golden case).
+1. Change the widget/page (or add a new golden case).
 2. Run `fvm flutter test test/golden --update-goldens` locally if you want
    a fast sanity check that the test itself works — expect the resulting
    images to *not* be the ones you commit.
 3. Trigger the **Regenerate goldens** GitHub Action
    (`.github/workflows/goldens.yml`, `workflow_dispatch` only —
    `gh workflow run goldens.yml --ref <your-branch>` or the Actions tab)
-   on your branch. It runs the same golden tests with `--update-goldens`
-   on `ubuntu-latest`, matching `ci.yaml` exactly.
-4. Download the `design-system-goldens` artifact from that run
-   (`gh run download <run-id> -n design-system-goldens`), and copy its
-   `.png` files into `packages/design_system/test/golden/goldens/`,
-   overwriting your local ones.
+   on your branch. It runs every package's golden tests with
+   `--update-goldens` on `ubuntu-latest`, matching `ci.yaml` exactly, and
+   uploads one artifact per package.
+4. Download the artifact(s) for whichever package(s) you touched —
+   `design-system-goldens`, `authentication-goldens`,
+   `feature_home-goldens`, and/or `feature_profile-goldens`
+   (`gh run download <run-id> -n <artifact-name>`) — and copy the `.png`
+   files into that package's own `test/golden/goldens/`, overwriting your
+   local ones.
 5. Commit those images. `melos run test` on your next `ci.yaml` run will
    now be comparing Linux-generated goldens against a Linux-generated
    baseline — the only comparison that's actually meaningful.

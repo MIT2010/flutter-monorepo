@@ -82,7 +82,12 @@ class ProfileViewState extends State<ProfileView> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(failure.message),
+                  Text(
+                    failure.message,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
                   SizedBox(height: context.spacing.md),
                   AppButton(
                     label: 'Coba lagi',

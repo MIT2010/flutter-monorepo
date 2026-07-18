@@ -54,9 +54,16 @@ class LoginViewState extends State<LoginView> {
               case LoginSuccess():
                 context.go('/home');
               case LoginFailureState(:final failure):
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(failure.message)));
+                final colors = Theme.of(context).colorScheme;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: colors.error,
+                    content: Text(
+                      failure.message,
+                      style: TextStyle(color: colors.onError),
+                    ),
+                  ),
+                );
               case LoginInitial() || LoginLoading():
                 break;
             }

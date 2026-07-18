@@ -68,7 +68,12 @@ class HomeView extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(failure.message),
+                  Text(
+                    failure.message,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
                   SizedBox(height: context.spacing.md),
                   AppButton(
                     label: 'Coba lagi',
@@ -106,22 +111,22 @@ class _StaleBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final colors = context.semanticColors;
     return Container(
       width: double.infinity,
-      color: colors.tertiaryContainer,
+      color: colors.warning,
       padding: EdgeInsets.symmetric(
         horizontal: context.spacing.md,
         vertical: context.spacing.sm,
       ),
       child: Row(
         children: [
-          Icon(Icons.cloud_off, size: 18, color: colors.onTertiaryContainer),
+          Icon(Icons.cloud_off, size: 18, color: colors.onWarning),
           SizedBox(width: context.spacing.sm),
           Expanded(
             child: Text(
               'Data mungkin belum terbaru — menampilkan versi tersimpan terakhir.',
-              style: TextStyle(color: colors.onTertiaryContainer),
+              style: TextStyle(color: colors.onWarning),
             ),
           ),
         ],

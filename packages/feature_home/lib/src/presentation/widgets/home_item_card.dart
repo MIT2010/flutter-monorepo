@@ -15,7 +15,7 @@ class HomeItemCard extends StatelessWidget {
         children: [
           if (item.imageUrl != null)
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(context.shape.radiusSm),
               child: Image.network(
                 item.imageUrl!,
                 width: 56,

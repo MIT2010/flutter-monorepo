@@ -11,6 +11,13 @@ on:
 # CI run for reasons that have nothing to do with the widget itself. See
 # CONTRIBUTING.md §6 "Regenerating golden files" for the full workflow this
 # job is one half of.
+#
+# Runs across every package with a test/golden/ directory, not just
+# design_system — packages/authentication, packages/feature_home, and
+# packages/feature_profile each got real page-level golden coverage
+# alongside the design_system token upgrade (2026-07-18), proving the app's
+# actual screens visually reflect the new tokens, not just the design
+# system's own isolated widget catalog.
 jobs:
   update_goldens:
     runs-on: ubuntu-latest
@@ -29,3 +36,21 @@ jobs:
         with:
           name: design-system-goldens
           path: packages/design_system/test/golden/goldens/*.png
+      - run: fvm flutter test test/golden --update-goldens
+        working-directory: packages/authentication
+      - uses: actions/upload-artifact@v4
+        with:
+          name: authentication-goldens
+          path: packages/authentication/test/golden/goldens/*.png
+      - run: fvm flutter test test/golden --update-goldens
+        working-directory: packages/feature_home
+      - uses: actions/upload-artifact@v4
+        with:
+          name: feature_home-goldens
+          path: packages/feature_home/test/golden/goldens/*.png
+      - run: fvm flutter test test/golden --update-goldens
+        working-directory: packages/feature_profile
+      - uses: actions/upload-artifact@v4
+        with:
+          name: feature_profile-goldens
+          path: packages/feature_profile/test/golden/goldens/*.png
