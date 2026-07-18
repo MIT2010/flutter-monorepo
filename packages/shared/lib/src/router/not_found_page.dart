@@ -12,7 +12,7 @@ class NotFoundPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AppEmptyState(
+      body: AppStateView(
         icon: Icons.search_off,
         message: 'Page not found',
         actionLabel: 'Go home',

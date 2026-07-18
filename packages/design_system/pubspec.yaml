@@ -12,7 +12,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -54,3 +53,14 @@ flutter:
   #
   # For details regarding fonts in packages, see
   # https://flutter.dev/to/font-from-package
+
+  # Plus Jakarta Sans (SIL OFL 1.1, see fonts/OFL.txt), bundled as a
+  # variable font -- one asset per style covers the whole 200-800 `wght`
+  # axis, Flutter's font matching interpolates the instance for whatever
+  # FontWeight a TextStyle requests. Source: github.com/tokotype/PlusJakartaSans.
+  fonts:
+    - family: Plus Jakarta Sans
+      fonts:
+        - asset: fonts/PlusJakartaSans-VariableFont_wght.ttf
+        - asset: fonts/PlusJakartaSans-Italic-VariableFont_wght.ttf
+          style: italic

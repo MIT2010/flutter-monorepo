@@ -30,7 +30,7 @@ class AppTheme {
   /// `Typography.material2021()` since the old `TextTheme` only set 6 of
   /// 15 slots, so this changes nothing about what actually renders, only
   /// makes the fallback explicit).
-  static const TextTheme _textTheme = TextTheme(
+  static const TextTheme _baseTextTheme = TextTheme(
     displayLarge: TextStyle(fontSize: 57, fontWeight: FontWeight.w400),
     displayMedium: TextStyle(fontSize: 45, fontWeight: FontWeight.w400),
     displaySmall: TextStyle(fontSize: 36, fontWeight: FontWeight.w400),
@@ -52,36 +52,119 @@ class AppTheme {
     labelSmall: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
   );
 
-  static const List<ThemeExtension<dynamic>> _lightExtensions = [
-    AppSpacingExtension.standard,
-    AppSemanticColors.light,
-    AppShapeExtension.standard,
-    AppElevationExtension.standard,
-    AppMotionExtension.standard,
-  ];
-
-  static const List<ThemeExtension<dynamic>> _darkExtensions = [
-    AppSpacingExtension.standard,
-    AppSemanticColors.dark,
-    AppShapeExtension.standard,
-    AppElevationExtension.standard,
-    AppMotionExtension.standard,
-  ];
-
-  static ThemeData light() => ThemeData(
-    useMaterial3: true,
-    colorScheme: ColorScheme.fromSeed(seedColor: _seedLight),
-    textTheme: _textTheme,
-    extensions: _lightExtensions,
+  /// Plus Jakarta Sans (SIL OFL 1.1, bundled locally under `fonts/` --
+  /// see `fonts/OFL.txt` -- variable `wght` axis 200-800, true per-weight
+  /// italics) applied over [_baseTextTheme] -- keeps every brand
+  /// size/weight override above, only swaps the family away from the
+  /// platform default (see docs/DESIGN_LANGUAGE.md §2). Bundled rather
+  /// than fetched at runtime (e.g. via `google_fonts`) so theme
+  /// construction stays a pure, synchronous, offline operation -- no
+  /// network dependency in tests or on a user's first launch.
+  static final TextTheme _textTheme = _baseTextTheme.apply(
+    fontFamily: 'Plus Jakarta Sans',
   );
 
-  static ThemeData dark() => ThemeData(
+  /// Builds the token extensions for one brightness, scaling
+  /// spacing/radius/motion away from [AppSpacingExtension.standard]/
+  /// [AppShapeExtension.standard]/[AppMotionExtension.standard] only when a
+  /// multiplier isn't 1 -- the default call (every real call site except
+  /// Theme Studio, see `apps/widgetbook`) returns the exact singleton
+  /// instances unchanged, so this stays behaviorally identical to the
+  /// fixed-constant list it replaces (these tokens have no `==` override,
+  /// so a `copyWith` clone with identical field values would still fail an
+  /// `expect(theme.extension<T>(), AppSpacingExtension.standard)` check).
+  static List<ThemeExtension<dynamic>> _extensions({
+    required AppSemanticColors semanticColors,
+    required double spacingMultiplier,
+    required double radiusMultiplier,
+    required double motionSpeedMultiplier,
+  }) {
+    const spacing = AppSpacingExtension.standard;
+    const shape = AppShapeExtension.standard;
+    const motion = AppMotionExtension.standard;
+
+    return [
+      spacingMultiplier == 1
+          ? spacing
+          : spacing.copyWith(
+              xs: spacing.xs * spacingMultiplier,
+              sm: spacing.sm * spacingMultiplier,
+              md: spacing.md * spacingMultiplier,
+              lg: spacing.lg * spacingMultiplier,
+              xl: spacing.xl * spacingMultiplier,
+            ),
+      semanticColors,
+      radiusMultiplier == 1
+          ? shape
+          : shape.copyWith(
+              radiusSm: shape.radiusSm * radiusMultiplier,
+              radiusMd: shape.radiusMd * radiusMultiplier,
+              radiusLg: shape.radiusLg * radiusMultiplier,
+              radiusPill: shape.radiusPill * radiusMultiplier,
+            ),
+      AppElevationExtension.standard,
+      motionSpeedMultiplier == 1
+          ? motion
+          : motion.copyWith(
+              durationFast: _scaled(motion.durationFast, motionSpeedMultiplier),
+              durationMedium: _scaled(
+                motion.durationMedium,
+                motionSpeedMultiplier,
+              ),
+              durationSlow: _scaled(motion.durationSlow, motionSpeedMultiplier),
+            ),
+    ];
+  }
+
+  /// A higher `speed` means shorter durations -- `speed: 2` plays every
+  /// transition in half the time. Curves/spring physics params are left
+  /// untouched: unlike a fixed duration, "speed" isn't a simple scalar
+  /// input to a spring simulation, so scaling it isn't attempted here (see
+  /// docs/DESIGN_LANGUAGE.md §5 and the Theme Studio design notes).
+  static Duration _scaled(Duration base, double speed) {
+    return Duration(microseconds: (base.inMicroseconds / speed).round());
+  }
+
+  /// [seedColor] defaults to this kit's own seed; [spacingMultiplier]/
+  /// [radiusMultiplier]/[motionSpeedMultiplier] default to `1` (no change).
+  /// These overrides exist for `apps/widgetbook`'s Theme Studio addon to
+  /// live-preview token changes through the same construction real screens
+  /// use, rather than Widgetbook maintaining a second, duplicate theme
+  /// recipe that could drift out of sync (§3 "extract once").
+  static ThemeData light({
+    Color? seedColor,
+    double spacingMultiplier = 1,
+    double radiusMultiplier = 1,
+    double motionSpeedMultiplier = 1,
+  }) => ThemeData(
+    useMaterial3: true,
+    colorScheme: ColorScheme.fromSeed(seedColor: seedColor ?? _seedLight),
+    textTheme: _textTheme,
+    extensions: _extensions(
+      semanticColors: AppSemanticColors.light,
+      spacingMultiplier: spacingMultiplier,
+      radiusMultiplier: radiusMultiplier,
+      motionSpeedMultiplier: motionSpeedMultiplier,
+    ),
+  );
+
+  static ThemeData dark({
+    Color? seedColor,
+    double spacingMultiplier = 1,
+    double radiusMultiplier = 1,
+    double motionSpeedMultiplier = 1,
+  }) => ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: _seedDark,
+      seedColor: seedColor ?? _seedDark,
       brightness: Brightness.dark,
     ),
     textTheme: _textTheme,
-    extensions: _darkExtensions,
+    extensions: _extensions(
+      semanticColors: AppSemanticColors.dark,
+      spacingMultiplier: spacingMultiplier,
+      radiusMultiplier: radiusMultiplier,
+      motionSpeedMultiplier: motionSpeedMultiplier,
+    ),
   );
 }

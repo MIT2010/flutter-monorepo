@@ -17,5 +17,5 @@ export 'src/widgets/buttons/app_button.dart';
 export 'src/widgets/cards/app_card.dart';
 export 'src/widgets/cards/app_expressive_card.dart';
 export 'src/widgets/dialogs/app_dialog.dart';
-export 'src/widgets/empty_state/app_empty_state.dart';
+export 'src/widgets/state_view/app_state_view.dart';
 export 'src/widgets/inputs/app_text_field.dart';
