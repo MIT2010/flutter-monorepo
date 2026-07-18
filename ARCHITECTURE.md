@@ -487,46 +487,163 @@ Also included in `core` (kept intentionally thin, not shown in full to avoid blo
 
 ## 16. Design System
 
-```dart
-// packages/design_system/lib/src/tokens/app_colors.dart
-class AppColors {
-  const AppColors._();
-  static const primary = Color(0xFF2D6CDF);
-  static const surface = Color(0xFFFFFFFF);
-  static const error = Color(0xFFD32F2F);
-  // dark-mode counterparts kept in AppColorsDark, selected by AppTheme
-}
-
-// packages/design_system/lib/src/tokens/app_spacing.dart
-class AppSpacing {
-  const AppSpacing._();
-  static const xs = 4.0, sm = 8.0, md = 16.0, lg = 24.0, xl = 32.0;
-}
-```
+Tokens are `ThemeExtension`s registered on `ThemeData.extensions`, not static
+classes — spacing, semantic colors, shape, elevation, and motion all live on
+`Theme.of(context)` the same way `colorScheme`/`textTheme` do, are readable
+per-subtree, and get free interpolation across `AnimatedTheme` transitions.
+`AppColors`/`AppSpacing` (plain static classes) and `AppTypography` (a
+6-slot static class) — shown in this section in earlier revisions of this
+doc — no longer exist: `AppColors` was fully redundant with what
+`ColorScheme.fromSeed` already derives (deleted outright, zero external
+call sites at the time), `AppSpacing` became `AppSpacingExtension`, and
+`AppTypography`'s 6 brand overrides were folded into `AppTheme`'s own
+15-slot `TextTheme` construction.
 
 ```dart
 // packages/design_system/lib/src/theme/app_theme.dart
 class AppTheme {
+  // Seed colors and the full type scale are private constants here now —
+  // ColorScheme.fromSeed derives every color role from one seed value, so
+  // exposing seeds separately was pure duplication; the type scale is 6
+  // brand-specific overrides plus M3's official baseline for the other 9
+  // slots (Typography.material2021() was already filling those in
+  // silently — this just makes the fallback explicit).
+  static const List<ThemeExtension<dynamic>> _lightExtensions = [
+    AppSpacingExtension.standard,
+    AppSemanticColors.light,
+    AppShapeExtension.standard,
+    AppElevationExtension.standard,
+    AppMotionExtension.standard,
+  ];
+
   static ThemeData light() => ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
-        // dynamic color: wrap MaterialApp with DynamicColorBuilder at app level,
-        // fall back to this static scheme when the platform doesn't support it
+        colorScheme: ColorScheme.fromSeed(seedColor: _seedLight),
+        textTheme: _textTheme,
+        extensions: _lightExtensions,
+        // dynamic color: wrap MaterialApp with DynamicColorBuilder at app
+        // level, fall back to this static seeded scheme when unsupported
       );
 
-  static ThemeData dark() => ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-          brightness: Brightness.dark,
-        ),
-      );
+  // dark() mirrors light() with _seedDark, Brightness.dark, and
+  // AppSemanticColors.dark in its own _darkExtensions list — semantic
+  // colors are the one category that genuinely differs by brightness;
+  // spacing/shape/elevation/motion share a single `.standard` instance.
 }
 ```
 
-Responsive layout: a single `Breakpoints` class (`mobile < 600 < tablet < 1024 < desktop`) plus one `AdaptiveLayout` widget that swaps between provided `mobile`/`tablet`/`desktop` builders. No responsive *framework* dependency — this is ~50 lines and every dev can read all of it.
+```dart
+// packages/design_system/lib/src/theme/app_theme_context.dart
+extension AppThemeContext on BuildContext {
+  AppSpacingExtension get spacing => _requireExtension<AppSpacingExtension>(this);
+  AppSemanticColors get semanticColors => _requireExtension<AppSemanticColors>(this);
+  AppShapeExtension get shape => _requireExtension<AppShapeExtension>(this);
+  AppElevationExtension get elevation => _requireExtension<AppElevationExtension>(this);
+  AppMotionExtension get motion => _requireExtension<AppMotionExtension>(this);
+}
+```
 
-Buttons/inputs/cards/dialogs/bottom sheets: each is one file, wraps a Material 3 widget with the design tokens applied, exposes the same named-parameter API as its Material counterpart so it never feels like a foreign DSL.
+Every accessor above (`context.spacing.md`, `context.shape.radiusLg`, etc.)
+routes through a shared `_requireExtension<T>` helper instead of a bare
+`Theme.of(context).extension<T>()!` — if `T` isn't registered (a stray
+`Theme(...)` override further down the tree that didn't copy `extensions`
+from the ambient theme is the usual cause), it throws a `FlutterError`
+naming exactly which extension is missing and how to fix it, in both debug
+*and* release builds (it doesn't route through `assert`, which strips out
+of release and would degrade to a bare null-check crash with zero context).
+
+Token categories:
+- **Spacing** (`AppSpacingExtension`) — `xs/sm/md/lg/xl`, unchanged values
+  from the old `AppSpacing`, migrated big-bang across every call site (a
+  compile-time rename with `melos run analyze` as the safety net, not a
+  deprecated-forwarding period — this codebase's established "extract
+  once" discipline, §3).
+- **Semantic colors** (`AppSemanticColors`) — `success`/`warning`/`info`
+  (+ paired `onSuccess`/`onWarning`/`onInfo`, same convention as
+  `ColorScheme.error`/`.onError`) for statuses `ColorScheme`'s M3 roles
+  don't cover. Every value is WCAG 2.1 AA contrast-verified (≥4.5:1) both
+  as text/icon directly on `colorScheme.surface` and as `onX` on its own
+  role used as a fill, in both light and dark, using
+  `Color.computeLuminance()` (already the WCAG relative-luminance
+  formula — no external package needed). Enforced by a real test
+  (`test/tokens/app_semantic_colors_test.dart`), not a one-time manual
+  check — a future edit that regresses contrast fails the suite.
+- **Typography** — the full 15-slot M3 type scale
+  (Display/Headline/Title/Body/Label × Large/Medium/Small), built directly
+  into `AppTheme`'s `TextTheme` rather than a separate public token class.
+  Consume via `Theme.of(context).textTheme.*`.
+- **Shape** (`AppShapeExtension`) — `radiusSm/Md/Lg/Pill` plus one
+  deliberately non-uniform `expressive` `BorderRadius` (large/small
+  diagonal corner pairs) for a less generic silhouette than a plain
+  rounded rectangle — the "M3 Expressive" shape direction, implemented
+  with stable native `BorderRadius`, not the `m3e_design` package (still
+  0.1.0 with recent breaking changes at the time this was written — not a
+  core-kit dependency; the *principles* were adopted, not the package).
+- **Elevation** (`AppElevationExtension`) — M3's official `level0`–`level5`
+  scale (0/1/3/6/8/12dp), sourced from the spec rather than invented
+  values, so custom-elevated components stay visually consistent with M3
+  built-ins' own tonal-elevation behavior.
+- **Motion** (`AppMotionExtension`) — standard durations/curves plus a
+  native `SpringDescription` (`package:flutter/physics.dart`) for
+  interactions that should feel livelier than a fixed-duration ease curve.
+  Same non-dependency reasoning as shape: native `SpringSimulation`, not
+  `m3e_design`.
+
+Responsive layout: unchanged — a single `Breakpoints` class
+(`mobile < 600 < tablet < 1024 < desktop`) plus one `AdaptiveLayout` widget
+that swaps between provided `mobile`/`tablet`/`desktop` builders. No
+responsive *framework* dependency — this is ~50 lines and every dev can
+read all of it.
+
+**Widgets** (each one file, wraps a Material 3 widget with tokens applied,
+exposes the same named-parameter API as its Material counterpart so it
+never feels like a foreign DSL):
+- `AppButton`, `AppTextField`, `AppCard`, `AppDialog` (`.confirm` only —
+  no `.info` variant in this kit), `AppBottomSheet` — the original five.
+- `AppStatusBadge` — token-driven status pill
+  (`success`/`warning`/`info` tone + optional icon), the first real
+  consumer of `AppSemanticColors` outside its own token tests.
+- `AppExpressiveCard` — flagship shape+motion demo: morphs from a plain
+  rounded rect to `AppShapeExtension.expressive`'s corners while lifting
+  elevation on tap, driven by `AppMotionExtension.spring`. Respects
+  `MediaQuery.disableAnimations`: the shape/elevation change still
+  happens, but jumps instantly instead of animating via spring physics
+  when reduce-motion is on — this is enforced by a test, not just
+  documented.
+- `AppEmptyState` — token-driven "nothing here yet" placeholder
+  (icon + message + optional action), generalizing the pattern
+  `NotFoundPage` (`packages/shared`) used to build by hand; `NotFoundPage`
+  now consumes it directly.
+
+**Golden tests** (`packages/design_system/test/golden/`): real
+`matchesGoldenFile`-based screenshot tests exist for all eight widgets
+above, light and dark, sharing one `pumpGolden` harness
+(`golden_harness.dart`). A golden file only means anything when compared
+against an image captured on the same OS CI runs on — a baseline drafted
+on Windows/macOS reliably mismatches the next `ubuntu-latest` CI run over
+font rendering/anti-aliasing differences alone. The real baseline is
+generated by the `Regenerate goldens` GitHub Action
+(`.github/workflows/goldens.yml`, `workflow_dispatch` only) running on
+`ubuntu-latest`, then committed from its artifact — see CONTRIBUTING.md
+§6 for the exact steps. Distinct from the plain `testWidgets`
+interaction tests living in `test/widgets/` (tap/text-presence/state
+assertions) — those aren't golden tests and were never meant to be; an
+earlier revision of the project's own task tracking mislabeled them as
+such, corrected here.
+
+**Widgetbook** (`apps/widgetbook/`, package name `design_system_widgetbook`):
+a dev-only, never-shipped interactive component catalog — light/dark
+toggle via a `MaterialThemeAddon` wired to the real `AppTheme.light()/
+dark()`, one `@widgetbook.UseCase`-annotated function per widget-state
+under `lib/use_cases/`, codegen'd into a directory tree by
+`widgetbook_generator` as part of `melos run gen`. Complements, not
+replaces, the golden tests above: golden tests are automated and
+CI-enforced (a regression is caught on every push, no human has to look);
+Widgetbook is a manual browsing/review tool for humans (a prop-variant
+knob panel + multi-viewport preview is fundamentally not something
+`matchesGoldenFile` gives you either, since a golden test only proves
+"unchanged from the last approved snapshot," not "correct"). Not
+referenced by any `melos run build:*` script, so it never ships.
 
 ---
 
@@ -786,7 +903,7 @@ class LoginPage extends StatelessWidget {
       create: (_) => getIt<LoginCubit>(),
       child: Scaffold(
         body: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: EdgeInsets.all(context.spacing.md),
           child: BlocConsumer<LoginCubit, LoginState>(
             // NOTE: freezed 3.x removed .when()/.whenOrNull() in favor of
             // Dart 3's native sealed-class pattern matching (see ADR-005).
@@ -806,9 +923,9 @@ class LoginPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 AppTextField(label: 'Email', controller: _emailController),
-                const SizedBox(height: AppSpacing.sm),
+                SizedBox(height: context.spacing.sm),
                 AppTextField(label: 'Password', obscure: true, controller: _passwordController),
-                const SizedBox(height: AppSpacing.md),
+                SizedBox(height: context.spacing.md),
                 AppButton(
                   label: 'Login',
                   loading: state is LoginLoading,
@@ -1261,5 +1378,8 @@ app to diff against.
 
 **ADR-015 — `Env.apiUrl` no longer assumes every backend is versioned; `API_VERSION` defaults to blank and is appended only when set.**
 *Context (2026-07-15):* Discovered in `akujamin-v2` (the same downstream project ADR-011/012/013/014 came from) — this kit's `Env.apiUrl` computed `'$apiBaseUrl/$apiVersion'` with `apiVersion` defaulting to `'v1'`, a versioned-API convention invented for this template and never checked against a real backend. The first real backend a project built from this kit was ever pointed at during live testing had **no API versioning concept at all**: every real endpoint 404'd under `/v1/...`, and the backend's own developer confirmed directly there is no versioning scheme to pin to. Because every prior "real network" test in that downstream project used a local `HttpServer` double matching the code's own (wrong) assumption rather than a real server's routing, this went undetected through that project's entire migration until its first live-backend verification pass. *Decision:* `Env.apiUrl` now delegates to a new pure, directly-testable top-level function, `joinApiUrl(baseUrl, apiVersion)`, which appends `apiVersion` as an extra path segment only when it's non-empty; `API_VERSION`'s default (both in `Env` and in all three `flavors/*.example.json` templates) changed from `'v1'` to blank — versioning is now opt-in per backend, not assumed. `API_VERSION` stays a real key in the templates (not deleted) so a backend that does version its API is still a one-line `flavors/*.json` edit, not a code change — same reasoning ADR-014 already established for per-flavor config generally. Blast radius of the fix is small (`env.dart` is `Env.apiUrl`'s only real caller inside this kit, `shared/di/register_module.dart`'s `Dio(BaseOptions(baseUrl: env.apiUrl))`) even though the bug's own blast radius, in the downstream project where it was found, was total — 100% of that project's network calls, every migrated feature, undetected for the length of an entire migration. Unlike `akujamin-v2`'s own fix for this (see that project's `MIGRATION_LOG.md`, permanent finding #9), this kit's `joinApiUrl` does **not** hardcode an `/api` prefix — that convention was specific to the one real backend that project happened to talk to, not a property of backends in general, and baking it into this generic template would just be trading one unverified assumption for another. *Status:* Accepted.
+
+**ADR-016 — `design_system`'s tokens moved from static classes to `ThemeExtension`s; `AppColors` was deleted rather than deprecated; three new components were added.**
+*Context (2026-07-18):* An audit of `design_system` asked whether its token architecture (plain static classes — `AppColors`, `AppSpacing`, `AppTypography` — read directly by call sites) would scale as more feature packages consumed it, versus Flutter's native `ThemeExtension` mechanism (available since Flutter 2.5, unused anywhere in this repo until now), which integrates with `Theme.of(context)`, supports per-subtree override, and gets free interpolation across `AnimatedTheme`. The same audit checked whether `AppColors`/`AppColorsDark` — two color values duplicating what `ColorScheme.fromSeed` already derives from those same two seeds — should be deprecated-forwarded or deleted outright, given `design_system` is consumed by 9+ features in a downstream migration project (`akujamin-v2`). Two research findings shaped scope: (1) `akujamin-v2`'s `design_system` turned out to be a **forked, independently-evolving copy**, not a live path/git dependency on this repo's package — confirmed via that project's own `pubspec.yaml` workspace block — so this migration's blast radius is 100% contained to this repo, not something to coordinate cross-project; (2) a repo-wide grep found **zero external call sites** for `AppColors`/`AppColorsDark`/`AppTypography` in this repo specifically (an earlier draft of this same audit had claimed "1 external file" for each — that number turned out to conflate this repo with `akujamin-v2`'s fork; the corrected, re-verified count is zero). *Decision:* Every token category became a `ThemeExtension` (`AppSpacingExtension`, `AppSemanticColors`, `AppShapeExtension`, `AppElevationExtension`, `AppMotionExtension`), read via `context.spacing`/`.semanticColors`/`.shape`/`.elevation`/`.motion` accessors that throw a helpful `FlutterError` (not a bare null-check) when the extension isn't registered on the ambient `ThemeData`. `AppSpacing` was migrated big-bang (22-call-site estimate from the original audit was also wrong — the real count was 8 files/25 occurrences; still migrated as one exhaustive `melos run analyze`-verified pass, no deprecated-forwarding period, consistent with §3's "extract once" principle) rather than deprecated, since a shim with zero live consumers protects nobody. `AppColors`/`AppColorsDark` were deleted outright, not deprecated, for the same zero-consumer reason plus the redundancy with `ColorScheme`. `AppTypography` was superseded in place: its 6 brand-specific overrides were preserved verbatim, expanded to the full 15-slot M3 type scale (the other 9 slots use M3's official baseline values — `Typography.material2021()` was already filling them in silently, so this changes nothing about what renders, only makes the fallback explicit) and folded directly into `AppTheme`'s `TextTheme` construction rather than kept as a separate public class. A new `AppSemanticColors` extension (`success`/`warning`/`info`) was added with every value WCAG 2.1 AA contrast-verified (`Color.computeLuminance()`, no new dependency) — a requirement, not a nice-to-have, checked by this decision's own review before implementation started. Three genuinely new components (not redesigns) were added: `AppStatusBadge` (first real `AppSemanticColors` consumer, replacing ad-hoc `colorScheme.error`/`.primary` swaps found scattered across status/step indicators), `AppExpressiveCard` (a shape+motion flagship demo, spring-physics elevation lift on tap via native `SpringSimulation` — `package:flutter/physics.dart`, not the `m3e_design` community package, which was still 0.1.0 with recent breaking changes at the time — respecting `MediaQuery.disableAnimations`, verified by a test, not just documented), and `AppEmptyState` (generalizing the bespoke pattern `NotFoundPage` had built by hand; `NotFoundPage` now consumes it). A real golden-test gap was also corrected: task tracking from an earlier session had labeled the plain `testWidgets` interaction tests under `test/widgets/` as "golden tests," which they never were (zero `matchesGoldenFile` usage) — real golden tests already existed for the original 5 widgets under `test/golden/` (a separate earlier-session gap: the audit that produced this ADR's Langkah 1 findings initially claimed those didn't exist either, before a `test/golden/` subdirectory it had missed was found) and were extended to cover all 3 new components, generated on `ubuntu-latest` via the existing `goldens.yml` workflow, never drafted from this Windows sandbox. A dev-only Widgetbook catalog (`apps/widgetbook/`) was added as a human-review complement — explicitly **not** a golden-test replacement, since it has no CI-enforced regression detection; the version initially assumed to be current (v4) turned out to be a beta only, stable was 3.25.0. *Status:* Accepted. Two of the four §16 inaccuracies this ADR's original scope named for correction (a missing `AppDialog.info` mention, and three "migration-born" widgets — `DynamicFormField`/`LocalImagePreview`/`AppMarkdownText`) turned out, on direct verification, to describe `akujamin-v2`'s forked `design_system`, not this repo's — neither exists here, so neither was a real inaccuracy to begin with. §16 was rewritten in full rather than patched against that stale list.
 
 *(Add new entries here, dated, every time a future-you would otherwise wonder "why did I do it this way." This is the single document that makes the 30-minute test possible in year five.)*
