@@ -12,18 +12,11 @@ class NotFoundPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: EdgeInsets.all(context.spacing.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Page not found'),
-              SizedBox(height: context.spacing.md),
-              AppButton(label: 'Go home', onPressed: () => context.go('/home')),
-            ],
-          ),
-        ),
+      body: AppEmptyState(
+        icon: Icons.search_off,
+        message: 'Page not found',
+        actionLabel: 'Go home',
+        onAction: () => context.go('/home'),
       ),
     );
   }
