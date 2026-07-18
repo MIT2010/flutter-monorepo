@@ -1,0 +1,29 @@
+name: design_system_widgetbook
+description: >
+  Dev-only component catalog for packages/design_system (interactive
+  browsing + prop review for humans) -- never shipped, excluded from the
+  release build scripts by simply not being referenced by them (§16).
+publish_to: "none"
+
+resolution: workspace
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  design_system:
+    path: ../../packages/design_system
+  flutter:
+    sdk: flutter
+
+  widgetbook: ^3.25.0
+  widgetbook_annotation: ^3.11.0
+
+dev_dependencies:
+  build_runner: ^2.4.13
+  flutter_lints: ^6.0.0
+  widgetbook_generator: ^3.24.0
+
+flutter:
+  uses-material-design: true
