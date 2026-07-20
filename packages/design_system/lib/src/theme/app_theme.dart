@@ -277,10 +277,22 @@ class AppTheme {
   /// (`AppSnackBar.showError`/`.showSuccess`/`.showInfo`) already come
   /// from the hand-authored `ColorScheme`/`AppSemanticColors` — nothing
   /// here overrides color, only shape/elevation/behavior.
+  ///
+  /// `elevation: 0` deliberately, not a Level-3 oversight: Material's
+  /// built-in elevation shadow renders as a hard, unblurred edge rather
+  /// than the soft ambient shadow §6 specifies (visually confirmed —
+  /// verified this isn't specific to SnackBar by checking the pre-existing
+  /// `AppExpressiveCard`, which shows the same hard edge at its own low
+  /// elevation). `AppCard` sidesteps this by painting a literal
+  /// `BoxShadow` list instead of using `Card.elevation`; `SnackBar`'s
+  /// shadow is internal to the widget with no equivalent hook. Floating
+  /// behavior's own margin already reads as "detached from the page
+  /// edges" without needing a shadow on top of it, and a harsh shadow
+  /// contradicts §1's restraint more than a missing one does.
   static SnackBarThemeData _snackBarTheme({required AppShapeExtension shape}) {
     return SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
-      elevation: 6,
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(shape.radiusSm),
       ),
