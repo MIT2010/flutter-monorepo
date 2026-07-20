@@ -4,12 +4,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('AppShapeExtension', () {
-    test('standard scale is strictly increasing, pill is largest', () {
-      const shape = AppShapeExtension.standard;
-      expect(shape.radiusSm, lessThan(shape.radiusMd));
-      expect(shape.radiusMd, lessThan(shape.radiusLg));
-      expect(shape.radiusLg, lessThan(shape.radiusPill));
-    });
+    test(
+      'Verdant scale (none/xs/sm/md/pill) is strictly increasing, pill is largest',
+      () {
+        const shape = AppShapeExtension.standard;
+        expect(shape.radiusNone, lessThan(shape.radiusXs));
+        expect(shape.radiusXs, lessThan(shape.radiusSm));
+        expect(shape.radiusSm, lessThan(shape.radiusMd));
+        expect(shape.radiusMd, lessThan(shape.radiusPill));
+      },
+    );
 
     test(
       'expressive is a non-uniform BorderRadius, not a plain rounded rect',
@@ -27,6 +31,8 @@ void main() {
       final copy = shape.copyWith(radiusMd: 20.0);
 
       expect(copy.radiusMd, 20.0);
+      expect(copy.radiusNone, shape.radiusNone);
+      expect(copy.radiusXs, shape.radiusXs);
       expect(copy.radiusSm, shape.radiusSm);
       expect(copy.radiusLg, shape.radiusLg);
       expect(copy.radiusPill, shape.radiusPill);
@@ -35,6 +41,8 @@ void main() {
 
     test('lerp interpolates radii and the expressive BorderRadius', () {
       const a = AppShapeExtension(
+        radiusNone: 0,
+        radiusXs: 0,
         radiusSm: 0,
         radiusMd: 0,
         radiusLg: 0,
@@ -42,6 +50,8 @@ void main() {
         expressive: BorderRadius.zero,
       );
       const b = AppShapeExtension(
+        radiusNone: 10,
+        radiusXs: 10,
         radiusSm: 10,
         radiusMd: 10,
         radiusLg: 10,

@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
 
+import 'verdant_colors.dart';
+
 /// Status colors `ColorScheme` doesn't cover (success/warning/info sit
 /// outside M3's primary/secondary/tertiary/error roles). Each role has a
 /// paired `onX` — same convention as `ColorScheme.error`/`.onError` — so a
 /// consumer can use the role either as text/icon color directly on a
 /// surface, or as a filled badge background with `onX` as the label color
 /// on top.
+///
+/// Verdant values (docs/VERDANT_DESIGN_SYSTEM.md §3.3): success stays in
+/// the Moss family (growth = success, thematically continuous with the
+/// primary action color, one step brighter so the two read as related but
+/// distinguishable), warning is Brass (aged brass fittings, not
+/// traffic-cone orange), info is Mist (river water under fog). Danger
+/// does NOT live here — it's `ColorScheme.error`/`.onError` (Ember),
+/// consistent with how every consumer already reaches for
+/// `colorScheme.error` directly rather than a semantic-colors field.
 ///
 /// Every value below is WCAG 2.1 AA-verified (>=4.5:1) both ways — role
 /// against `AppTheme`'s real `colorScheme.surface`, and `onX` against its
@@ -24,21 +35,29 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   });
 
   static const AppSemanticColors light = AppSemanticColors(
-    success: Color(0xFF1B5E20),
-    onSuccess: Color(0xFFFFFFFF),
-    warning: Color(0xFF8A5300),
-    onWarning: Color(0xFFFFFFFF),
-    info: Color(0xFF1565C0),
-    onInfo: Color(0xFFFFFFFF),
+    // moss50 (VERDANT_DESIGN_SYSTEM.md §3.3's "new leaf" success tone,
+    // one step brighter than moss60's primary) passes AA cleanly here --
+    // verified by this file's own contrast test below, not assumed.
+    success: VerdantColors.moss50,
+    onSuccess: VerdantColors.stone0,
+    // brass60 (the spec's originally-proposed light-mode warning) measured
+    // 4.29:1 against stone0 -- short of the 4.5 AA bar, caught by this
+    // file's own real contrast test, not assumed from the spec document.
+    // brass70 ("warning, pressed" in the spec's own scale) is darker and
+    // clears AA -- reused rather than guessing another unverified hex.
+    warning: VerdantColors.brass70,
+    onWarning: VerdantColors.stone0,
+    info: VerdantColors.mist60,
+    onInfo: VerdantColors.stone0,
   );
 
   static const AppSemanticColors dark = AppSemanticColors(
-    success: Color(0xFF81C784),
-    onSuccess: Color(0xFF000000),
-    warning: Color(0xFFFFD54F),
-    onWarning: Color(0xFF000000),
-    info: Color(0xFF90CAF9),
-    onInfo: Color(0xFF000000),
+    success: VerdantColors.moss40,
+    onSuccess: VerdantColors.stone98,
+    warning: VerdantColors.brass40,
+    onWarning: VerdantColors.stone98,
+    info: VerdantColors.mist40,
+    onInfo: VerdantColors.stone98,
   );
 
   final Color success;

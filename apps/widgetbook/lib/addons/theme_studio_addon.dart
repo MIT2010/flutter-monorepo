@@ -8,26 +8,36 @@ import 'package:widgetbook/widgetbook.dart';
 /// renders the catalog identically to how it looks without the addon.
 class ThemeStudioSettings {
   const ThemeStudioSettings({
-    required this.seedColor,
+    required this.primaryColor,
     required this.spacingMultiplier,
     required this.radiusMultiplier,
     required this.motionSpeedMultiplier,
   });
 
-  static const defaultSeedLight = Color(0xFF2D6CDF);
+  /// Matches `AppTheme`'s own light-mode default primary (Verdant Moss
+  /// 60) — see docs/VERDANT_DESIGN_SYSTEM.md §3.2/§11.
+  static const defaultPrimaryLight = Color(0xFF35604A);
 
-  final Color seedColor;
+  final Color primaryColor;
   final double spacingMultiplier;
   final double radiusMultiplier;
   final double motionSpeedMultiplier;
 }
 
 /// Live design-token customization for the whole Widgetbook catalog --
-/// seed color, spacing/radius/motion scale -- regenerated through
+/// primary color, spacing/radius/motion scale -- regenerated through
 /// [AppTheme.light]/[AppTheme.dark]'s own optional overrides (not a
 /// separate theme-construction recipe, see `app_theme.dart`'s "extract
 /// once" note) so a preview here matches what shipping the same values
 /// for real would actually look like.
+///
+/// `primaryColor` overrides only the primary/onPrimary/primaryContainer/
+/// onPrimaryContainer role family -- every other role (secondary,
+/// surface, outline, etc.) stays fixed to the hand-authored Stone
+/// palette regardless, matching Verdant's "one saturated color, rest
+/// neutral" rule even while previewing a different accent
+/// (VERDANT_DESIGN_SYSTEM.md §11) -- there is no `ColorScheme.fromSeed`
+/// anywhere in this pipeline to regenerate a whole palette from.
 ///
 /// State lives only in Widgetbook's own per-addon query params (the same
 /// mechanism every built-in addon, e.g. the Light/Dark [MaterialThemeAddon]
@@ -35,7 +45,7 @@ class ThemeStudioSettings {
 /// Widgetbook load with no Theme Studio query params present always starts
 /// from [ThemeStudioSettings]'s defaults, i.e. `AppTheme`'s real, shipped
 /// values -- deliberate, so nobody mistakes a leftover experiment for
-/// what's actually in the codebase (see docs/DESIGN_LANGUAGE.md and
+/// what's actually in the codebase (see docs/VERDANT_DESIGN_SYSTEM.md and
 /// ARCHITECTURE.md §16's Theme Studio design notes).
 ///
 /// Must be listed *after* [MaterialThemeAddon] in `addons: [...]` --
@@ -49,8 +59,8 @@ class ThemeStudioAddon extends WidgetbookAddon<ThemeStudioSettings> {
   @override
   List<Field> get fields => [
     ColorField(
-      name: 'seedColor',
-      initialValue: ThemeStudioSettings.defaultSeedLight,
+      name: 'primaryColor',
+      initialValue: ThemeStudioSettings.defaultPrimaryLight,
     ),
     DoubleSliderField(
       name: 'spacingMultiplier',
@@ -81,9 +91,9 @@ class ThemeStudioAddon extends WidgetbookAddon<ThemeStudioSettings> {
   @override
   ThemeStudioSettings valueFromQueryGroup(Map<String, String> group) {
     return ThemeStudioSettings(
-      seedColor:
-          valueOf<Color>('seedColor', group) ??
-          ThemeStudioSettings.defaultSeedLight,
+      primaryColor:
+          valueOf<Color>('primaryColor', group) ??
+          ThemeStudioSettings.defaultPrimaryLight,
       spacingMultiplier: valueOf<double>('spacingMultiplier', group) ?? 1,
       radiusMultiplier: valueOf<double>('radiusMultiplier', group) ?? 1,
       motionSpeedMultiplier:
@@ -100,13 +110,13 @@ class ThemeStudioAddon extends WidgetbookAddon<ThemeStudioSettings> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = isDark
         ? AppTheme.dark(
-            seedColor: setting.seedColor,
+            primaryColor: setting.primaryColor,
             spacingMultiplier: setting.spacingMultiplier,
             radiusMultiplier: setting.radiusMultiplier,
             motionSpeedMultiplier: setting.motionSpeedMultiplier,
           )
         : AppTheme.light(
-            seedColor: setting.seedColor,
+            primaryColor: setting.primaryColor,
             spacingMultiplier: setting.spacingMultiplier,
             radiusMultiplier: setting.radiusMultiplier,
             motionSpeedMultiplier: setting.motionSpeedMultiplier,
@@ -145,10 +155,13 @@ class _ExportPanel extends StatelessWidget {
   final ThemeStudioSettings settings;
 
   String get _snippet {
-    final hex = settings.seedColor.toARGB32().toRadixString(16).padLeft(8, '0');
+    final hex = settings.primaryColor
+        .toARGB32()
+        .toRadixString(16)
+        .padLeft(8, '0');
     return '''
 AppTheme.light(
-  seedColor: const Color(0x$hex),
+  primaryColor: const Color(0x$hex),
   spacingMultiplier: ${settings.spacingMultiplier.toStringAsFixed(2)},
   radiusMultiplier: ${settings.radiusMultiplier.toStringAsFixed(2)},
   motionSpeedMultiplier: ${settings.motionSpeedMultiplier.toStringAsFixed(2)},

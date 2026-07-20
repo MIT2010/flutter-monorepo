@@ -6,8 +6,9 @@ void main() {
   group('AppMotionExtension', () {
     test('standard durations are strictly increasing', () {
       const motion = AppMotionExtension.standard;
-      expect(motion.durationFast, lessThan(motion.durationMedium));
-      expect(motion.durationMedium, lessThan(motion.durationSlow));
+      expect(motion.durationMicro, lessThan(motion.durationStandard));
+      expect(motion.durationStandard, lessThan(motion.durationPanel));
+      expect(motion.durationPanel, lessThan(motion.durationPage));
     });
 
     test('standard spring has positive mass/stiffness/damping', () {
@@ -20,36 +21,39 @@ void main() {
     test('copyWith overrides only the given fields', () {
       const motion = AppMotionExtension.standard;
       final copy = motion.copyWith(
-        durationMedium: const Duration(milliseconds: 500),
+        durationStandard: const Duration(milliseconds: 500),
       );
 
-      expect(copy.durationMedium, const Duration(milliseconds: 500));
-      expect(copy.durationFast, motion.durationFast);
-      expect(copy.durationSlow, motion.durationSlow);
-      expect(copy.curveStandard, motion.curveStandard);
+      expect(copy.durationStandard, const Duration(milliseconds: 500));
+      expect(copy.durationMicro, motion.durationMicro);
+      expect(copy.durationPanel, motion.durationPanel);
+      expect(copy.durationPage, motion.durationPage);
+      expect(copy.curveEnter, motion.curveEnter);
       expect(copy.spring, motion.spring);
     });
 
     test('lerp interpolates durations and spring params linearly', () {
       const a = AppMotionExtension(
-        durationFast: Duration.zero,
-        durationMedium: Duration.zero,
-        durationSlow: Duration.zero,
-        curveStandard: Curves.linear,
-        curveEmphasized: Curves.linear,
+        durationMicro: Duration.zero,
+        durationStandard: Duration.zero,
+        durationPanel: Duration.zero,
+        durationPage: Duration.zero,
+        curveEnter: Curves.linear,
+        curveExit: Curves.linear,
         spring: SpringDescription(mass: 0, stiffness: 0, damping: 0),
       );
       const b = AppMotionExtension(
-        durationFast: Duration(milliseconds: 100),
-        durationMedium: Duration(milliseconds: 100),
-        durationSlow: Duration(milliseconds: 100),
-        curveStandard: Curves.ease,
-        curveEmphasized: Curves.ease,
+        durationMicro: Duration(milliseconds: 100),
+        durationStandard: Duration(milliseconds: 100),
+        durationPanel: Duration(milliseconds: 100),
+        durationPage: Duration(milliseconds: 100),
+        curveEnter: Curves.ease,
+        curveExit: Curves.ease,
         spring: SpringDescription(mass: 10, stiffness: 10, damping: 10),
       );
 
       final mid = a.lerp(b, 0.5);
-      expect(mid.durationMedium, const Duration(milliseconds: 50));
+      expect(mid.durationStandard, const Duration(milliseconds: 50));
       expect(mid.spring.mass, 5.0);
     });
 

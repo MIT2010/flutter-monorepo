@@ -58,11 +58,11 @@ void main() {
       expect(dark.extension<AppShapeExtension>(), AppShapeExtension.standard);
       expect(
         light.extension<AppElevationExtension>(),
-        AppElevationExtension.standard,
+        AppElevationExtension.light,
       );
       expect(
         dark.extension<AppElevationExtension>(),
-        AppElevationExtension.standard,
+        AppElevationExtension.dark,
       );
       expect(
         light.extension<AppMotionExtension>(),

@@ -77,7 +77,7 @@ void main() {
         // reach its target that fast, unlike the reduce-motion instant jump
         // verified below.
         expect(midElevation, greaterThan(initialElevation));
-        expect(midElevation, lessThan(AppElevationExtension.standard.level3));
+        expect(midElevation, lessThan(AppElevationExtension.light.level3));
 
         await gesture.up();
         await tester.pumpAndSettle();
@@ -117,12 +117,12 @@ void main() {
         );
         await tester.pump();
 
-        expect(materialOf().elevation, AppElevationExtension.standard.level3);
+        expect(materialOf().elevation, AppElevationExtension.light.level3);
 
         await gesture.up();
         await tester.pump();
 
-        expect(materialOf().elevation, AppElevationExtension.standard.level1);
+        expect(materialOf().elevation, AppElevationExtension.light.level1);
       },
     );
   });

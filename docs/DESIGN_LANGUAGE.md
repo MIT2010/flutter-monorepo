@@ -1,5 +1,12 @@
 # Design Language
 
+> **ARCHIVED — superseded by [docs/VERDANT_DESIGN_SYSTEM.md](VERDANT_DESIGN_SYSTEM.md).**
+> Kept in place as historical record (same pattern ARCHITECTURE.md's ADR log
+> uses for superseded decisions — not deleted, not treated as current). The
+> "confident, warm, precise" personality and the token values described below
+> no longer reflect `design_system`'s actual palette/shape/motion — see
+> Verdant §1 ("The soul of Verdant") and §13 for what replaced it and why.
+
 This document is the character brief every `design_system` component inherits
 from. It exists so future component decisions (Fase 1 anatomy, new widgets,
 Widgetbook customization) have a consistent reference to check against instead
