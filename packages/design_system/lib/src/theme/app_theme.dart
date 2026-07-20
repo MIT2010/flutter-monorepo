@@ -204,9 +204,14 @@ class AppTheme {
             borderRadius: BorderRadius.circular(shape.radiusXs),
           ),
         ),
-        textStyle: const WidgetStatePropertyAll(
-          TextStyle(fontWeight: FontWeight.w500),
-        ),
+        // No textStyle override -- ElevatedButton's own default already
+        // resolves to theme.textTheme.labelLarge (medium weight, §10.1's
+        // "never bold"), which correctly carries the Plus Jakarta Sans
+        // fontFamily. A bare TextStyle(fontWeight: ...) here replaces
+        // (ButtonStyle fields don't merge) rather than layers on top of
+        // that default, silently dropping the fontFamily back to the
+        // platform default -- the same font-loading trap flagged after
+        // the Fase 0 typeface work.
         backgroundColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.disabled)) return disabledFill;
           if (states.contains(WidgetState.pressed)) return pressColor;
