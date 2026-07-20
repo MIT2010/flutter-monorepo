@@ -22,6 +22,13 @@ import '../tokens/verdant_colors.dart';
 /// as they elevate) is itself a well-known Material signature; Verdant's
 /// depth model (`AppElevationExtension`) communicates elevation through
 /// borders/shadows/explicit surface-tone steps instead.
+///
+/// Component-level `ThemeData` fields (`elevatedButtonTheme`,
+/// `inputDecorationTheme`, `dialogTheme`, `snackBarTheme`) carry §10's
+/// per-component shape/depth decisions so the six widgets built against
+/// this theme (Button/Card/TextField/Navigation/Dialog-Sheet/
+/// Snackbar-Badge, §10.1-10.6) stay thin, theme-driven wrappers — the same
+/// pattern the original five widgets already used.
 class AppTheme {
   const AppTheme._();
 
@@ -162,70 +169,157 @@ class AppTheme {
     );
   }
 
-  /// Builds the token extensions for one brightness, scaling
-  /// spacing/radius/motion away from [AppSpacingExtension.standard]/
-  /// [AppShapeExtension.standard]/[AppMotionExtension.standard] only when a
-  /// multiplier isn't 1 -- the default call (every real call site except
-  /// Theme Studio, see `apps/widgetbook`) returns the exact singleton
-  /// instances unchanged, so this stays behaviorally identical to the
-  /// fixed-constant list it replaces (these tokens have no `==` override,
-  /// so a `copyWith` clone with identical field values would still fail an
-  /// `expect(theme.extension<T>(), AppSpacingExtension.standard)` check).
-  static List<ThemeExtension<dynamic>> _extensions({
-    required AppSemanticColors semanticColors,
-    required AppElevationExtension elevation,
-    required double spacingMultiplier,
-    required double radiusMultiplier,
-    required double motionSpeedMultiplier,
+  /// The single most common commitment point in the UI — deserves the
+  /// most restraint, not the most decoration (§10.1). Filled `moss.60`/
+  /// `moss.40` surface, `radius.xs`, `elevation: 0` at every state (filled
+  /// color alone is enough weight — no shadow, ever). Hover/press darken
+  /// one step along the same Moss scale the fill's own rest color comes
+  /// from; disabled falls back to a flat Stone treatment with no
+  /// interaction affordance implied. Only one variant exists because only
+  /// one is a real consumer today (`AppButton` has never had a secondary/
+  /// outlined mode) — §10.1's secondary-button note documents the
+  /// available treatment for when a screen actually needs it, not a
+  /// mandate to build it unused.
+  static ElevatedButtonThemeData _elevatedButtonTheme({
+    required ColorScheme colorScheme,
+    required AppShapeExtension shape,
+    required bool isLight,
   }) {
-    const spacing = AppSpacingExtension.standard;
-    const shape = AppShapeExtension.standard;
-    const motion = AppMotionExtension.standard;
+    final hoverColor = isLight ? VerdantColors.moss70 : VerdantColors.moss50;
+    final pressColor = isLight ? VerdantColors.moss80 : VerdantColors.moss60;
+    final disabledFill = isLight
+        ? VerdantColors.stone30
+        : VerdantColors.stone80;
+    final disabledText = isLight
+        ? VerdantColors.stone50
+        : VerdantColors.stone50;
 
-    return [
-      spacingMultiplier == 1
-          ? spacing
-          : spacing.copyWith(
-              xxxs: spacing.xxxs * spacingMultiplier,
-              xxs: spacing.xxs * spacingMultiplier,
-              xs: spacing.xs * spacingMultiplier,
-              sm: spacing.sm * spacingMultiplier,
-              md: spacing.md * spacingMultiplier,
-              lg: spacing.lg * spacingMultiplier,
-              xl: spacing.xl * spacingMultiplier,
-              xxl: spacing.xxl * spacingMultiplier,
-              xxxl: spacing.xxxl * spacingMultiplier,
-              xxxxl: spacing.xxxxl * spacingMultiplier,
-            ),
-      semanticColors,
-      radiusMultiplier == 1
-          ? shape
-          : shape.copyWith(
-              radiusNone: shape.radiusNone * radiusMultiplier,
-              radiusXs: shape.radiusXs * radiusMultiplier,
-              radiusSm: shape.radiusSm * radiusMultiplier,
-              radiusMd: shape.radiusMd * radiusMultiplier,
-              radiusPill: shape.radiusPill * radiusMultiplier,
-            ),
-      elevation,
-      motionSpeedMultiplier == 1
-          ? motion
-          : motion.copyWith(
-              durationMicro: _scaled(
-                motion.durationMicro,
-                motionSpeedMultiplier,
-              ),
-              durationStandard: _scaled(
-                motion.durationStandard,
-                motionSpeedMultiplier,
-              ),
-              durationPanel: _scaled(
-                motion.durationPanel,
-                motionSpeedMultiplier,
-              ),
-              durationPage: _scaled(motion.durationPage, motionSpeedMultiplier),
-            ),
-    ];
+    return ElevatedButtonThemeData(
+      style: ButtonStyle(
+        elevation: const WidgetStatePropertyAll(0),
+        shadowColor: const WidgetStatePropertyAll(Colors.transparent),
+        overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(shape.radiusXs),
+          ),
+        ),
+        textStyle: const WidgetStatePropertyAll(
+          TextStyle(fontWeight: FontWeight.w500),
+        ),
+        backgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) return disabledFill;
+          if (states.contains(WidgetState.pressed)) return pressColor;
+          if (states.contains(WidgetState.hovered)) return hoverColor;
+          return colorScheme.primary;
+        }),
+        foregroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) return disabledText;
+          return colorScheme.onPrimary;
+        }),
+      ),
+    );
+  }
+
+  /// Precision input (§10.3): `radius.xs`, `stone.30` resting border
+  /// shifting to a 2px `moss.60` focus border (no glow, no shadow — the
+  /// focus ring *is* the border, thickened and recolored). Error state
+  /// recolors the border and helper text to `ember.60`. `AppTextField`
+  /// itself renders the label as a static `Text` above the field (never
+  /// `InputDecoration.labelText`, which would float) — this theme only
+  /// owns the field's own chrome.
+  static InputDecorationTheme _inputDecorationTheme({
+    required ColorScheme colorScheme,
+    required AppShapeExtension shape,
+  }) {
+    OutlineInputBorder border(Color color, {double width = 1}) =>
+        OutlineInputBorder(
+          borderRadius: BorderRadius.circular(shape.radiusXs),
+          borderSide: BorderSide(color: color, width: width),
+        );
+
+    return InputDecorationTheme(
+      border: border(colorScheme.outlineVariant),
+      enabledBorder: border(colorScheme.outlineVariant),
+      focusedBorder: border(colorScheme.primary, width: 2),
+      errorBorder: border(colorScheme.error),
+      focusedErrorBorder: border(colorScheme.error, width: 2),
+      errorStyle: TextStyle(color: colorScheme.error),
+    );
+  }
+
+  /// Genuine interruption — Level 3 depth, the one register where shadow
+  /// is fully deployed, and `radius.md` (6px), the most rounded any
+  /// Verdant surface gets by default, marking it as the exceptional
+  /// floating case (§10.5). `elevation: 8` approximates the Level 3
+  /// register; see `AppDialog`'s own doc comment for the motion side of
+  /// this (handled per-call via `AnimationStyle`, not here).
+  static DialogThemeData _dialogTheme({
+    required ColorScheme colorScheme,
+    required AppShapeExtension shape,
+  }) {
+    return DialogThemeData(
+      elevation: 8,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(shape.radiusMd),
+      ),
+    );
+  }
+
+  /// A temporary overlay (§10.6) — `radius.sm`, floating behavior (reads
+  /// as a detached surface rather than a full-width fixed bar, matching
+  /// the Level 3 "true overlay" register). Tone colors
+  /// (`AppSnackBar.showError`/`.showSuccess`/`.showInfo`) already come
+  /// from the hand-authored `ColorScheme`/`AppSemanticColors` — nothing
+  /// here overrides color, only shape/elevation/behavior.
+  static SnackBarThemeData _snackBarTheme({required AppShapeExtension shape}) {
+    return SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      elevation: 6,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(shape.radiusSm),
+      ),
+    );
+  }
+
+  static AppSpacingExtension _scaledSpacing(double multiplier) {
+    const spacing = AppSpacingExtension.standard;
+    if (multiplier == 1) return spacing;
+    return spacing.copyWith(
+      xxxs: spacing.xxxs * multiplier,
+      xxs: spacing.xxs * multiplier,
+      xs: spacing.xs * multiplier,
+      sm: spacing.sm * multiplier,
+      md: spacing.md * multiplier,
+      lg: spacing.lg * multiplier,
+      xl: spacing.xl * multiplier,
+      xxl: spacing.xxl * multiplier,
+      xxxl: spacing.xxxl * multiplier,
+      xxxxl: spacing.xxxxl * multiplier,
+    );
+  }
+
+  static AppShapeExtension _scaledShape(double multiplier) {
+    const shape = AppShapeExtension.standard;
+    if (multiplier == 1) return shape;
+    return shape.copyWith(
+      radiusNone: shape.radiusNone * multiplier,
+      radiusXs: shape.radiusXs * multiplier,
+      radiusSm: shape.radiusSm * multiplier,
+      radiusMd: shape.radiusMd * multiplier,
+      radiusPill: shape.radiusPill * multiplier,
+    );
+  }
+
+  static AppMotionExtension _scaledMotion(double speed) {
+    const motion = AppMotionExtension.standard;
+    if (speed == 1) return motion;
+    return motion.copyWith(
+      durationMicro: _scaled(motion.durationMicro, speed),
+      durationStandard: _scaled(motion.durationStandard, speed),
+      durationPanel: _scaled(motion.durationPanel, speed),
+      durationPage: _scaled(motion.durationPage, speed),
+    );
   }
 
   /// A higher `speed` means shorter durations -- `speed: 2` plays every
@@ -266,23 +360,39 @@ class AppTheme {
         ? _onPrimaryContainerLight
         : primary;
 
+    final colorScheme = _colorScheme(
+      brightness: Brightness.light,
+      primary: primary,
+      onPrimary: onPrimary,
+      primaryContainer: primaryContainer,
+      onPrimaryContainer: onPrimaryContainer,
+    );
+    final spacing = _scaledSpacing(spacingMultiplier);
+    final shape = _scaledShape(radiusMultiplier);
+    final motion = _scaledMotion(motionSpeedMultiplier);
+
     return ThemeData(
       useMaterial3: true,
-      colorScheme: _colorScheme(
-        brightness: Brightness.light,
-        primary: primary,
-        onPrimary: onPrimary,
-        primaryContainer: primaryContainer,
-        onPrimaryContainer: onPrimaryContainer,
-      ),
+      colorScheme: colorScheme,
       textTheme: _textTheme,
-      extensions: _extensions(
-        semanticColors: AppSemanticColors.light,
-        elevation: AppElevationExtension.light,
-        spacingMultiplier: spacingMultiplier,
-        radiusMultiplier: radiusMultiplier,
-        motionSpeedMultiplier: motionSpeedMultiplier,
+      extensions: [
+        spacing,
+        AppSemanticColors.light,
+        shape,
+        AppElevationExtension.light,
+        motion,
+      ],
+      elevatedButtonTheme: _elevatedButtonTheme(
+        colorScheme: colorScheme,
+        shape: shape,
+        isLight: true,
       ),
+      inputDecorationTheme: _inputDecorationTheme(
+        colorScheme: colorScheme,
+        shape: shape,
+      ),
+      dialogTheme: _dialogTheme(colorScheme: colorScheme, shape: shape),
+      snackBarTheme: _snackBarTheme(shape: shape),
     );
   }
 
@@ -303,23 +413,39 @@ class AppTheme {
         ? _onPrimaryContainerDark
         : primary;
 
+    final colorScheme = _colorScheme(
+      brightness: Brightness.dark,
+      primary: primary,
+      onPrimary: onPrimary,
+      primaryContainer: primaryContainer,
+      onPrimaryContainer: onPrimaryContainer,
+    );
+    final spacing = _scaledSpacing(spacingMultiplier);
+    final shape = _scaledShape(radiusMultiplier);
+    final motion = _scaledMotion(motionSpeedMultiplier);
+
     return ThemeData(
       useMaterial3: true,
-      colorScheme: _colorScheme(
-        brightness: Brightness.dark,
-        primary: primary,
-        onPrimary: onPrimary,
-        primaryContainer: primaryContainer,
-        onPrimaryContainer: onPrimaryContainer,
-      ),
+      colorScheme: colorScheme,
       textTheme: _textTheme,
-      extensions: _extensions(
-        semanticColors: AppSemanticColors.dark,
-        elevation: AppElevationExtension.dark,
-        spacingMultiplier: spacingMultiplier,
-        radiusMultiplier: radiusMultiplier,
-        motionSpeedMultiplier: motionSpeedMultiplier,
+      extensions: [
+        spacing,
+        AppSemanticColors.dark,
+        shape,
+        AppElevationExtension.dark,
+        motion,
+      ],
+      elevatedButtonTheme: _elevatedButtonTheme(
+        colorScheme: colorScheme,
+        shape: shape,
+        isLight: false,
       ),
+      inputDecorationTheme: _inputDecorationTheme(
+        colorScheme: colorScheme,
+        shape: shape,
+      ),
+      dialogTheme: _dialogTheme(colorScheme: colorScheme, shape: shape),
+      snackBarTheme: _snackBarTheme(shape: shape),
     );
   }
 }

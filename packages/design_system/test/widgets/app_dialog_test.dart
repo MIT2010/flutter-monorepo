@@ -10,6 +10,7 @@ void main() {
       bool? result;
       await tester.pumpWidget(
         MaterialApp(
+          theme: AppTheme.light(),
           home: Scaffold(
             body: Builder(
               builder: (context) => AppButton(
@@ -42,6 +43,7 @@ void main() {
       bool? result;
       await tester.pumpWidget(
         MaterialApp(
+          theme: AppTheme.light(),
           home: Scaffold(
             body: Builder(
               builder: (context) => AppButton(

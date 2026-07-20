@@ -291,7 +291,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('home-tab'), findsOneWidget);
-      expect(find.byType(NavigationBar), findsOneWidget);
+      expect(find.byType(AppNavigationBar), findsOneWidget);
       expect(find.text('Home'), findsOneWidget);
       expect(find.text('Profile'), findsOneWidget);
     });

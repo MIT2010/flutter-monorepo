@@ -3,6 +3,16 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme_context.dart';
 
 /// Wraps [showModalBottomSheet] with a consistent rounded-top shape (§16).
+///
+/// Genuine interruption, same register as [AppDialog] — Level 3 depth and
+/// `radius.md` (6px), the most rounded any Verdant surface gets by default,
+/// marking it as the exceptional floating case (§10.5). `elevation: 8`
+/// approximates Level 3's register; Material's `elevation` draws its own
+/// built-in shadow curve, not the literal shadow spec in
+/// docs/VERDANT_DESIGN_SYSTEM.md §6, since `showModalBottomSheet` doesn't
+/// expose a raw `BoxShadow` list. Motion uses `motion.panel` with Verdant
+/// Enter/Exit via [AnimationStyle], same single-duration caveat as
+/// [AppDialog.confirm].
 class AppBottomSheet {
   const AppBottomSheet._();
 
@@ -11,12 +21,19 @@ class AppBottomSheet {
     required WidgetBuilder builder,
     bool isScrollControlled = true,
   }) {
-    final radius = context.shape.radiusLg;
+    final radius = context.shape.radiusMd;
+    final motion = context.motion;
     return showModalBottomSheet<T>(
       context: context,
       isScrollControlled: isScrollControlled,
+      elevation: 8,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(radius)),
+      ),
+      sheetAnimationStyle: AnimationStyle(
+        duration: motion.durationPanel,
+        curve: motion.curveEnter,
+        reverseCurve: motion.curveExit,
       ),
       builder: builder,
     );

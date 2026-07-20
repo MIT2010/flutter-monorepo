@@ -8,6 +8,7 @@ void main() {
       String? changed;
       await tester.pumpWidget(
         MaterialApp(
+          theme: AppTheme.light(),
           home: Scaffold(
             body: AppTextField(
               label: 'Email',
@@ -26,8 +27,9 @@ void main() {
 
     testWidgets('shows an error message when errorText is set', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: AppTheme.light(),
+          home: const Scaffold(
             body: AppTextField(label: 'Email', errorText: 'Required'),
           ),
         ),
@@ -38,8 +40,11 @@ void main() {
 
     testWidgets('obscures text when obscure is true', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: AppTextField(label: 'Password', obscure: true)),
+        MaterialApp(
+          theme: AppTheme.light(),
+          home: const Scaffold(
+            body: AppTextField(label: 'Password', obscure: true),
+          ),
         ),
       );
 

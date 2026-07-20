@@ -25,10 +25,16 @@ class AppButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: loading ? null : onPressed,
       child: loading
-          ? const SizedBox(
+          ? SizedBox(
               height: 18,
               width: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              // Explicit onPrimary color -- the default spinner color
+              // resolves to colorScheme.primary, which is illegible on
+              // Verdant's filled-moss button surface (Section 10.1).
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             )
           : icon == null
           ? Text(label)
