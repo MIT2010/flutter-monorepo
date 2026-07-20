@@ -1,22 +1,9 @@
 import 'package:design_system/design_system.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('AppElevationExtension', () {
-    test('legacy level0-5 still match the M3 dp scale (pending Tahap 2)', () {
-      for (final elevation in [
-        AppElevationExtension.light,
-        AppElevationExtension.dark,
-      ]) {
-        expect(elevation.level0, 0.0);
-        expect(elevation.level1, 1.0);
-        expect(elevation.level2, 3.0);
-        expect(elevation.level3, 6.0);
-        expect(elevation.level4, 8.0);
-        expect(elevation.level5, 12.0);
-      }
-    });
-
     test('flush has no border and no shadow', () {
       for (final elevation in [
         AppElevationExtension.light,
@@ -73,44 +60,32 @@ void main() {
 
     test('copyWith overrides only the given field', () {
       const elevation = AppElevationExtension.light;
-      final copy = elevation.copyWith(level3: 7.0);
+      final copy = elevation.copyWith(resting: elevation.flush);
 
-      expect(copy.level3, 7.0);
-      expect(copy.level0, elevation.level0);
-      expect(copy.level5, elevation.level5);
+      expect(copy.resting, elevation.flush);
       expect(copy.flush, elevation.flush);
-      expect(copy.resting, elevation.resting);
+      expect(copy.lifted, elevation.lifted);
+      expect(copy.floating, elevation.floating);
     });
 
-    test('lerp interpolates every numeric level linearly', () {
-      const level = AppDepthLevel(border: null, shadow: []);
+    test('lerp snaps AppDepthLevel fields at the midpoint', () {
+      const levelA = AppDepthLevel(border: null, shadow: []);
+      const levelB = AppDepthLevel(border: Border(), shadow: [BoxShadow()]);
       const a = AppElevationExtension(
-        flush: level,
-        resting: level,
-        lifted: level,
-        floating: level,
-        level0: 0,
-        level1: 0,
-        level2: 0,
-        level3: 0,
-        level4: 0,
-        level5: 0,
+        flush: levelA,
+        resting: levelA,
+        lifted: levelA,
+        floating: levelA,
       );
       const b = AppElevationExtension(
-        flush: level,
-        resting: level,
-        lifted: level,
-        floating: level,
-        level0: 10,
-        level1: 10,
-        level2: 10,
-        level3: 10,
-        level4: 10,
-        level5: 10,
+        flush: levelB,
+        resting: levelB,
+        lifted: levelB,
+        floating: levelB,
       );
 
-      final mid = a.lerp(b, 0.5);
-      expect(mid.level3, 5.0);
+      expect(a.lerp(b, 0.3).flush, levelA);
+      expect(a.lerp(b, 0.7).flush, levelB);
     });
 
     test('lerp returns this unchanged when other is a different type', () {

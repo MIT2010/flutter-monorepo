@@ -36,12 +36,14 @@ void main() {
     });
 
     testWidgets(
-      'lifts elevation gradually via spring physics when reduce motion is off',
+      'border shifts from outlineVariant to primary on press, and back on '
+      'release -- no shape or elevation change',
       (tester) async {
         final cardKey = GlobalKey();
+        final theme = AppTheme.light();
         await tester.pumpWidget(
           MaterialApp(
-            theme: AppTheme.light(),
+            theme: theme,
             home: Scaffold(
               body: AppExpressiveCard(
                 key: cardKey,
@@ -52,48 +54,48 @@ void main() {
           ),
         );
 
-        Material materialOf() => tester.widget<Material>(
-          find.descendant(
-            of: find.byKey(cardKey),
-            matching: find.byType(Material),
-          ),
-        );
+        BoxDecoration decorationOf() {
+          final container = tester.widget<AnimatedContainer>(
+            find.descendant(
+              of: find.byKey(cardKey),
+              matching: find.byType(AnimatedContainer),
+            ),
+          );
+          return container.decoration as BoxDecoration;
+        }
 
-        final initialElevation = materialOf().elevation;
+        final restBorder = decorationOf().border as Border;
+        expect(restBorder.top.color, theme.colorScheme.outlineVariant);
 
         final gesture = await tester.startGesture(
           tester.getCenter(find.byKey(cardKey)),
         );
-        // Two pumps, not one: the ticker only anchors its own start time on
-        // its first post-start frame callback, so a single pump(duration)
-        // right after starting the gesture reports elapsed=0, not
-        // `duration` -- the first pump anchors it, the second observes
-        // real progress.
         await tester.pump();
-        await tester.pump(const Duration(milliseconds: 16));
+        await tester.pump(const Duration(milliseconds: 150));
 
-        final midElevation = materialOf().elevation;
-        // Still mid-flight after one frame -- a spring simulation doesn't
-        // reach its target that fast, unlike the reduce-motion instant jump
-        // verified below.
-        expect(midElevation, greaterThan(initialElevation));
-        expect(midElevation, lessThan(AppElevationExtension.light.level3));
+        final pressedBorder = decorationOf().border as Border;
+        expect(pressedBorder.top.color, theme.colorScheme.primary);
 
         await gesture.up();
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 150));
+
+        final releasedBorder = decorationOf().border as Border;
+        expect(releasedBorder.top.color, theme.colorScheme.outlineVariant);
       },
     );
 
     testWidgets(
-      'jumps instantly to the tapped elevation (no spring animation) when '
+      'jumps instantly to the pressed border color (no animation) when '
       'reduce motion is on',
       (tester) async {
         final cardKey = GlobalKey();
+        final theme = AppTheme.light();
         await tester.pumpWidget(
           MediaQuery(
             data: const MediaQueryData(disableAnimations: true),
             child: MaterialApp(
-              theme: AppTheme.light(),
+              theme: theme,
               home: Scaffold(
                 body: AppExpressiveCard(
                   key: cardKey,
@@ -105,24 +107,29 @@ void main() {
           ),
         );
 
-        Material materialOf() => tester.widget<Material>(
-          find.descendant(
-            of: find.byKey(cardKey),
-            matching: find.byType(Material),
-          ),
-        );
+        BoxDecoration decorationOf() {
+          final container = tester.widget<AnimatedContainer>(
+            find.descendant(
+              of: find.byKey(cardKey),
+              matching: find.byType(AnimatedContainer),
+            ),
+          );
+          return container.decoration as BoxDecoration;
+        }
 
         final gesture = await tester.startGesture(
           tester.getCenter(find.byKey(cardKey)),
         );
         await tester.pump();
 
-        expect(materialOf().elevation, AppElevationExtension.light.level3);
+        final pressedBorder = decorationOf().border as Border;
+        expect(pressedBorder.top.color, theme.colorScheme.primary);
 
         await gesture.up();
         await tester.pump();
 
-        expect(materialOf().elevation, AppElevationExtension.light.level1);
+        final releasedBorder = decorationOf().border as Border;
+        expect(releasedBorder.top.color, theme.colorScheme.outlineVariant);
       },
     );
   });

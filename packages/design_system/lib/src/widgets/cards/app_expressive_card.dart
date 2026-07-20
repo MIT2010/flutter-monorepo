@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
 
 import '../../theme/app_theme_context.dart';
 
-/// Flagship demo of the shape + motion tokens working together: on tap,
-/// morphs from a plain rounded rectangle to [AppShapeExtension.expressive]'s
-/// non-uniform corners while lifting elevation, driven by
-/// [AppMotionExtension.spring] (native `SpringSimulation`, not the
-/// m3e_design package — see the design_system token-upgrade proposal,
-/// 2026-07-17).
+/// A card that expresses confidence through color, not motion (§5.4).
+///
+/// The previous design morphed [AppShapeExtension.expressive]'s asymmetric
+/// corners and lifted elevation via [AppMotionExtension.spring] on tap —
+/// under Verdant's own anti-pattern critic pass, that mechanic is
+/// unmistakably M3-Expressive-derived and was retired entirely, not
+/// retuned. The replacement is deliberately quiet: the same fixed
+/// `radius.sm` geometry every Verdant card uses (§10.2 — "no
+/// asymmetric/expressive variant survives as a default"), with only its
+/// hairline border shifting from `stone.20`/`outlineVariant` to
+/// `moss.60`/`primary` on press. No shape change, no elevation change, no
+/// spring — `motion.micro` with Verdant Enter, the same restrained
+/// vocabulary every other Verdant interaction uses.
 ///
 /// Respects the OS "reduce motion" accessibility setting
-/// (`MediaQuery.disableAnimations`): when set, the shape/elevation change
-/// still happens on tap, but instantly rather than via spring physics —
-/// this is not optional for a component other widgets are meant to copy.
+/// (`MediaQuery.disableAnimations`): the border color still changes on
+/// press when set, just instantly rather than animated — the same
+/// jump-not-animate precedent the original component established (§8.7),
+/// carried forward here rather than dropped with the spring mechanic.
 class AppExpressiveCard extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
@@ -24,61 +31,38 @@ class AppExpressiveCard extends StatefulWidget {
   State<AppExpressiveCard> createState() => _AppExpressiveCardState();
 }
 
-class _AppExpressiveCardState extends State<AppExpressiveCard>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
+class _AppExpressiveCardState extends State<AppExpressiveCard> {
+  bool _pressed = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this, duration: Duration.zero);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _animateTo(double target) {
-    if (MediaQuery.of(context).disableAnimations) {
-      _controller.value = target;
-      return;
-    }
-    final spring = context.motion.spring;
-    _controller.animateWith(
-      SpringSimulation(spring, _controller.value, target, 0),
-    );
+  void _setPressed(bool value) {
+    if (widget.onTap == null || _pressed == value) return;
+    setState(() => _pressed = value);
   }
 
   @override
   Widget build(BuildContext context) {
-    final shape = context.shape;
-    final elevation = context.elevation;
+    final colorScheme = Theme.of(context).colorScheme;
+    final motion = context.motion;
+    final reduceMotion = MediaQuery.of(context).disableAnimations;
+    final radius = BorderRadius.circular(context.shape.radiusSm);
+    final borderColor = _pressed
+        ? colorScheme.primary
+        : colorScheme.outlineVariant;
 
     return GestureDetector(
-      onTapDown: widget.onTap == null ? null : (_) => _animateTo(1.0),
-      onTapUp: widget.onTap == null ? null : (_) => _animateTo(0.0),
-      onTapCancel: widget.onTap == null ? null : () => _animateTo(0.0),
+      onTapDown: widget.onTap == null ? null : (_) => _setPressed(true),
+      onTapUp: widget.onTap == null ? null : (_) => _setPressed(false),
+      onTapCancel: widget.onTap == null ? null : () => _setPressed(false),
       onTap: widget.onTap,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          final t = _controller.value;
-          final radius = BorderRadius.lerp(
-            BorderRadius.circular(shape.radiusMd),
-            shape.expressive,
-            t,
-          )!;
-          final currentElevation =
-              elevation.level1 + (elevation.level3 - elevation.level1) * t;
-          return Material(
-            elevation: currentElevation,
-            borderRadius: radius,
-            clipBehavior: Clip.antiAlias,
-            child: child,
-          );
-        },
+      child: AnimatedContainer(
+        duration: reduceMotion ? Duration.zero : motion.durationMicro,
+        curve: motion.curveEnter,
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          border: Border.all(color: borderColor),
+          borderRadius: radius,
+        ),
         child: Padding(
           padding: EdgeInsets.all(context.spacing.md),
           child: widget.child,
