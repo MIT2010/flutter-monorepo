@@ -6,6 +6,7 @@ import 'app_route.dart';
 import 'app_shell.dart';
 import 'auth_session.dart';
 import 'feature_routes.dart';
+import 'first_launch_gate.dart';
 import 'go_router_refresh_stream.dart';
 import 'not_found_page.dart';
 
@@ -23,8 +24,9 @@ import 'not_found_page.dart';
 @lazySingleton
 class AppRouter {
   final AuthSession _authSession;
+  final FirstLaunchGate _firstLaunchGate;
 
-  AppRouter(this._authSession);
+  AppRouter(this._authSession, this._firstLaunchGate);
 
   /// Routes outside the persistent bottom nav, e.g. `/login`. Must be set
   /// before [router] is first read.
@@ -61,6 +63,17 @@ class AppRouter {
     final status = _authSession.status;
     final loggedIn = status.isAuthenticated;
     final loggingIn = state.matchedLocation == '/login';
+
+    // Scoped to the not-yet-logged-in case only, matching a first-launch
+    // flag's own real-world lifecycle: it's cleared once onboarding
+    // completes or the user logs in, well before a session could ever be
+    // restored as authenticated with the flag still set. Once cleared,
+    // this stops firing and '/onboarding' reverts to being redirected
+    // like any other non-guest route below — not a permanent guest
+    // allowance.
+    if (!loggedIn && _firstLaunchGate.isFirstLaunch) {
+      return state.matchedLocation == '/onboarding' ? null : '/onboarding';
+    }
 
     if (!loggedIn && !loggingIn) return '/login';
     if (loggedIn && loggingIn) return '/home';

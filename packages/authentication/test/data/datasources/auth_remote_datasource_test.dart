@@ -56,4 +56,39 @@ void main() {
       expect(captured, {'email': 'a@example.com', 'password': 'secret'});
     },
   );
+
+  test('refresh posts to /auth/refresh with the given refresh token and '
+      'parses the new token pair', () async {
+    const pair = TokenPairModel(
+      accessToken: 'access-2',
+      refreshToken: 'refresh-2',
+    );
+
+    when(
+      () => client.post<TokenPairModel>(
+        '/auth/refresh',
+        data: any(named: 'data'),
+        parser: any(named: 'parser'),
+      ),
+    ).thenAnswer((invocation) async {
+      final parser =
+          invocation.namedArguments[#parser]
+              as TokenPairModel Function(dynamic);
+      return Ok(parser(pair.toJson()));
+    });
+
+    final result = await dataSource.refresh('refresh-1');
+
+    expect(result.isOk, isTrue);
+    expect((result as Ok<Failure, TokenPairModel>).value, pair);
+
+    final captured = verify(
+      () => client.post<TokenPairModel>(
+        '/auth/refresh',
+        data: captureAny(named: 'data'),
+        parser: any(named: 'parser'),
+      ),
+    ).captured.single;
+    expect(captured, {'refreshToken': 'refresh-1'});
+  });
 }

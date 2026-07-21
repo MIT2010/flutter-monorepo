@@ -42,4 +42,19 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<User?> getCachedUser() => _tokenStorage.getCachedUser();
+
+  @override
+  Future<bool> refreshToken() async {
+    final refreshToken = await _tokenStorage.refreshToken;
+    if (refreshToken == null) return false;
+
+    final result = await _remote.refresh(refreshToken);
+    return result.fold((failure) async => false, (pair) async {
+      await _tokenStorage.saveTokens(
+        access: pair.accessToken,
+        refresh: pair.refreshToken,
+      );
+      return true;
+    });
+  }
 }

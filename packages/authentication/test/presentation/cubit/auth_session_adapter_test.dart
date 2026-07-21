@@ -41,6 +41,21 @@ void main() {
     },
   );
 
+  test('status reflects AuthCubit.refreshing as still isAuthenticated with the '
+      "user's role -- AppRouter must not redirect away from the current "
+      'screen just because a reactive token refresh is in flight', () async {
+    when(() => repository.getCachedUser()).thenAnswer((_) async => user);
+    when(() => repository.refreshToken()).thenAnswer((_) async => false);
+    final authCubit = AuthCubit(repository);
+    await pumpEventQueue();
+
+    await authCubit.refresh();
+    final adapter = AuthSessionAdapter(authCubit);
+
+    expect(adapter.status.isAuthenticated, isTrue);
+    expect(adapter.status.roles, ['admin']);
+  });
+
   test('statusStream follows AuthCubit through a login/logout cycle', () async {
     when(() => repository.getCachedUser()).thenAnswer((_) async => null);
     when(() => repository.logout()).thenAnswer((_) async => const Ok(null));

@@ -95,6 +95,70 @@ void main() {
     });
   });
 
+  group('AuthRepositoryImpl.refreshToken', () {
+    const pair = TokenPairModel(
+      accessToken: 'access-2',
+      refreshToken: 'refresh-2',
+    );
+
+    test('calls remote.refresh with the stored refresh token, saves the new '
+        'pair, and returns true on success', () async {
+      when(
+        () => tokenStorage.refreshToken,
+      ).thenAnswer((_) async => 'refresh-1');
+      when(
+        () => remote.refresh('refresh-1'),
+      ).thenAnswer((_) async => const Ok(pair));
+      when(
+        () => tokenStorage.saveTokens(
+          access: any(named: 'access'),
+          refresh: any(named: 'refresh'),
+        ),
+      ).thenAnswer((_) async {});
+
+      final refreshed = await repository.refreshToken();
+
+      expect(refreshed, isTrue);
+      verify(
+        () => tokenStorage.saveTokens(access: 'access-2', refresh: 'refresh-2'),
+      ).called(1);
+    });
+
+    test(
+      'returns false without calling remote when nothing is cached',
+      () async {
+        when(() => tokenStorage.refreshToken).thenAnswer((_) async => null);
+
+        final refreshed = await repository.refreshToken();
+
+        expect(refreshed, isFalse);
+        verifyNever(() => remote.refresh(any()));
+      },
+    );
+
+    test(
+      'returns false and never saves tokens when remote.refresh fails',
+      () async {
+        when(
+          () => tokenStorage.refreshToken,
+        ).thenAnswer((_) async => 'refresh-1');
+        when(
+          () => remote.refresh('refresh-1'),
+        ).thenAnswer((_) async => const Err(UnauthorizedFailure()));
+
+        final refreshed = await repository.refreshToken();
+
+        expect(refreshed, isFalse);
+        verifyNever(
+          () => tokenStorage.saveTokens(
+            access: any(named: 'access'),
+            refresh: any(named: 'refresh'),
+          ),
+        );
+      },
+    );
+  });
+
   group('AuthRepositoryImpl.getCachedUser', () {
     test('delegates straight to token storage', () async {
       when(() => tokenStorage.getCachedUser()).thenAnswer(

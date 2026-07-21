@@ -28,11 +28,20 @@ class _FakeTokenProvider implements TokenProvider {
   Future<void> clear() async {}
 }
 
+class _FakeTokenRefresher implements TokenRefresher {
+  @override
+  Future<bool> refresh() async => false;
+
+  @override
+  Future<void> forceLogout() async {}
+}
+
 void main() {
   group('configureDependencies', () {
-    setUp(
-      () => getIt.registerSingleton<TokenProvider>(_FakeTokenProvider()),
-    );
+    setUp(() {
+      getIt.registerSingleton<TokenProvider>(_FakeTokenProvider());
+      getIt.registerSingleton<TokenRefresher>(_FakeTokenRefresher());
+    });
     tearDown(() => getIt.reset());
 
     test(

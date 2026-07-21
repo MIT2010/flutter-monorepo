@@ -3,6 +3,7 @@ library;
 
 export 'src/data/datasources/auth_remote_datasource.dart';
 export 'src/data/datasources/secure_token_storage.dart';
+export 'src/data/models/token_pair_model.dart';
 export 'src/data/models/user_model.dart';
 export 'src/data/repositories/auth_repository_impl.dart';
 export 'src/di/register_module.dart';
