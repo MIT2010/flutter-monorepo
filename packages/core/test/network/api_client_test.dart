@@ -69,9 +69,11 @@ void main() {
       expect((result as Ok<Failure, bool>).value, isTrue);
     });
 
-    test('maps a 401 response to UnauthorizedFailure', () async {
+    test('maps a 401 response to UnauthorizedFailure carrying the real '
+        'server message, not the generic default', () async {
       final dio = _buildDio(
-        (options) async => _jsonBody({'message': 'unauth'}, 401),
+        (options) async =>
+            _jsonBody({'message': 'Email atau kata sandi salah'}, 401),
       );
       final client = ApiClient(dio);
 
@@ -81,7 +83,24 @@ void main() {
       );
 
       expect(result.isErr, isTrue);
-      expect((result as Err<Failure, Map>).failure, isA<UnauthorizedFailure>());
+      final failure = (result as Err<Failure, Map>).failure;
+      expect(failure, isA<UnauthorizedFailure>());
+      expect(failure.message, 'Email atau kata sandi salah');
+    });
+
+    test('falls back to the generic "Session expired" message when a 401 '
+        'body carries none', () async {
+      final dio = _buildDio((options) async => _jsonBody({}, 401));
+      final client = ApiClient(dio);
+
+      final result = await client.get<Map>(
+        '/thing',
+        parser: (json) => json as Map,
+      );
+
+      final failure = (result as Err<Failure, Map>).failure;
+      expect(failure, isA<UnauthorizedFailure>());
+      expect(failure.message, 'Session expired');
     });
 
     test(
@@ -151,6 +170,86 @@ void main() {
       );
 
       expect((result as Err<Failure, Map>).failure, isA<NetworkFailure>());
+    });
+
+    group('parser exceptions (unrelated to DioException)', () {
+      test('get() converts a parser exception to ParsingFailure instead of '
+          'letting it escape uncaught', () async {
+        final dio = _buildDio(
+          (options) async => _jsonBody({'id': 'not-an-int'}, 200),
+        );
+        final client = ApiClient(dio);
+
+        final result = await client.get<int>(
+          '/thing',
+          parser: (json) => (json as Map)['id'] as int,
+        );
+
+        expect(result.isErr, isTrue);
+        expect((result as Err<Failure, int>).failure, isA<ParsingFailure>());
+      });
+
+      test('post() converts a parser exception to ParsingFailure', () async {
+        final dio = _buildDio(
+          (options) async => _jsonBody({'created': 'yes'}, 201),
+        );
+        final client = ApiClient(dio);
+
+        final result = await client.post<bool>(
+          '/thing',
+          data: {'name': 'x'},
+          parser: (json) => (json as Map)['created'] as bool,
+        );
+
+        expect((result as Err<Failure, bool>).failure, isA<ParsingFailure>());
+      });
+
+      test('put() converts a parser exception to ParsingFailure', () async {
+        final dio = _buildDio(
+          (options) async => _jsonBody({'updated': 'yes'}, 200),
+        );
+        final client = ApiClient(dio);
+
+        final result = await client.put<bool>(
+          '/thing',
+          data: {'name': 'x'},
+          parser: (json) => (json as Map)['updated'] as bool,
+        );
+
+        expect((result as Err<Failure, bool>).failure, isA<ParsingFailure>());
+      });
+
+      test('delete() converts a parser exception to ParsingFailure', () async {
+        final dio = _buildDio(
+          (options) async => _jsonBody({'deleted': 'yes'}, 200),
+        );
+        final client = ApiClient(dio);
+
+        final result = await client.delete<bool>(
+          '/thing',
+          parser: (json) => (json as Map)['deleted'] as bool,
+        );
+
+        expect((result as Err<Failure, bool>).failure, isA<ParsingFailure>());
+      });
+
+      test(
+        'multipart() converts a parser exception to ParsingFailure',
+        () async {
+          final dio = _buildDio(
+            (options) async => _jsonBody({'uploaded': 'yes'}, 200),
+          );
+          final client = ApiClient(dio);
+
+          final result = await client.multipart<bool>(
+            '/thing',
+            data: FormData(),
+            parser: (json) => (json as Map)['uploaded'] as bool,
+          );
+
+          expect((result as Err<Failure, bool>).failure, isA<ParsingFailure>());
+        },
+      );
     });
   });
 }

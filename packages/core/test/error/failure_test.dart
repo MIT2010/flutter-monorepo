@@ -17,11 +17,23 @@ void main() {
       expect(failure.message, 'No internet connection');
     });
 
-    test('UnauthorizedFailure has a fixed human-readable message', () {
-      const failure = UnauthorizedFailure();
+    test(
+      'UnauthorizedFailure defaults to a generic message with no argument',
+      () {
+        const failure = UnauthorizedFailure();
 
-      expect(failure.message, 'Session expired');
-    });
+        expect(failure.message, 'Session expired');
+      },
+    );
+
+    test(
+      'UnauthorizedFailure carries a real server message when given one',
+      () {
+        const failure = UnauthorizedFailure('Email atau kata sandi salah');
+
+        expect(failure.message, 'Email atau kata sandi salah');
+      },
+    );
 
     test('CacheFailure and ValidationFailure carry their own message', () {
       const cache = CacheFailure('cache miss');
@@ -29,6 +41,13 @@ void main() {
 
       expect(cache.message, 'cache miss');
       expect(validation.message, 'email is required');
+    });
+
+    test('ParsingFailure carries its own message', () {
+      const failure = ParsingFailure('Failed to parse response: bad shape');
+
+      expect(failure.message, 'Failed to parse response: bad shape');
+      expect(failure, isA<Failure>());
     });
   });
 }

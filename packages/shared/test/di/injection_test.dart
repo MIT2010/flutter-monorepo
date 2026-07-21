@@ -3,8 +3,36 @@ import 'package:shared/shared.dart';
 import 'package:shared/src/di/injection.config.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+/// `shared`'s own `configureDependencies()` is a self-contained
+/// composition root for this test suite (unlike `apps/mobile`'s, it never
+/// folds in `authentication`'s registrations — see `injection.dart`'s doc
+/// comment). `RegisterModule.dio` now needs a `TokenProvider` to attach
+/// `AuthInterceptor`, and the only concrete implementation
+/// (`SecureTokenStorage`) lives in `authentication`, so this suite has to
+/// supply a stand-in itself, the same way `apps/mobile`'s real
+/// composition root supplies the real one.
+class _FakeTokenProvider implements TokenProvider {
+  @override
+  Future<String?> get accessToken async => null;
+
+  @override
+  Future<String?> get refreshToken async => null;
+
+  @override
+  Future<void> saveTokens({
+    required String access,
+    required String refresh,
+  }) async {}
+
+  @override
+  Future<void> clear() async {}
+}
+
 void main() {
   group('configureDependencies', () {
+    setUp(
+      () => getIt.registerSingleton<TokenProvider>(_FakeTokenProvider()),
+    );
     tearDown(() => getIt.reset());
 
     test(

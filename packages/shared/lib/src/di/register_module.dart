@@ -8,16 +8,23 @@ import 'app_environment.dart';
 /// External/third-party instances that can't carry an `@injectable`
 /// annotation themselves (§12: "@module → external deps").
 ///
-/// `AuthInterceptor`/`RefreshTokenInterceptor`/`ConnectivityInterceptor`
-/// aren't attached yet — they depend on `TokenProvider`/`ConnectivityChecker`
-/// implementations that ship with `authentication` and a connectivity
-/// plugin, neither of which exists in the repo yet. `LoggingInterceptor`
-/// only needs `AppLogger` (already in `core`), so it's safe to wire now.
+/// `AuthInterceptor` is attached below — `authentication`'s own
+/// `RegisterModule` already provides `TokenProvider` (via
+/// `SecureTokenStorage`), the only dependency it needs, so nothing keeps
+/// it from being wired now. `RefreshTokenInterceptor`/
+/// `ConnectivityInterceptor` still aren't: the former also needs a real
+/// `/auth/refresh` call site and an `onRefreshFailed` hook into whatever
+/// owns logout, which is a composition-root (`apps/mobile`) decision, not
+/// something this module can supply generically; the latter needs a
+/// `ConnectivityChecker` implementation backed by a connectivity plugin,
+/// which doesn't exist in the repo yet. `LoggingInterceptor` only needs
+/// `AppLogger` (already in `core`), so it was already safe to wire.
 @module
 abstract class RegisterModule {
   @lazySingleton
-  Dio dio(AppLogger logger, Env env) {
+  Dio dio(AppLogger logger, Env env, TokenProvider tokenProvider) {
     return Dio(BaseOptions(baseUrl: env.apiUrl))
+      ..interceptors.add(AuthInterceptor(tokenProvider))
       ..interceptors.add(LoggingInterceptor(logger, enabled: env.isDev));
   }
 

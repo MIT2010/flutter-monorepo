@@ -23,6 +23,12 @@ class ApiClient {
       return Ok(parser(response.data));
     } on DioException catch (e) {
       return Err(_mapDioError(e));
+    } catch (e) {
+      // The request succeeded but `parser` couldn't make sense of the
+      // body -- a TypeError/FormatException from an unexpected shape,
+      // not a network-layer failure. Left uncaught before this, any
+      // caller above the data layer could crash on a malformed response.
+      return Err(ParsingFailure('Failed to parse response: $e'));
     }
   }
 
@@ -41,6 +47,12 @@ class ApiClient {
       return Ok(parser(response.data));
     } on DioException catch (e) {
       return Err(_mapDioError(e));
+    } catch (e) {
+      // The request succeeded but `parser` couldn't make sense of the
+      // body -- a TypeError/FormatException from an unexpected shape,
+      // not a network-layer failure. Left uncaught before this, any
+      // caller above the data layer could crash on a malformed response.
+      return Err(ParsingFailure('Failed to parse response: $e'));
     }
   }
 
@@ -55,6 +67,12 @@ class ApiClient {
       return Ok(parser(response.data));
     } on DioException catch (e) {
       return Err(_mapDioError(e));
+    } catch (e) {
+      // The request succeeded but `parser` couldn't make sense of the
+      // body -- a TypeError/FormatException from an unexpected shape,
+      // not a network-layer failure. Left uncaught before this, any
+      // caller above the data layer could crash on a malformed response.
+      return Err(ParsingFailure('Failed to parse response: $e'));
     }
   }
 
@@ -73,6 +91,12 @@ class ApiClient {
       return Ok(parser(response.data));
     } on DioException catch (e) {
       return Err(_mapDioError(e));
+    } catch (e) {
+      // The request succeeded but `parser` couldn't make sense of the
+      // body -- a TypeError/FormatException from an unexpected shape,
+      // not a network-layer failure. Left uncaught before this, any
+      // caller above the data layer could crash on a malformed response.
+      return Err(ParsingFailure('Failed to parse response: $e'));
     }
   }
 
@@ -91,6 +115,12 @@ class ApiClient {
       return Ok(parser(response.data));
     } on DioException catch (e) {
       return Err(_mapDioError(e));
+    } catch (e) {
+      // The request succeeded but `parser` couldn't make sense of the
+      // body -- a TypeError/FormatException from an unexpected shape,
+      // not a network-layer failure. Left uncaught before this, any
+      // caller above the data layer could crash on a malformed response.
+      return Err(ParsingFailure('Failed to parse response: $e'));
     }
   }
 
@@ -105,7 +135,9 @@ class ApiClient {
       DioExceptionType.receiveTimeout ||
       DioExceptionType.sendTimeout => const NetworkFailure(),
       DioExceptionType.badResponse when e.response?.statusCode == 401 =>
-        const UnauthorizedFailure(),
+        UnauthorizedFailure(
+          _extractMessage(e.response?.data) ?? 'Session expired',
+        ),
       DioExceptionType.badResponse => ServerFailure(
         _extractMessage(e.response?.data) ?? 'Server error',
         statusCode: e.response?.statusCode,
