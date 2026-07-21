@@ -250,6 +250,19 @@ class AppTheme {
       errorBorder: border(colorScheme.error),
       focusedErrorBorder: border(colorScheme.error, width: 2),
       errorStyle: TextStyle(color: colorScheme.error),
+      // A leading icon (e.g. AppSearchField's magnifying glass) recolors
+      // with focus for the same reason the border itself does (§10.16) —
+      // so the icon and border always agree about focus state. Only
+      // prefixIconColor: AppPasswordField's trailing reveal toggle sets
+      // its own explicit per-frame color for its tap-flash animation
+      // (§10.18), which always overrides an ambient IconTheme regardless
+      // of what suffixIconColor would say, so there's nothing useful to
+      // set there.
+      prefixIconColor: WidgetStateColor.resolveWith(
+        (states) => states.contains(WidgetState.focused)
+            ? colorScheme.primary
+            : colorScheme.onSurfaceVariant,
+      ),
     );
   }
 
