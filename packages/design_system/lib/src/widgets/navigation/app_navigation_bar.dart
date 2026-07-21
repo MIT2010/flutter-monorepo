@@ -55,8 +55,13 @@ class AppNavigationBar extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        child: SizedBox(
-          height: 64,
+        child: ConstrainedBox(
+          // minHeight, not a fixed SizedBox -- a label that needs two
+          // lines at a large MediaQuery.textScaler must be able to grow
+          // the bar taller instead of clipping (VERDANT_DESIGN_SYSTEM.md
+          // §14.3's own rule, caught failing this exact case in
+          // test/accessibility/text_scaling_test.dart before this fix).
+          constraints: const BoxConstraints(minHeight: 64),
           child: Row(
             children: [
               for (var i = 0; i < destinations.length; i++)
@@ -114,6 +119,7 @@ class _Destination extends StatelessWidget {
             ),
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(destination.icon, color: tone, size: 24),
