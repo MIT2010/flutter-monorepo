@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// A container for related content, not a design flourish (§10.2). Level 1
@@ -13,6 +14,7 @@ import '../../theme/app_theme_context.dart';
 /// Material's own drop-shadow curve, which can't express Verdant's literal
 /// border/shadow-list spec (§6). [InkWell] still supplies real tap/hover
 /// feedback and ripple.
+@verdantStable
 class AppCard extends StatefulWidget {
   final Widget child;
 

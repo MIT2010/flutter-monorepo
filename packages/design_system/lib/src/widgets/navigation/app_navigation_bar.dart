@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// One tab in an [AppNavigationBar] — icon + label only, no business logic
@@ -31,6 +32,7 @@ class AppNavigationDestination {
 /// - **Icons**: the same icon regardless of selection, only recolored —
 ///   never the filled-when-selected/outline-when-not toggle, one of
 ///   Material's most recognizable navigation-bar tells.
+@verdantStable
 class AppNavigationBar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;

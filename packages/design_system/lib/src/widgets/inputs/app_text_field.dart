@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// Precision input — the closest digital analog to "writing in a premium
@@ -10,6 +11,7 @@ import '../../theme/app_theme_context.dart';
 /// against by default. Border/focus/error colors come from the app-wide
 /// `InputDecorationTheme` (`AppTheme`), so this widget stays a thin wrapper
 /// with the same named-parameter shape as its Material counterpart (§16).
+@verdantStable
 class AppTextField extends StatelessWidget {
   final String label;
   final TextEditingController? controller;

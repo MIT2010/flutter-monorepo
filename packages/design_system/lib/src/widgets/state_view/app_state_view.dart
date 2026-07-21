@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 import '../buttons/app_button.dart';
 
@@ -15,6 +16,7 @@ enum AppStateViewTone { neutral, error }
 /// Home/Profile's error+retry and akujamin-v2's 8+ near-identical
 /// error/loading screens never had a shared component at all (design
 /// system component-gap audit, 2026-07-18).
+@verdantStable
 class AppStateView extends StatelessWidget {
   final IconData? icon;
   final bool loading;

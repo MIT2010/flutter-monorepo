@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// Static tone-specific `SnackBar` helpers -- 6 raw
@@ -10,6 +11,7 @@ import '../../theme/app_theme_context.dart';
 /// ARCHITECTURE.md ADR-017). Only `error`/`success` get explicit color
 /// treatment -- no `warning` variant, since no evidenced occurrence needed
 /// one (docs/COMPONENT_ANATOMY.md §3).
+@verdantStable
 class AppSnackBar {
   const AppSnackBar._();
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// Which [AppSemanticColors] role an [AppStatusBadge] renders with.
@@ -10,6 +11,7 @@ enum AppStatusTone { success, warning, info }
 /// classes seen scattered across step indicators and status displays with
 /// one reusable, WCAG-AA-contrast-verified component (§16 token-upgrade
 /// proposal, 2026-07-17 — first real consumer of [AppSemanticColors]).
+@verdantStable
 class AppStatusBadge extends StatelessWidget {
   final String label;
   final AppStatusTone tone;

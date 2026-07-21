@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../maturity/verdant_maturity.dart';
+
 /// Centered, unlabelled loading spinner -- `Center(child:
 /// CircularProgressIndicator())` was hand-rolled identically 17 times
 /// across this kit's own Home/Profile pages and 8 screens in `akujamin-v2`
@@ -7,6 +9,7 @@ import 'package:flutter/material.dart';
 /// parameters: no observed occurrence varied size, color, or added a
 /// label -- for a labelled loading state, see `AppStateView(loading:
 /// true, message: ...)` instead (docs/COMPONENT_ANATOMY.md §2/§1).
+@verdantStable
 class AppLoadingIndicator extends StatelessWidget {
   const AppLoadingIndicator({super.key});
 

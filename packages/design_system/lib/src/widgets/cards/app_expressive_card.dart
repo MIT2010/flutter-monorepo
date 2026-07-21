@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// A card that expresses confidence through color, not motion (§5.4).
@@ -21,6 +22,7 @@ import '../../theme/app_theme_context.dart';
 /// press when set, just instantly rather than animated — the same
 /// jump-not-animate precedent the original component established (§8.7),
 /// carried forward here rather than dropped with the spring mechanic.
+@verdantStable
 class AppExpressiveCard extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;

@@ -1,14 +1,16 @@
-# Verdant — Design System Specification v1.3
+# Verdant — Design System Specification v1.4
 
 *Chief Design Officer's specification. This document is the source of truth for Verdant's visual identity.*
 
-**Status: APPROVED as the new default visual identity for flutter_starter_kit**, superseding `docs/DESIGN_LANGUAGE.md` (archived, not deleted — see that file's own banner). All five §13 open decisions were resolved: `AppExpressiveCard`'s shape-morph/spring was retired in favor of a hairline border-shift-on-press redesign (§5.4); Plus Jakarta Sans retained; `DESIGN_LANGUAGE.md` archived as historical record; rollout scope is tokens (Tahap 1) + 6 detailed components (Tahap 2) + `AppExpressiveCard` (Tahap 3) first; the remaining component list stays build-on-demand, not built ahead of real need. **Tahap 1, 2, and 3 are all implemented, golden-verified, and CI-green as of this revision.**
+**Status: APPROVED as the new default visual identity for flutter_starter_kit**, superseding `docs/DESIGN_LANGUAGE.md` (archived, not deleted — see that file's own banner). All five §13 open decisions were resolved: `AppExpressiveCard`'s shape-morph/spring was retired in favor of a hairline border-shift-on-press redesign (§5.4); Plus Jakarta Sans retained; `DESIGN_LANGUAGE.md` archived as historical record; rollout scope is tokens (Tahap 1) + 6 detailed components (Tahap 2) + `AppExpressiveCard` (Tahap 3) first; the remaining component list stays build-on-demand, not built ahead of real need. **Tahap 1, 2, and 3 are all implemented, golden-verified, and CI-green as of this revision.** **v1.4 supersedes the build-on-demand-only part of that last sentence** — see the v1.4 revision note and §15.
 
 **v1.1 revision note**: a systematic comparison against the original brief found this document under-covered two things the brief explicitly required — full Purpose/Shape/Depth/Motion/State specification for every named component (not just the 6 built in Tahap 2), and full treatment of every named Visual DNA/token category. That revision closed the gap **as specification only** — §10.7 onward, the expanded §4/§8 subsections, and the §9 token decisions are documentation, not implementation. The staged, build-on-demand code discipline established in §13 point 5 is unchanged: having a full spec for, say, a Calendar/Date Picker does not mean one gets built before a real screen needs it.
 
 **v1.2 revision note**: a second full read caught what v1.1 missed — every reference to "Section 3's scale" for type (§8.3, former §10.1) pointed at Color, not Typography, because **no Typography section existed at all**, despite the brief naming type a primary design element on equal footing with color. §14 (appended at the end, same renumbering-avoidance reasoning as §10.7 onward) now covers the full 15-slot type scale pulled from the real, already-implemented `AppTheme._baseTextTheme` (not invented fresh), the checkable reasoning behind each brand-overridden slot, and an explicit answer on `MediaQuery.textScaler` interaction — including one honest, unverified gap (200% text-scaling hasn't actually been tested against the six implemented components yet). Also closes two smaller optional items: §12.1 (a consolidated non-framework anti-pattern checklist) and §14.4's explicit "no" on a separate Border token scale, both decided the same documented-reasoning way as §9's Opacity/Interaction/Focus/Responsive calls.
 
 **v1.3 revision note**: closes v1.2's one self-acknowledged gap — §14.3 now reports a real, executed 200% `textScaler` verification (`test/accessibility/text_scaling_test.dart`) instead of an unverified claim. Five of the six Tahap 2 components passed outright; `AppNavigationBar` genuinely overflowed under a realistic-but-narrower adversarial case (four longer destination labels on a small-phone width) and has been fixed (fixed `SizedBox` height replaced with a `ConstrainedBox` minimum), golden-reverified, and is now guarded by a permanent regression test. This is code + test work, not documentation-only like v1.1/v1.2 — flagged here since this document's own status line otherwise implies everything below it is settled prose.
+
+**v1.4 revision note**: a deliberate philosophy change, approved explicitly, not a correction of a previous mistake. §13 point 5 and §10.24 both stated a real, considered decision at the time they were written — "build-on-demand only, per real screen need" — and that decision is not being retracted as *wrong*; it's being superseded because the cost/benefit changed. §15 ("Maturity levels") is the new section this revision adds: all seventeen §10.7–§10.23 components move from specification-only to fully implemented, but gated by two concrete risk mitigations instead of the evidence-of-need gate they were previously held to — an explicit maturity label (`@verdantStable`/`@verdantPreview`) so nobody mistakes a spec-only-derived component for one proven under real use, and a proof-of-concept phase (two components, one simple/one complex, built and reported on before the remaining fifteen) rather than one large batch. See §15 for the full mechanism and what "preview" means for a project consuming this kit. §13 gains a sixth decision recording this change; §10.24's own text is left as-is (it was accurate when written) with an editorial note appended pointing here, matching this document's own established practice of not silently rewriting settled history (§13's intro already states this, borrowed from how ARCHITECTURE.md's ADR log works).
 
 ## 0.1 Token-cheap vs. code-required — the boundary a downstream project needs
 
@@ -346,7 +348,7 @@ Unlike Interaction, the focus ring is a literal, reusable, cross-component *valu
 
 ## 10. Component philosophy
 
-Full philosophy-first treatment for every component named in the original brief. Sections 10.1–10.6 carry the most identity weight (the ones a user looks at in every session) and are **implemented, golden-tested, and CI-verified** as of Tahap 2. Sections 10.7–10.23 give every remaining named component the same Purpose/Shape/Depth/Motion/State treatment — **specification only**, per this revision's own stated scope (see the v1.1 revision note at the top of this document): none of them are implemented yet, and none should be built until a real screen needs them, per §13 point 5's unchanged staging discipline. §10.24 restates that boundary explicitly at the end of this section so it isn't lost after sixteen sections of detail.
+Full philosophy-first treatment for every component named in the original brief. Sections 10.1–10.6 carry the most identity weight (the ones a user looks at in every session) and are **implemented, golden-tested, and CI-verified** as of Tahap 2, and marked `@verdantStable` (§15). Sections 10.7–10.23 give every remaining named component the same Purpose/Shape/Depth/Motion/State treatment — written as **specification only** when v1.1 added them (see that revision note at the top of this document), but **as of v1.4 these are being implemented too**, marked `@verdantPreview` (§15) rather than gated on a real consumer the way §13 point 5 originally required. §10.24's own text, written under the old v1.1–v1.3 policy, is left unchanged below with an editorial note appended — see §15 and §13 point 6 for the actual current policy.
 
 ### 10.1 Button
 - **Purpose**: the single most common commitment point in the UI — deserves the most restraint, not the most decoration.
@@ -513,6 +515,8 @@ Full philosophy-first treatment for every component named in the original brief.
 
 Everything in §10.7–§10.23 is **specification only**, matching the v1.1 revision note at the top of this document and §13 point 5's unchanged staging discipline: none of these seventeen components are implemented, and none should be built ahead of a real screen needing them. Building any of them follows the same Fase-1 (anatomy: states/variants) → Fase-2 (golden-tested implementation) process already used for `AppStateView`/`AppLoadingIndicator`/`AppSnackBar`, one component at a time, only when a concrete screen requires it — not as a batch, and not because a full spec now exists for all of them. A complete specification removes ambiguity about *what* to build when the time comes; it is not permission to start building now.
 
+**Editorial note, v1.4**: the paragraph above was accurate under the policy in force through v1.3 and is left as written, not rewritten, matching this document's own practice of not erasing settled history (§13's intro). **It no longer reflects current policy** — §13 point 6 and §15 supersede it: all seventeen components are being implemented now, gated by explicit maturity labeling and a proof-of-concept-first rollout instead of by per-component evidence of need.
+
 ---
 
 ## 11. Flutter implementation strategy
@@ -564,9 +568,10 @@ All five original open decisions are now resolved; kept here as a record, matchi
 2. **Typeface** — ~~keep Plus Jakarta Sans, or revisit?~~ **Resolved**: kept (Section 0).
 3. **`docs/DESIGN_LANGUAGE.md`** — ~~archive or remove?~~ **Resolved**: archived as historical record, not deleted.
 4. **Rollout scope** — ~~tokens + 6 detailed components first, or something else?~~ **Resolved**: tokens (Tahap 1) + 6 components (Tahap 2) + `AppExpressiveCard` (Tahap 3), all now implemented.
-5. **Component anatomy for the remaining components list** — ~~build ahead, or build-on-demand?~~ **Resolved**: build-on-demand only, per real screen need — unaffected by this revision's addition of full specifications for all of them (§10.24's own restated boundary).
+5. **Component anatomy for the remaining components list** — ~~build ahead, or build-on-demand?~~ **Resolved as of v1.3**: build-on-demand only, per real screen need. **Superseded in v1.4** — see point 6.
+6. **Whether to keep gating §10.7–§10.23 on real, evidenced demand** — ~~keep the build-on-demand gate, or build all seventeen now?~~ **Resolved (v1.4)**: build all seventeen now, gated instead by an explicit maturity label (`@verdantStable`/`@verdantPreview`, §15) and a proof-of-concept phase (two components built and reported on before the remaining fifteen) rather than by per-component evidence of need. Point 5's original reasoning — don't build ahead of real need — is not wrong, it's outweighed here by the value of a complete, consistent UI kit *combined with* the risk mitigations §15 describes; a project consuming this kit can now reach for any of the seventeen, with an honest, checkable signal for how much real-world proof stands behind each one.
 
-**What this revision does not do**: it does not open new implementation decisions. The next decision — which, if any, of §10.7–§10.23's now-fully-specified components has real, evidenced demand in `flutter_starter_kit` or `akujamin-v2` today — is deliberately left for your review of this document in full, not pre-empted here.
+**What this revision does not do**: it does not change §10.1–§10.6's or `AppExpressiveCard`/`AppLoadingIndicator`/`AppStateView`'s status — those already carry real evidence (Tahap 2's build, or the component-gap audits ADR-016/017 cite) and are marked `@verdantStable`, unaffected by this decision either way.
 
 ---
 
@@ -622,5 +627,51 @@ Each override (and each *non*-override) below is checked against the brief's own
 
 - **Border tokens as a scale separate from Radius — decision: no.** The system has exactly two border widths in use anywhere: 1px (hairline, Level 1/resting — §6) and 2px (emphasis — focus rings §9.3, TextField focus §10.3, OTP focus §10.17). Both are already fully specified inline at their point of use, and both are pinned to a specific structural meaning rather than being an independent design lever a future theme would plausibly want to retune the way a color or spacing value gets retuned. Inventing an `AppBorderExtension` for a two-value, already-fixed-meaning constant set would add indirection without a real retheming use case behind it — the same reasoning §9.2 already applied to Interaction tokens (not every repeated value needs its own scale; some are correctly expressed as documented constants at their point of use).
 - **A dedicated non-framework anti-pattern checklist — decision: yes, worth building.** Unlike Border tokens, this doesn't invent new design decisions — every item below is already a rule stated somewhere else in this document. What's missing is a single, scannable checklist a reviewer can run a new component against, instead of checking it against eight scattered sections individually. Added as §12.1.
+
+---
+
+## 15. Maturity levels
+
+**Added in v1.4** — the mechanism behind the philosophy change the v1.4 revision note (top of document) and §13 point 6 describe. Read those first for *why* this exists; this section is *what* it is and *how* to use it.
+
+### 15.1 The problem this solves
+
+Once §10.7–§10.23 stop being specification-only and start being real, shipped `design_system` widgets, a genuine risk appears that didn't exist under the old build-on-demand gate: a component built directly from a written spec, with zero real screens to prove the spec anticipated every real-world need, sitting in the same package, imported the exact same way, with no visible difference from a component like `AppButton` that Tahap 2 proved against real use *and* golden-tested under real adversarial conditions (§14.3's `AppNavigationBar` overflow is the concrete example of what that proving process catches). A consumer of this kit has no way to tell the two apart just by importing them. That is the actual risk being mitigated — not "the component might have a bug" (any component might), but "the component's public API might still be wrong in a way only a real consumer would surface, and nothing tells you that going in."
+
+### 15.2 The mechanism: `@verdantStable` / `@verdantPreview`
+
+Real Dart annotations, not a doc-comment convention — `packages/design_system/lib/src/maturity/verdant_maturity.dart`:
+
+```dart
+class VerdantStable {
+  const VerdantStable();
+}
+
+class VerdantPreview {
+  const VerdantPreview();
+}
+
+const verdantStable = VerdantStable();
+const verdantPreview = VerdantPreview();
+```
+
+Applied directly above a widget's class declaration — `@verdantStable class AppButton extends StatelessWidget { ... }` — the same ergonomic pattern `package:meta`'s `@immutable`/`@internal` use (a `const` shorthand instance, not a bare class reference). Chosen over a doc-comment convention (e.g. `/// {@maturity preview}`) for one concrete reason: an annotation is a real, typed, greppable Dart construct — visible on IDE hover, findable with `grep -rn '@verdantPreview'` without parsing prose, and available as a hook for a future custom lint rule if this repo ever adds one (not built now — no evidenced need yet, the same "don't build ahead of proof" discipline §13 point 5 originally applied to whole components, applied here to tooling instead). A doc comment can't be any of those things mechanically; it's read, not checked.
+
+**`@verdantStable`**: born from a real, cited consumer need (§0.1/§13), the same evidence bar Tahap 2's six components (eight classes — `AppButton`, `AppCard`, `AppTextField`, `AppNavigationBar`, `AppDialog`, `AppBottomSheet`, `AppSnackBar`, `AppStatusBadge`) were held to. Extended, by the identical criterion, to three components that predate Tahap 2 but carry the same real evidence — `AppExpressiveCard` (Tahap 3, redesigned under real anti-pattern review), `AppLoadingIndicator`, and `AppStateView` (both named in the component-gap audit, ADR-016/017, as replacing real hand-rolled duplication found across this kit and `akujamin-v2`). A stable widget's public API follows this repo's normal "don't break existing callers" discipline like any other public class.
+
+**`@verdantPreview`**: implemented directly from this document's §10.7–§10.23 specification, without a real, cited consumer yet. Fully implemented and golden-tested, not a stub — but its public API may still change if the first real consumer surfaces a gap the written spec didn't anticipate.
+
+### 15.3 What "preview" means for a project built from this kit
+
+Read this before depending on a `@verdantPreview` widget in a real screen:
+
+- **It is not a stability promise the way `@verdantStable` is.** A breaking API change to a preview widget, if a real consumer's first use surfaces a gap, is expected maintenance on this kit's part — not a bug, and not something that needed to go through a slower deprecation cycle first. The written spec (§10.7–§10.23) is a careful, considered design, checked against the same anti-pattern/WCAG/textScaler bars every stable component is (§12, §14.3) — but it is still a design done *without* the thing that caught `AppNavigationBar`'s real overflow bug: an actual adversarial use case.
+- **It is fully real, not a placeholder.** A preview widget is implemented, golden-tested (light + dark), and has a Widgetbook use-case exactly like a stable one — there is no functional or quality gap at the point of shipping, only an evidence-of-real-use gap.
+- **The path from preview to stable is real usage, not a timer.** A `@verdantPreview` widget graduates to `@verdantStable` the same way Tahap 2's did originally — a real screen consumes it, any gap that surfaces gets fixed, and the annotation is updated once that's happened. There's no fixed "N releases and it's stable" rule; the criterion is evidence, same as §0.1's retheme/redesign boundary is a checkable test, not a vibe.
+- **Check the annotation before treating any `design_system` widget as risk-free to ship behind.** `grep -rn '@verdantPreview' packages/design_system/lib` (or an IDE search) lists the current set.
+
+### 15.4 Rollout: proof-of-concept before scaling to all seventeen
+
+Per the explicit instruction behind v1.4: rather than implementing all seventeen §10.7–§10.23 components in one pass, two are built first — one simple (§10.15 Tag), one complex (§10.19 Calendar/Date Picker) — each with a golden test and a Widgetbook use-case that exposes **per-instance knobs** (`context.knobs.*`, adjustable live per catalog entry), not just Theme Studio's existing global addon (§0, "what survives" — Theme Studio stays for whole-catalog retheming; knobs are the complementary per-component tool). The proof-of-concept also answers a tooling question: whether a knob-auto-generation tool is worth adopting for the remaining fifteen, or whether hand-written knobs are the better bar for this kit's own quality standard. Findings, including any real obstacle discovered while implementing (the same "found while actually building it" pattern that caught the font-loading regression in Tahap 2 and the `AppNavigationBar` overflow in §14.3 — golden-green is necessary, not sufficient, proof), are reported before the remaining fifteen components are scheduled into batches.
 
 ---

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// Wraps [AlertDialog] behind a single static helper so confirm dialogs
@@ -15,6 +16,7 @@ import '../../theme/app_theme_context.dart';
 /// 320ms rather than the spec's 220ms; the front-loaded Verdant Exit curve
 /// still reads as a quicker departure than the entrance despite sharing
 /// the numeric duration.
+@verdantStable
 class AppDialog {
   const AppDialog._();
 

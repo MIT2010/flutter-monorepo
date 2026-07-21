@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// Wraps [showModalBottomSheet] with a consistent rounded-top shape (§16).
@@ -13,6 +14,7 @@ import '../../theme/app_theme_context.dart';
 /// expose a raw `BoxShadow` list. Motion uses `motion.panel` with Verdant
 /// Enter/Exit via [AnimationStyle], same single-duration caveat as
 /// [AppDialog.confirm].
+@verdantStable
 class AppBottomSheet {
   const AppBottomSheet._();
 
