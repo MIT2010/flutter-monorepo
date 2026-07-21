@@ -34,6 +34,14 @@ class AppTextField extends StatelessWidget {
   final Widget? prefixIcon;
   final Widget? suffixIcon;
 
+  /// [AppDropdown]'s closed-state trigger is this widget in `readOnly`
+  /// mode with an [onTap] that opens the option list — §10.22 calls for
+  /// "the same border, focus-recolor, and static label rules" as a plain
+  /// TextField, and reusing this widget in read-only mode is the most
+  /// direct way to guarantee that rather than hand-rolling a look-alike.
+  final bool readOnly;
+  final VoidCallback? onTap;
+
   const AppTextField({
     super.key,
     this.label,
@@ -45,6 +53,8 @@ class AppTextField extends StatelessWidget {
     this.onChanged,
     this.prefixIcon,
     this.suffixIcon,
+    this.readOnly = false,
+    this.onTap,
   });
 
   @override
@@ -62,6 +72,8 @@ class AppTextField extends StatelessWidget {
           obscureText: obscure,
           keyboardType: keyboardType,
           onChanged: onChanged,
+          readOnly: readOnly,
+          onTap: onTap,
           decoration: InputDecoration(
             errorText: errorText,
             hintText: hintText,
