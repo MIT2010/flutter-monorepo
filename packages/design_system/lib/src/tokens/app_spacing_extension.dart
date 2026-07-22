@@ -7,17 +7,12 @@ import 'package:flutter/material.dart';
 /// `context.spacing` — replaces the old static `AppSpacing` class so
 /// spacing lives in `Theme.of(context)` like every other design token,
 /// supports per-subtree override, and gets free `lerp` across
-/// `AnimatedTheme` transitions (§16).
+/// `AnimatedTheme` transitions.
 ///
-/// Verdant scale (docs/VERDANT_DESIGN_SYSTEM.md §4): fine-grained at the
-/// bottom (precise micro-adjustments), deliberately generous jumps at the
-/// top (macro composition, page margins) — "think like architecture, not
-/// mobile apps." `xs` through `xl` keep their pre-Verdant names but not
-/// their pre-Verdant values (`xs` was 4, is now 8; `sm` was 8, is now 12)
-/// — every existing `context.spacing.xs`/`.sm`/etc. call site picks up
-/// the new value automatically, no code changes needed, which is exactly
-/// the "cheap to retheme" case VERDANT_DESIGN_SYSTEM.md's token-vs-code
-/// boundary note describes.
+/// Fine-grained at the bottom (precise micro-adjustments), deliberately
+/// generous jumps at the top (macro composition, page margins) — every
+/// `context.spacing.xs`/`.sm`/etc. call site picks up a value change
+/// automatically, no code changes needed.
 @immutable
 class AppSpacingExtension extends ThemeExtension<AppSpacingExtension> {
   const AppSpacingExtension({

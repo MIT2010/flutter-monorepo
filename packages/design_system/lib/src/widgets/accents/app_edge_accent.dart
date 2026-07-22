@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../theme/app_theme_context.dart';
 
-/// Verdant's one consistent "you are here / this is selected" language —
+/// One consistent "you are here / this is selected" language —
 /// a persistent leading-edge accent bar, not a fill wash by itself.
 ///
 /// Formalizes the treatment `AppSidebar`/`AppNavigationBar` already used
@@ -12,23 +12,21 @@ import '../../theme/app_theme_context.dart';
 /// items, list rows) reaches for the same signal instead of six
 /// components independently reinventing "just fill it primary" — which
 /// is also exactly the language Material's own selected-state components
-/// already use, and was one of the concrete reasons the pre-redesign
-/// system read as generic (docs/VERDANT_DESIGN_SYSTEM.md's visual-audit
-/// revision note).
+/// already use.
 ///
 /// [fill] is optional and deliberately subtle when supplied (a
 /// `primaryContainer`-tier wash, not a saturated fill) — the edge bar is
 /// the signal that has to carry the state on its own; the fill is a
 /// secondary reinforcement, never the primary one.
-class VerdantEdgeAccent extends StatelessWidget {
-  const VerdantEdgeAccent({
+class AppEdgeAccent extends StatelessWidget {
+  const AppEdgeAccent({
     super.key,
     required this.selected,
     required this.color,
     required this.child,
     this.width = 3,
     this.fill,
-    this.side = VerdantEdgeSide.left,
+    this.side = AppEdgeSide.left,
     this.shadow,
     this.duration,
     this.curve,
@@ -39,7 +37,7 @@ class VerdantEdgeAccent extends StatelessWidget {
   final Widget child;
   final double width;
   final Color? fill;
-  final VerdantEdgeSide side;
+  final AppEdgeSide side;
 
   /// Optional shadow (e.g. `AppElevationExtension.lifted.shadow` on
   /// hover) — a row that's edge-to-edge by design (the divider *is* the
@@ -63,9 +61,9 @@ class VerdantEdgeAccent extends StatelessWidget {
       decoration: BoxDecoration(
         color: selected ? fill : null,
         border: switch (side) {
-          VerdantEdgeSide.left => Border(left: accentSide),
-          VerdantEdgeSide.top => Border(top: accentSide),
-          VerdantEdgeSide.bottom => Border(bottom: accentSide),
+          AppEdgeSide.left => Border(left: accentSide),
+          AppEdgeSide.top => Border(top: accentSide),
+          AppEdgeSide.bottom => Border(bottom: accentSide),
         },
         boxShadow: shadow,
       ),
@@ -78,4 +76,4 @@ class VerdantEdgeAccent extends StatelessWidget {
 /// written for vertical lists where "leading edge" means left; for a
 /// horizontal bottom bar the analogous edge (nearest the content it's
 /// indicating) is the cell's top, not its left.
-enum VerdantEdgeSide { left, top, bottom }
+enum AppEdgeSide { left, top, bottom }

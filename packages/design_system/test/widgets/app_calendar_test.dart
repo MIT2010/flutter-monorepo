@@ -24,10 +24,10 @@ void main() {
       );
 
       final chevronRight = find.byWidgetPredicate(
-        (w) => w is VerdantIcon && w.glyph == VerdantGlyph.chevronRight,
+        (w) => w is Icon && w.icon == Icons.chevron_right,
       );
       final chevronLeft = find.byWidgetPredicate(
-        (w) => w is VerdantIcon && w.glyph == VerdantGlyph.chevronLeft,
+        (w) => w is Icon && w.icon == Icons.chevron_left,
       );
 
       await tester.tap(chevronRight);

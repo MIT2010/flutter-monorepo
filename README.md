@@ -133,25 +133,6 @@ and `--dart-define-from-file=flavors/<flavor>.json` (ADR-014) — see §30 of
 ARCHITECTURE.md for the full flavor story, and "Bootstrapping a new
 project" above for the JSON file setup this now depends on.
 
-## Using `design_system` widgets — check the maturity annotation
-
-Every widget in `packages/design_system` carries a `@verdantStable` or
-`@verdantPreview` annotation right above its class declaration (full
-convention: [docs/VERDANT_DESIGN_SYSTEM.md](docs/VERDANT_DESIGN_SYSTEM.md)
-§15). What that means before you build a real screen on top of one:
-
-- **`@verdantStable`** — proven against real use (this kit's own screens,
-  or a downstream project's). Its public API follows the same "don't
-  break existing callers" discipline as any other public class here.
-- **`@verdantPreview`** — fully implemented and golden-tested, not a
-  stub, but built directly from a written specification with no real
-  screen having used it yet. **Its public API may still change** if your
-  project is the first real consumer and surfaces a gap the spec didn't
-  anticipate — treat that as expected maintenance on this kit's part, not
-  a promise broken. If you hit exactly that, it's worth reporting back
-  (an issue, or a PR) — that's precisely the evidence that moves a widget
-  from preview to stable.
-
 ## Scaffolding a new feature (`mason make feature`)
 
 ```bash

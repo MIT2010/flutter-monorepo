@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
-/// A container for related content, not a design flourish (§10.2). Level 1
-/// depth (hairline border, no shadow) at rest — even when [onTap] is set;
-/// Level 2 (border + barely-visible shadow) appears only as *hover
-/// feedback* on a tappable card, never as permanent decoration on a static
-/// one, per §6's "depth as feedback, not decoration" rule for Level 2.
+/// A container for related content, not a design flourish. Level 1 depth
+/// (hairline border, no shadow) at rest — even when [onTap] is set; Level
+/// 2 (border + barely-visible shadow) appears only as *hover feedback* on
+/// a tappable card, never as permanent decoration on a static one —
+/// depth as feedback, not decoration.
 ///
 /// Builds its own [ShapeDecoration] from [AppElevationExtension]'s named
-/// depth levels rather than wrapping [Card] — [Card]'s `elevation` produces
-/// Material's own drop-shadow curve, which can't express Verdant's literal
-/// border/shadow-list spec (§6). [InkWell] still supplies real tap/hover
-/// feedback and ripple, via `customBorder` rather than `borderRadius` so
-/// the ripple itself is clipped to the same rounded silhouette too.
-@verdantStable
+/// depth levels rather than wrapping [Card] — [Card]'s `elevation`
+/// produces Material's own drop-shadow curve, which can't express this
+/// system's literal border/shadow-list spec. [InkWell] still supplies
+/// real tap/hover feedback and ripple, via `customBorder` rather than
+/// `borderRadius` so the ripple itself is clipped to the same rounded
+/// silhouette too.
 class AppCard extends StatefulWidget {
   final Widget child;
 

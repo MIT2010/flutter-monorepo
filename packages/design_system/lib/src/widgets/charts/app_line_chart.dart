@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 import 'app_bar_chart.dart' show AppChartSeries;
 
@@ -26,11 +25,10 @@ import 'app_bar_chart.dart' show AppChartSeries;
 /// [AppBarChart] — a chart is an aggregated view, not a raw per-row list.
 ///
 /// **Motion**: the line draws in left-to-right via `motion.standard` +
-/// Verdant Enter — an animated `Path` extraction along the line's own
+/// Enter — an animated `Path` extraction along the line's own
 /// length, not a generic fade/scale, since a trend line's own shape *is*
 /// the thing worth animating. Respects `MediaQuery.disableAnimations`
 /// (§8.7): the full line simply appears with no animation.
-@verdantPreview
 class AppLineChart extends StatefulWidget {
   final List<String> categories;
   final List<AppChartSeries> series;

@@ -2,11 +2,9 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Closes the one self-acknowledged, unverified gap in
-/// docs/VERDANT_DESIGN_SYSTEM.md §14.3: "every Verdant component's
-/// dimensions around text must be intrinsic ... verified not to clip text
-/// at 200% textScaler" was stated as a rule, not something the six Tahap 2
-/// components had actually been checked against. This file is that check.
+/// Every component's dimensions around text must be intrinsic — verified
+/// not to clip text at 200% textScaler, not just stated as a rule. This
+/// file is that check.
 ///
 /// A `RenderFlex overflowed` (or any other layout) exception is Flutter's
 /// concrete signal that content is being clipped -- caught here via

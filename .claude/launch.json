@@ -10,26 +10,6 @@
         "Set-Location 'C:\\Users\\FX505G\\Documents\\Flutter projects\\flutter_starter_kit\\apps\\mobile'; fvm flutter run -d web-server --web-port=8766 --web-hostname=127.0.0.1 -t lib/main_dev.dart --dart-define-from-file=../../flavors/development.json"
       ],
       "port": 8766
-    },
-    {
-      "name": "flutter-starter-kit-widgetbook",
-      "runtimeExecutable": "powershell",
-      "runtimeArgs": [
-        "-NoProfile",
-        "-Command",
-        "Set-Location 'C:\\Users\\FX505G\\Documents\\Flutter projects\\flutter_starter_kit\\apps\\widgetbook'; fvm flutter run -d web-server --web-port=8767 --web-hostname=127.0.0.1 -t lib/main.dart"
-      ],
-      "port": 8767
-    },
-    {
-      "name": "fintech-demo",
-      "runtimeExecutable": "powershell",
-      "runtimeArgs": [
-        "-NoProfile",
-        "-Command",
-        "Set-Location 'C:\\Users\\FX505G\\Documents\\Flutter projects\\flutter_starter_kit\\apps\\fintech_demo'; fvm flutter run -d web-server --web-port=8768 --web-hostname=127.0.0.1 -t lib/main.dart"
-      ],
-      "port": 8768
     }
   ]
 }

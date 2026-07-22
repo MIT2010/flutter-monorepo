@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// Switching between parallel views at the same hierarchy level, in place
@@ -21,11 +20,10 @@ import '../../theme/app_theme_context.dart';
 /// internal tap handler uses when calling `animateTo` (only
 /// `animationDuration`, which this widget does set to `motion.standard`).
 /// The slide plays on Material's own `Curves.ease` rather than literal
-/// Verdant Enter — both are decisive-start/no-overshoot curves, close in
+/// Enter — both are decisive-start/no-overshoot curves, close in
 /// character, but not byte-identical. Rebuilding tap handling from scratch
 /// just to swap a curve on a ~220ms underline slide wasn't worth
 /// reimplementing `TabBar`'s label-measurement logic to get there.
-@verdantPreview
 class AppTabs extends StatefulWidget {
   final List<String> labels;
   final int initialIndex;

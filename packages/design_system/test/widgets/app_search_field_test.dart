@@ -2,8 +2,8 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Finder _glyph(VerdantGlyph g) =>
-    find.byWidgetPredicate((w) => w is VerdantIcon && w.glyph == g);
+Finder _glyph(IconData g) =>
+    find.byWidgetPredicate((w) => w is Icon && w.icon == g);
 
 void main() {
   group('AppSearchField', () {
@@ -16,7 +16,7 @@ void main() {
         ),
       );
 
-      expect(_glyph(VerdantGlyph.search), findsOneWidget);
+      expect(_glyph(Icons.search), findsOneWidget);
       // No persistent label row above the field -- only the hint text
       // (rendered inside the field itself, styled quite differently from
       // a label) says "Search" by default.
@@ -46,13 +46,13 @@ void main() {
         ),
       );
 
-      expect(_glyph(VerdantGlyph.close), findsNothing);
+      expect(_glyph(Icons.close), findsNothing);
 
       await tester.enterText(find.byType(TextField), 'sepatu');
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 120));
 
-      expect(_glyph(VerdantGlyph.close), findsOneWidget);
+      expect(_glyph(Icons.close), findsOneWidget);
     });
 
     testWidgets('tapping clear empties the field and hides the button '
@@ -68,7 +68,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 120));
 
-      await tester.tap(_glyph(VerdantGlyph.close));
+      await tester.tap(_glyph(Icons.close));
       // AnimatedSwitcher keeps the outgoing "clear" icon in the tree for
       // the duration of its own fade-out, and needs a settle pump beyond
       // that exact duration to actually drop it -- pumping precisely
@@ -78,7 +78,7 @@ void main() {
 
       final field = tester.widget<TextField>(find.byType(TextField));
       expect(field.controller!.text, isEmpty);
-      expect(_glyph(VerdantGlyph.close), findsNothing);
+      expect(_glyph(Icons.close), findsNothing);
     });
 
     testWidgets('onChanged reports typed text', (tester) async {
@@ -109,7 +109,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 120));
 
-      expect(_glyph(VerdantGlyph.close), findsOneWidget);
+      expect(_glyph(Icons.close), findsOneWidget);
     });
   });
 }

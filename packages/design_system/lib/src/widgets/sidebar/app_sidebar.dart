@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
-import '../accents/verdant_edge_accent.dart';
+import '../accents/app_edge_accent.dart';
 
 /// One destination in an [AppSidebar] — icon + label only, no business
 /// logic (design_system is a leaf package, §16), the same shape as
@@ -30,12 +29,11 @@ class AppSidebarDestination {
 /// pill/chip selection indicator into an edge bar.
 ///
 /// [extended] toggles between the icon-only (collapsed) and icon+label
-/// (expanded) width, animating via `motion.standard` + Verdant Enter/
+/// (expanded) width, animating via `motion.standard` + Enter/
 /// Exit. The label stays in the tree at all times and fades via
 /// [AnimatedOpacity] rather than being conditionally removed — a hard
 /// swap would either truncate mid-animation with an ellipsis or pop in/
 /// out abruptly, both of which §10.11 explicitly calls out as wrong.
-@verdantPreview
 class AppSidebar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
@@ -107,7 +105,7 @@ class _SidebarRow extends StatelessWidget {
       type: MaterialType.transparency,
       child: InkWell(
         onTap: onTap,
-        child: VerdantEdgeAccent(
+        child: AppEdgeAccent(
           selected: selected,
           color: colorScheme.primary,
           fill: colorScheme.primaryContainer,

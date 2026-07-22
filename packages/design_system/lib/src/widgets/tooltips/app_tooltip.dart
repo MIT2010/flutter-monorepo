@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// Supplementary, non-essential context on hover/long-press (§10.21) —
@@ -27,7 +26,6 @@ import '../../theme/app_theme_context.dart';
 /// source rather than assumed, the same way [AppTabs]' curve gap was
 /// confirmed. The entrance plays on Flutter's own internal default
 /// rather than a literal `motion.micro` value.
-@verdantPreview
 class AppTooltip extends StatelessWidget {
   final String message;
   final Widget child;

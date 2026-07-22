@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// A fixed-length numeric code, one digit per cell (§10.17) — the most
@@ -27,7 +26,6 @@ import '../../theme/app_theme_context.dart';
 /// `colorScheme.error` together, with one shared helper-text line below
 /// — matching [AppTextField]'s error language rather than inventing a
 /// separate one.
-@verdantPreview
 class AppOtpField extends StatefulWidget {
   final int length;
   final ValueChanged<String>? onChanged;

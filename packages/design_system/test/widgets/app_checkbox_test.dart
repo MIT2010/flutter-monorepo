@@ -90,8 +90,8 @@ void main() {
     testWidgets('checked shows a check icon, indeterminate shows a dash', (
       tester,
     ) async {
-      Finder glyph(VerdantGlyph g) =>
-          find.byWidgetPredicate((w) => w is VerdantIcon && w.glyph == g);
+      Finder glyph(IconData g) =>
+          find.byWidgetPredicate((w) => w is Icon && w.icon == g);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -99,7 +99,7 @@ void main() {
           home: Scaffold(body: AppCheckbox(value: true, onChanged: (_) {})),
         ),
       );
-      expect(glyph(VerdantGlyph.check), findsOneWidget);
+      expect(glyph(Icons.check), findsOneWidget);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -109,7 +109,7 @@ void main() {
           ),
         ),
       );
-      expect(glyph(VerdantGlyph.remove), findsOneWidget);
+      expect(glyph(Icons.remove), findsOneWidget);
     });
 
     testWidgets('unchecked shows no glyph', (tester) async {
@@ -119,7 +119,7 @@ void main() {
           home: Scaffold(body: AppCheckbox(value: false, onChanged: (_) {})),
         ),
       );
-      expect(find.byType(VerdantIcon), findsNothing);
+      expect(find.byType(Icon), findsNothing);
     });
   });
 }

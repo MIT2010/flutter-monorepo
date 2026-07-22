@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../icons/verdant_icons.dart';
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 import '../inputs/app_text_field.dart';
 
@@ -22,7 +20,6 @@ import '../inputs/app_text_field.dart';
 /// via `AppTheme`'s `InputDecorationTheme.prefixIconColor`, matching the
 /// border's own focus recolor. The trailing "×" fades in/out
 /// (`motion.micro`) only once text is present.
-@verdantPreview
 class AppSearchField extends StatefulWidget {
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
@@ -69,8 +66,8 @@ class _AppSearchFieldState extends State<AppSearchField> {
       controller: _controller,
       onChanged: widget.onChanged,
       hintText: widget.hintText,
-      prefixIcon: VerdantIcon(
-        VerdantGlyph.search,
+      prefixIcon: Icon(
+        Icons.search,
         color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
       suffixIcon: AnimatedSwitcher(
@@ -82,8 +79,8 @@ class _AppSearchFieldState extends State<AppSearchField> {
         child: hasText
             ? IconButton(
                 key: const ValueKey('clear'),
-                icon: VerdantIcon(
-                  VerdantGlyph.close,
+                icon: Icon(
+                  Icons.close,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
                 tooltip: 'Clear',

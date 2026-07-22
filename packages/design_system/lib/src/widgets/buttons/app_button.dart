@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// Wraps [ElevatedButton] with the design tokens applied and owns its own
 /// loading-spinner-replaces-label behavior, so every screen gets consistent
 /// loading UI for free instead of scattering
 /// `if (state is Loading) CircularProgressIndicator()` (§16, §23).
-@verdantStable
 class AppButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -49,7 +47,7 @@ class AppButton extends StatelessWidget {
               width: 18,
               // Explicit onPrimary color -- the default spinner color
               // resolves to colorScheme.primary, which is illegible on
-              // Verdant's filled-moss button surface (Section 10.1).
+              // this button's own filled surface.
               child: CircularProgressIndicator(
                 strokeWidth: 2,
                 color: colorScheme.onPrimary,

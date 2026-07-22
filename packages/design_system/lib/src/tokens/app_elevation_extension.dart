@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'verdant_colors.dart';
-
-/// One named depth treatment (docs/VERDANT_DESIGN_SYSTEM.md §6) — border,
-/// shadow, and an optional surface-tone override, instead of a single
-/// Material elevation dp number. `shadow` is deliberately near-invisible
-/// or empty for everything except [AppElevationExtension.floating] — most
-/// of a Verdant screen lives at [AppElevationExtension.resting], which
-/// has **no shadow at all**, only a hairline border.
+/// One named depth treatment — border, shadow, and an optional
+/// surface-tone override, instead of a single Material elevation dp
+/// number. `shadow` is deliberately near-invisible or empty for
+/// everything except [AppElevationExtension.floating] — most of a screen
+/// lives at [AppElevationExtension.resting], which has **no shadow at
+/// all**, only a hairline border.
 @immutable
 class AppDepthLevel {
   const AppDepthLevel({
@@ -26,18 +24,18 @@ class AppDepthLevel {
   final List<BoxShadow> shadow;
 
   /// `null` means "render at the ambient page surface color." Only
-  /// [AppElevationExtension.floating] overrides this, one Stone step
-  /// lighter (light mode) / lighter-of-dark (dark mode) than the page —
-  /// the surface-tone step that, combined with [shadow], marks a true
-  /// overlay as detached from the content below it.
+  /// [AppElevationExtension.floating] overrides this, one tone step
+  /// lighter than the page in either mode — the surface-tone step that,
+  /// combined with [shadow], marks a true overlay as detached from the
+  /// content below it.
   final Color? surfaceColor;
 }
 
 /// Depth/elevation tokens.
 ///
-/// Verdant (docs/VERDANT_DESIGN_SYSTEM.md §6) replaces Material's
-/// always-on, six-level shadow scale with four named levels, each with a
-/// stated reason to exist: [flush] (the page itself), [resting] (hairline
+/// Replaces Material's always-on, six-level shadow scale with four named
+/// levels, each with a stated reason to exist: [flush] (the page itself),
+/// [resting] (hairline
 /// border, no shadow — where most of a screen lives), [lifted]
 /// (interaction feedback only — hover/focus on an otherwise-resting
 /// container), [floating] (true overlays: dialogs, sheets, menus — the
@@ -54,11 +52,11 @@ class AppElevationExtension extends ThemeExtension<AppElevationExtension> {
   static const AppElevationExtension light = AppElevationExtension(
     flush: AppDepthLevel(border: null, shadow: []),
     resting: AppDepthLevel(
-      border: Border.fromBorderSide(BorderSide(color: VerdantColors.stone20)),
+      border: Border.fromBorderSide(BorderSide(color: Color(0xFFE0E0E0))),
       shadow: [],
     ),
     lifted: AppDepthLevel(
-      border: Border.fromBorderSide(BorderSide(color: VerdantColors.stone20)),
+      border: Border.fromBorderSide(BorderSide(color: Color(0xFFE0E0E0))),
       shadow: [
         BoxShadow(
           color: Color(0x0A000000), // black @ 4%
@@ -76,18 +74,18 @@ class AppElevationExtension extends ThemeExtension<AppElevationExtension> {
           offset: Offset(0, 8),
         ),
       ],
-      surfaceColor: VerdantColors.stone10,
+      surfaceColor: Color(0xFFF5F5F5),
     ),
   );
 
   static const AppElevationExtension dark = AppElevationExtension(
     flush: AppDepthLevel(border: null, shadow: []),
     resting: AppDepthLevel(
-      border: Border.fromBorderSide(BorderSide(color: VerdantColors.stone80)),
+      border: Border.fromBorderSide(BorderSide(color: Color(0xFF616161))),
       shadow: [],
     ),
     lifted: AppDepthLevel(
-      border: Border.fromBorderSide(BorderSide(color: VerdantColors.stone80)),
+      border: Border.fromBorderSide(BorderSide(color: Color(0xFF616161))),
       shadow: [
         BoxShadow(
           color: Color(0x0A000000),
@@ -105,7 +103,7 @@ class AppElevationExtension extends ThemeExtension<AppElevationExtension> {
           offset: Offset(0, 8),
         ),
       ],
-      surfaceColor: VerdantColors.stone95,
+      surfaceColor: Color(0xFF2C2C2C),
     ),
   );
 
@@ -113,7 +111,7 @@ class AppElevationExtension extends ThemeExtension<AppElevationExtension> {
   final AppDepthLevel flush;
 
   /// Cards, list items, containers at rest — hairline border, no shadow.
-  /// Most of a Verdant screen lives here.
+  /// Most of a screen lives here.
   final AppDepthLevel resting;
 
   /// Hover/focus feedback on an otherwise-resting interactive container —

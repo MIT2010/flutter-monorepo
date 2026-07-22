@@ -1,11 +1,17 @@
 # Design Language
 
-> **ARCHIVED — superseded by [docs/VERDANT_DESIGN_SYSTEM.md](VERDANT_DESIGN_SYSTEM.md).**
-> Kept in place as historical record (same pattern ARCHITECTURE.md's ADR log
-> uses for superseded decisions — not deleted, not treated as current). The
-> "confident, warm, precise" personality and the token values described below
-> no longer reflect `design_system`'s actual palette/shape/motion — see
-> Verdant §1 ("The soul of Verdant") and §13 for what replaced it and why.
+> **ARCHIVED.** Kept in place as historical record (same pattern
+> ARCHITECTURE.md's ADR log uses for superseded decisions — not deleted,
+> not treated as current). This document briefly gave way to a fully
+> custom visual identity ("Verdant") built directly on top of this
+> package; that identity later outgrew being a starter kit's internal
+> component library and was extracted to its own standalone project. This
+> repo's `design_system` reverted to a plain, unbranded baseline
+> (`ColorScheme.fromSeed`, standard Material icons) rather than returning
+> to the specific "confident, warm, precise" personality described below —
+> so neither this document nor its successor currently describes
+> `design_system`'s actual palette/shape/motion. Treat both as history,
+> not current spec.
 
 This document is the character brief every `design_system` component inherits
 from. It exists so future component decisions (Fase 1 anatomy, new widgets,

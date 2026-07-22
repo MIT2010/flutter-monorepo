@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../icons/verdant_icons.dart';
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 const _monthNames = [
@@ -37,10 +35,9 @@ bool _isSameDay(DateTime a, DateTime b) =>
 /// selected renders as selected (filled) — the chosen date is the more
 /// important fact once one is chosen.
 ///
-/// Month navigation cross-fades via `motion.standard` + Verdant Enter/Exit
+/// Month navigation cross-fades via `motion.standard` + Enter/Exit
 /// — no horizontal slide, which would imply a "swipeable card deck"
 /// gesture language this system doesn't use anywhere else.
-@verdantPreview
 class AppCalendar extends StatefulWidget {
   final DateTime? selectedDate;
   final ValueChanged<DateTime>? onDateSelected;
@@ -117,8 +114,8 @@ class _AppCalendarState extends State<AppCalendar> {
             child: Row(
               children: [
                 IconButton(
-                  icon: VerdantIcon(
-                    VerdantGlyph.chevronLeft,
+                  icon: Icon(
+                    Icons.chevron_left,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   tooltip: 'Previous month',
@@ -141,8 +138,8 @@ class _AppCalendarState extends State<AppCalendar> {
                   ),
                 ),
                 IconButton(
-                  icon: VerdantIcon(
-                    VerdantGlyph.chevronRight,
+                  icon: Icon(
+                    Icons.chevron_right,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   tooltip: 'Next month',
@@ -333,7 +330,6 @@ class _DayCell extends StatelessWidget {
 /// [AppElevationExtension.floating] rather than [Dialog]'s own `elevation`
 /// number, the same reason [AppCard] does (Material's elevation curve
 /// can't express this system's literal shadow-list spec, §6).
-@verdantPreview
 class AppDatePicker {
   const AppDatePicker._();
 

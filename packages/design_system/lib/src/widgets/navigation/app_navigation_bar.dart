@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
-import '../accents/verdant_edge_accent.dart';
+import '../accents/app_edge_accent.dart';
 
 /// One tab in an [AppNavigationBar] — icon + label only, no business logic
 /// (design_system is a leaf package, §16). Consumers (e.g.
@@ -33,7 +32,6 @@ class AppNavigationDestination {
 /// - **Icons**: the same icon regardless of selection, only recolored —
 ///   never the filled-when-selected/outline-when-not toggle, one of
 ///   Material's most recognizable navigation-bar tells.
-@verdantStable
 class AppNavigationBar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
@@ -61,9 +59,9 @@ class AppNavigationBar extends StatelessWidget {
         child: ConstrainedBox(
           // minHeight, not a fixed SizedBox -- a label that needs two
           // lines at a large MediaQuery.textScaler must be able to grow
-          // the bar taller instead of clipping (VERDANT_DESIGN_SYSTEM.md
-          // §14.3's own rule, caught failing this exact case in
-          // test/accessibility/text_scaling_test.dart before this fix).
+          // the bar taller instead of clipping (caught failing this exact
+          // case in test/accessibility/text_scaling_test.dart before this
+          // fix).
           constraints: const BoxConstraints(minHeight: 64),
           child: Row(
             children: [
@@ -109,11 +107,11 @@ class _Destination extends StatelessWidget {
       type: MaterialType.transparency,
       child: InkWell(
         onTap: onTap,
-        child: VerdantEdgeAccent(
+        child: AppEdgeAccent(
           selected: selected,
           color: colorScheme.primary,
           fill: colorScheme.primaryContainer,
-          side: VerdantEdgeSide.top,
+          side: AppEdgeSide.top,
           width: 2,
           duration: duration,
           curve: curve,

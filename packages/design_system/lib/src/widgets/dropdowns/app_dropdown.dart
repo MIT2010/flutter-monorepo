@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../icons/verdant_icons.dart';
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
-import '../accents/verdant_edge_accent.dart';
+import '../accents/app_edge_accent.dart';
 import '../inputs/app_text_field.dart';
 
 /// One choice in an [AppDropdown]'s option list.
@@ -37,12 +35,11 @@ class AppDropdownItem<T> {
 ///   (`CompositedTransformFollower`) is used for the common case; full
 ///   screen-edge avoidance is a separate, larger problem than this
 ///   batch's scope.
-/// - Entrance is animated (`motion.panel` + Verdant Enter); exit is
+/// - Entrance is animated (`motion.panel` + Enter); exit is
 ///   instant. Animating a raw `OverlayEntry`'s removal needs deferring
 ///   the actual `remove()` call until a reverse animation finishes —
 ///   the same class of gap [AppDialog]'s own doc comment already
 ///   discloses for its exit duration.
-@verdantPreview
 class AppDropdown<T> extends StatefulWidget {
   final String? label;
   final T? value;
@@ -123,8 +120,8 @@ class _AppDropdownState<T> extends State<AppDropdown<T>> {
     // `Overlay.of(context)` finds the nearest ancestor Overlay, which in
     // a plain single-theme app happens to already sit inside the one
     // theme everything uses, but isn't guaranteed to if this widget is
-    // rendered under a *nested* Theme override (Widgetbook's Theme
-    // Studio color knob does exactly this). Without this, the overlay's
+    // rendered under a *nested* Theme override (a theme-preview tool with
+    // a live color knob does exactly this). Without this, the overlay's
     // own BuildContext resolves against whatever theme sits at the
     // Overlay's actual position in the tree, not this widget's — same
     // class of bug AppMenu.show's own doc comment explains in more
@@ -180,8 +177,8 @@ class _AppDropdownState<T> extends State<AppDropdown<T>> {
           turns: _open ? 0.5 : 0,
           duration: motion.durationMicro,
           curve: _open ? motion.curveEnter : motion.curveExit,
-          child: VerdantIcon(
-            VerdantGlyph.chevronDown,
+          child: Icon(
+            Icons.keyboard_arrow_down,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
@@ -282,7 +279,7 @@ class _DropdownOptionRowState extends State<_DropdownOptionRow> {
       child: InkWell(
         onTap: widget.onTap,
         onHover: (hovering) => setState(() => _hovering = hovering),
-        child: VerdantEdgeAccent(
+        child: AppEdgeAccent(
           selected: widget.selected,
           color: colorScheme.primary,
           width: 3,

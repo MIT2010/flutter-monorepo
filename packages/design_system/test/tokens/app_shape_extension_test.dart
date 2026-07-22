@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('AppShapeExtension', () {
     test(
-      'Verdant scale (none/xs/sm/md/pill) is strictly increasing, pill is largest',
+      'radius scale (none/xs/sm/md/pill) is strictly increasing, pill is largest',
       () {
         const shape = AppShapeExtension.standard;
         expect(shape.radiusNone, lessThan(shape.radiusXs));

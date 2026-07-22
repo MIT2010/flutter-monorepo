@@ -2,15 +2,11 @@ import 'package:flutter/material.dart';
 
 /// Corner-radius scale.
 ///
-/// Verdant (docs/VERDANT_DESIGN_SYSTEM.md §5): corners are precise, not
-/// soft — the opposite of Material's generously-rounded default posture.
-/// `radiusNone`/`radiusXs`/`radiusSm`/`radiusMd` are the Verdant scale
-/// (0/2/4/6), `radiusPill` is reserved for true pill objects — tags,
-/// badges — never buttons/cards by default. Every corner of a surface
-/// uses the same tier uniformly (docs/VERDANT_DESIGN_SYSTEM.md §16
-/// revision note: an earlier revision chamfered the top-right corner of
-/// every rectangle-family surface as a distinct shape signature — reverted
-/// after review, corners are plain and uniform again).
+/// Corners are precise, not soft — the opposite of Material's
+/// generously-rounded default posture. `radiusNone`/`radiusXs`/
+/// `radiusSm`/`radiusMd` (0/2/4/6), `radiusPill` is reserved for true
+/// pill objects — tags, badges — never buttons/cards by default. Every
+/// corner of a surface uses the same tier uniformly on all four corners.
 @immutable
 class AppShapeExtension extends ThemeExtension<AppShapeExtension> {
   const AppShapeExtension({

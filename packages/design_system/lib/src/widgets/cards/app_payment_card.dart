@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
-/// A bank/payment card visual (§10.26) — the one UI element real banking
-/// apps treat as their most recognizable artifact, and the piece
-/// `apps/fintech_demo`'s Cards screen was missing entirely: before this,
-/// a card was represented as a flat data row (a tiny network badge + two
-/// lines of text inside [AppCard]), which reads as a table, not a card.
+/// A bank/payment card visual — the one UI element real banking apps treat
+/// as their most recognizable artifact. Before this widget existed, a card
+/// was represented as a flat data row (a tiny network badge + two lines of
+/// text inside [AppCard]), which reads as a table, not a card.
 ///
 /// **Fill, not gradient**: solid `color` (defaults to
 /// `colorScheme.primary`) rather than a gradient — Tahap 3's
@@ -21,9 +19,7 @@ import '../../theme/app_theme_context.dart';
 ///
 /// **Shape**: standard ISO/IEC 7810 ID-1 card proportions (1.586:1) via
 /// [AspectRatio], `radius.sm` corners — the same tier [AppCard] uses,
-/// keeping this consistent with Verdant's "precise, not soft" corner
-/// posture (§5) rather than the more rounded corners a literal plastic
-/// card has.
+/// rather than the more rounded corners a literal plastic card has.
 ///
 /// **Depth**: no border, no shadow — the solid fill itself is what
 /// separates this from the page, consistent with §6's "shadow only for
@@ -32,11 +28,10 @@ import '../../theme/app_theme_context.dart';
 ///
 /// **Frozen state**: the fill desaturates toward
 /// `colorScheme.surfaceContainerHighest` (a theme-safe neutral, not a raw
-/// [VerdantColors] value) and a small "Frozen" tag appears top-right using
+/// hex value) and a small "Frozen" tag appears top-right using
 /// `colorScheme.error`/`.onError` — the same role Cards page already used
 /// for its own "Card frozen" text before this component existed, reused
 /// here rather than inventing a second danger-adjacent color.
-@verdantPreview
 class AppPaymentCard extends StatelessWidget {
   /// Already-masked, e.g. `'•••• •••• •••• 4821'` — this component never
   /// receives or renders a full card number.
@@ -155,9 +150,8 @@ class AppPaymentCard extends StatelessWidget {
 
 /// The card chip -- a small rounded rect with two horizontal divider
 /// lines, the universally-recognized flat glyph for a payment chip. Drawn
-/// locally rather than added to [VerdantGlyph]: that enum is scoped to
-/// glyphs the design system's own components render internally, not a
-/// one-off decorative shape a single component owns.
+/// locally rather than a shared glyph -- this shape is scoped to this one
+/// component, not something the design system's other widgets need too.
 class _Chip extends StatelessWidget {
   final Color color;
 

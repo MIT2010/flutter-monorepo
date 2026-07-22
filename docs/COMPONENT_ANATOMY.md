@@ -173,4 +173,4 @@ lands — noted as a follow-up simplification, not a new obligation.
 
 Anatomy only — no code from this document has been written yet for
 `AppLoadingIndicator`/`AppSnackBar`. Waiting for confirmation before Fase
-2 (implementation + golden tests + Widgetbook use-cases) for those two.
+2 (implementation + golden tests) for those two.

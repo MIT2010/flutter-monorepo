@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// Precision input — the closest digital analog to "writing in a premium
-/// notebook" (§10.3). [label] sits above the field permanently, never as a
+/// notebook." [label] sits above the field permanently, never as a
 /// Material-style floating label that overlaps the border on focus — a
 /// static label reads as more precise and printed-page-like, and avoids
-/// the "clever" floating-label motion Verdant's restraint principle argues
-/// against by default. Border/focus/error colors come from the app-wide
-/// `InputDecorationTheme` (`AppTheme`), so this widget stays a thin wrapper
-/// with the same named-parameter shape as its Material counterpart (§16).
-@verdantStable
+/// that "clever" floating-label motion by default. Border/focus/error
+/// colors come from the app-wide `InputDecorationTheme` (`AppTheme`), so
+/// this widget stays a thin wrapper with the same named-parameter shape
+/// as its Material counterpart.
 class AppTextField extends StatelessWidget {
   /// Nullable so composite fields built on top of this one can opt out of
   /// the persistent label entirely — [AppSearchField] is the named §10.16

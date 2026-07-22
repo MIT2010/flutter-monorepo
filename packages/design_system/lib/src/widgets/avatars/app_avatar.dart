@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// Sizing tiers tied to existing `space` tokens rather than a separate
@@ -36,7 +35,6 @@ enum AppAvatarSize { small, medium, large }
 /// same [size]), not an addition drawn outside those bounds — otherwise
 /// a facepile's per-avatar spacing math would need to account for two
 /// different avatar diameters depending on whether each one is ringed.
-@verdantPreview
 class AppAvatar extends StatefulWidget {
   final ImageProvider? image;
   final String initials;

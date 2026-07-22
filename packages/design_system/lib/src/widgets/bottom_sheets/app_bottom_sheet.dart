@@ -1,24 +1,20 @@
 import 'package:flutter/material.dart';
 
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
-/// Wraps [showModalBottomSheet] with a consistent rounded-top shape (§16).
+/// Wraps [showModalBottomSheet] with a consistent rounded-top shape.
 ///
 /// Genuine interruption, same register as [AppDialog] — Level 3 depth and
-/// `radius.md` (6px), the most rounded any Verdant surface gets by default,
-/// marking it as the exceptional floating case (§10.5). `elevation: 8`
+/// `radius.md` (6px), the most rounded any surface gets by default,
+/// marking it as the exceptional floating case. `elevation: 8`
 /// approximates Level 3's register; Material's `elevation` draws its own
-/// built-in shadow curve, not the literal shadow spec in
-/// docs/VERDANT_DESIGN_SYSTEM.md §6, since `showModalBottomSheet` doesn't
-/// expose a raw `BoxShadow` list. Motion uses `motion.panel` with Verdant
-/// Enter/Exit via [AnimationStyle], same single-duration caveat as
-/// [AppDialog.confirm].
+/// built-in shadow curve since `showModalBottomSheet` doesn't expose a
+/// raw `BoxShadow` list. Motion uses `motion.panel` with Enter/Exit via
+/// [AnimationStyle], same single-duration caveat as [AppDialog.confirm].
 ///
 /// Both top corners carry the normal `radius.md` rounding — the bottom two
 /// stay perfectly square, since a sheet anchored to the bottom of the
 /// screen has to stay flush with its edges there.
-@verdantStable
 class AppBottomSheet {
   const AppBottomSheet._();
 

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// One data series in an [AppBarChart] — a label (for the legend) plus
@@ -17,12 +16,10 @@ class AppChartSeries {
 /// component in this system for accidentally introducing saturated,
 /// rainbow color where restraint should dominate.
 ///
-/// **Color**: multi-series bars cycle through `context.semanticColors.
-/// chartSeries` — the exact `moss.60`/`mist.60`/`brass.60`/`ember.60`/
-/// `stone.60` five-series order §10.14 names, added to
-/// [AppSemanticColors] rather than referenced as raw [VerdantColors]
-/// here (component code never reaches for `VerdantColors` directly —
-/// only `AppTheme`'s own token-construction layer does).
+/// **Color**: multi-series bars cycle through
+/// `context.semanticColors.chartSeries` — a fixed five-color sequence
+/// (component code never reaches for a raw hex value directly — only
+/// `AppTheme`'s own token-construction layer does).
 ///
 /// **Performance is part of this spec, not an afterthought**: bars are
 /// drawn with a single [CustomPainter] pass over a [Canvas], not one
@@ -31,7 +28,7 @@ class AppChartSeries {
 /// but per-widget overhead still isn't free, and a canvas draw call
 /// scales the same whether there are 5 bars or 500.
 ///
-/// **Motion**: bars grow in once via `motion.standard` + Verdant Enter
+/// **Motion**: bars grow in once via `motion.standard` + Enter
 /// on first load — never replayed on rebuild, never a looping "live
 /// data" pulse. Respects `MediaQuery.disableAnimations` (§8.7): bars
 /// simply appear at final height instead of animating.
@@ -42,7 +39,6 @@ class AppChartSeries {
 /// line-chart variant ships alongside the bar chart in the same batch —
 /// this widget covers the one explicitly, concretely spec'd shape
 /// ("bars rising").
-@verdantPreview
 class AppBarChart extends StatefulWidget {
   final List<String> categories;
   final List<AppChartSeries> series;

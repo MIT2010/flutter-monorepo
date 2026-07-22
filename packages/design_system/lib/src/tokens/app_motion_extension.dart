@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 /// Durations/curves for widget-state transitions.
 ///
-/// Verdant (docs/VERDANT_DESIGN_SYSTEM.md §7): "natural, confident,
-/// predictable, elegant — never playful, never bouncy." One curve family,
+/// "Natural, confident, predictable, elegant — never playful, never
+/// bouncy." One curve family,
 /// two directions, zero overshoot: [curveEnter] (decisive start, gentle
 /// settle) for anything appearing/growing, [curveExit] (front-loaded,
 /// quick) for anything disappearing — attention should leave a screen
@@ -23,11 +23,11 @@ import 'package:flutter/material.dart';
 ///
 /// [spring] is kept as reusable Flutter physics infrastructure
 /// (`SpringDescription`/`SpringSimulation` from `package:flutter/physics.dart`)
-/// but is **not** part of Verdant's default motion vocabulary — no
-/// component reaches for it by default post-Tahap-3, when
-/// `AppExpressiveCard`'s spring-driven shape-morph is retired (§5.4). Not
-/// deleted outright, since the underlying physics capability is genuinely
-/// useful and harmless left unused.
+/// but is **not** part of the default motion vocabulary — no component
+/// reaches for it by default, since `AppExpressiveCard`'s spring-driven
+/// shape-morph was retired in favor of a quieter hairline-border-shift
+/// treatment. Not deleted outright, since the underlying physics
+/// capability is genuinely useful and harmless left unused.
 @immutable
 class AppMotionExtension extends ThemeExtension<AppMotionExtension> {
   const AppMotionExtension({

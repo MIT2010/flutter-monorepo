@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// One choice in an [AppMenu] — a value, a label, and an optional
@@ -47,7 +46,6 @@ class AppMenuItem<T> {
 ///   not assumed. Both directions play over `motion.panel`, so the exit
 ///   is slightly slower than §10.23's literal `motion.standard`, a
 ///   disclosed timing gap in the same spirit as [AppDialog]'s own.
-@verdantPreview
 class AppMenu {
   const AppMenu._();
 
@@ -64,7 +62,7 @@ class AppMenu {
     // its new route. That's invisible in a plain single-theme app (the
     // route's own Navigator/Overlay already sits inside the one theme
     // everything uses), but breaks the instant a caller sits under a
-    // *nested* Theme override -- exactly what Widgetbook's Theme Studio
+    // *nested* Theme override -- exactly what a theme-preview tool's live
     // color knob does, and a real app could do too (a themed section of
     // a screen). Caught by actually opening this in a running app rather
     // than trusting golden tests, which only ever exercise a single flat

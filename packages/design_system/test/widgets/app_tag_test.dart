@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 final _closeIcon = find.byWidgetPredicate(
-  (w) => w is VerdantIcon && w.glyph == VerdantGlyph.close,
+  (w) => w is Icon && w.icon == Icons.close,
 );
 
 void main() {

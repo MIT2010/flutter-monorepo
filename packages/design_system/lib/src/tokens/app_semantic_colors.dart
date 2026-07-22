@@ -1,22 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'verdant_colors.dart';
-
 /// Status colors `ColorScheme` doesn't cover (success/warning/info sit
 /// outside M3's primary/secondary/tertiary/error roles). Each role has a
 /// paired `onX` — same convention as `ColorScheme.error`/`.onError` — so a
 /// consumer can use the role either as text/icon color directly on a
 /// surface, or as a filled badge background with `onX` as the label color
-/// on top.
-///
-/// Verdant values (docs/VERDANT_DESIGN_SYSTEM.md §3.3): success stays in
-/// the Moss family (growth = success, thematically continuous with the
-/// primary action color, one step brighter so the two read as related but
-/// distinguishable), warning is Brass (aged brass fittings, not
-/// traffic-cone orange), info is Mist (river water under fog). Danger
-/// does NOT live here — it's `ColorScheme.error`/`.onError` (Ember),
-/// consistent with how every consumer already reaches for
-/// `colorScheme.error` directly rather than a semantic-colors field.
+/// on top. Danger does NOT live here — it's `ColorScheme.error`/`.onError`.
 ///
 /// Every value below is WCAG 2.1 AA-verified (>=4.5:1) both ways — role
 /// against `AppTheme`'s real `colorScheme.surface`, and `onX` against its
@@ -36,50 +25,37 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   });
 
   static const AppSemanticColors light = AppSemanticColors(
-    // moss50 (VERDANT_DESIGN_SYSTEM.md §3.3's "new leaf" success tone,
-    // one step brighter than moss60's primary) passes AA cleanly here --
-    // verified by this file's own contrast test below, not assumed.
-    success: VerdantColors.moss50,
-    onSuccess: VerdantColors.stone0,
-    // brass60 (the spec's originally-proposed light-mode warning) measured
-    // 4.29:1 against stone0 -- short of the 4.5 AA bar, caught by this
-    // file's own real contrast test, not assumed from the spec document.
-    // brass70 ("warning, pressed" in the spec's own scale) is darker and
-    // clears AA -- reused rather than guessing another unverified hex.
-    warning: VerdantColors.brass70,
-    onWarning: VerdantColors.stone0,
-    info: VerdantColors.mist60,
-    onInfo: VerdantColors.stone0,
-    // §10.14's literal five-series order. Unlike warning/success/info
-    // above, these are decorative bar/line *fills*, not text -- held to
-    // WCAG's looser 3:1 non-text ("meaningful graphical object") contrast
-    // bar rather than 4.5:1 text contrast, so brass60 (which failed the
-    // stricter bar for `warning` above) is fine reused here at its
-    // originally-spec'd tier.
+    success: Color(0xFF2E7D32),
+    onSuccess: Colors.white,
+    warning: Color(0xFF8A5300),
+    onWarning: Colors.white,
+    info: Color(0xFF1565C0),
+    onInfo: Colors.white,
+    // A controlled five-series sequence for multi-series charts, reused
+    // rather than each chart component inventing its own categorical
+    // palette.
     chartSeries: [
-      VerdantColors.moss60,
-      VerdantColors.mist60,
-      VerdantColors.brass60,
-      VerdantColors.ember60,
-      VerdantColors.stone60,
+      Color(0xFF2E7D32),
+      Color(0xFF1565C0),
+      Color(0xFF8A5300),
+      Color(0xFFC62828),
+      Color(0xFF616161),
     ],
   );
 
   static const AppSemanticColors dark = AppSemanticColors(
-    success: VerdantColors.moss40,
-    onSuccess: VerdantColors.stone98,
-    warning: VerdantColors.brass40,
-    onWarning: VerdantColors.stone98,
-    info: VerdantColors.mist40,
-    onInfo: VerdantColors.stone98,
-    // Same *40 tier every other dark-mode saturated role already uses
-    // (colorScheme.primary/error/tertiary) for consistency across modes.
+    success: Color(0xFF81C784),
+    onSuccess: Colors.black,
+    warning: Color(0xFFFFB74D),
+    onWarning: Colors.black,
+    info: Color(0xFF64B5F6),
+    onInfo: Colors.black,
     chartSeries: [
-      VerdantColors.moss40,
-      VerdantColors.mist40,
-      VerdantColors.brass40,
-      VerdantColors.ember40,
-      VerdantColors.stone40,
+      Color(0xFF81C784),
+      Color(0xFF64B5F6),
+      Color(0xFFFFB74D),
+      Color(0xFFE57373),
+      Color(0xFFBDBDBD),
     ],
   );
 

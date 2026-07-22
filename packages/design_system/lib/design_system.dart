@@ -2,10 +2,8 @@
 /// calls — this package is a leaf, safe to reuse in any Flutter app (§16).
 library;
 
-export 'src/icons/verdant_icons.dart';
 export 'src/layout/adaptive_layout.dart';
 export 'src/layout/breakpoints.dart';
-export 'src/maturity/verdant_maturity.dart';
 export 'src/theme/app_theme.dart';
 export 'src/theme/app_theme_context.dart';
 export 'src/tokens/app_elevation_extension.dart';
@@ -13,7 +11,7 @@ export 'src/tokens/app_motion_extension.dart';
 export 'src/tokens/app_semantic_colors.dart';
 export 'src/tokens/app_shape_extension.dart';
 export 'src/tokens/app_spacing_extension.dart';
-export 'src/widgets/accents/verdant_edge_accent.dart';
+export 'src/widgets/accents/app_edge_accent.dart';
 export 'src/widgets/avatars/app_avatar.dart';
 export 'src/widgets/badges/app_status_badge.dart';
 export 'src/widgets/bottom_sheets/app_bottom_sheet.dart';

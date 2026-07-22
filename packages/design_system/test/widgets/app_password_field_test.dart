@@ -16,7 +16,7 @@ void main() {
       expect(field.obscureText, isTrue);
       expect(
         find.byWidgetPredicate(
-          (w) => w is VerdantIcon && w.glyph == VerdantGlyph.eye,
+          (w) => w is Icon && w.icon == Icons.visibility_outlined,
         ),
         findsOneWidget,
       );
@@ -39,7 +39,7 @@ void main() {
       expect(field.obscureText, isFalse);
       expect(
         find.byWidgetPredicate(
-          (w) => w is VerdantIcon && w.glyph == VerdantGlyph.eyeOff,
+          (w) => w is Icon && w.icon == Icons.visibility_off_outlined,
         ),
         findsOneWidget,
       );
@@ -77,11 +77,11 @@ void main() {
 
         await tester.tap(find.byType(IconButton));
         await tester.pump();
-        final flashed = tester.widget<VerdantIcon>(find.byType(VerdantIcon));
+        final flashed = tester.widget<Icon>(find.byType(Icon));
         expect(flashed.color, colorScheme.primary);
 
         await tester.pump(const Duration(milliseconds: 120));
-        final settled = tester.widget<VerdantIcon>(find.byType(VerdantIcon));
+        final settled = tester.widget<Icon>(find.byType(Icon));
         expect(settled.color, colorScheme.onSurfaceVariant);
       },
     );

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../icons/verdant_icons.dart';
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// A user-manipulable label — filterable, removable, sometimes toggleable
@@ -18,7 +16,6 @@ import '../../theme/app_theme_context.dart';
 /// `.primary` pairing [AppNavigationBar]'s selected-destination wash
 /// already established, reused here for the identical "moss wash" role
 /// rather than inventing a second expression of it.
-@verdantPreview
 class AppTag extends StatelessWidget {
   final String label;
   final bool selected;
@@ -107,7 +104,7 @@ class _RemoveButton extends StatelessWidget {
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(2),
-          child: VerdantIcon(VerdantGlyph.close, size: 14, color: color),
+          child: Icon(Icons.close, size: 14, color: color),
         ),
       ),
     );

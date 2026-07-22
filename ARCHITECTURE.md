@@ -637,19 +637,11 @@ assertions) — those aren't golden tests and were never meant to be; an
 earlier revision of the project's own task tracking mislabeled them as
 such, corrected here.
 
-**Widgetbook** (`apps/widgetbook/`, package name `design_system_widgetbook`):
-a dev-only, never-shipped interactive component catalog — light/dark
-toggle via a `MaterialThemeAddon` wired to the real `AppTheme.light()/
-dark()`, one `@widgetbook.UseCase`-annotated function per widget-state
-under `lib/use_cases/`, codegen'd into a directory tree by
-`widgetbook_generator` as part of `melos run gen`. Complements, not
-replaces, the golden tests above: golden tests are automated and
-CI-enforced (a regression is caught on every push, no human has to look);
-Widgetbook is a manual browsing/review tool for humans (a prop-variant
-knob panel + multi-viewport preview is fundamentally not something
-`matchesGoldenFile` gives you either, since a golden test only proves
-"unchanged from the last approved snapshot," not "correct"). Not
-referenced by any `melos run build:*` script, so it never ships.
+This kit has no interactive component catalog of its own — the golden
+tests above are the only regression coverage for `design_system`'s widgets.
+(A Widgetbook-based catalog was maintained here for a time; it moved out
+with the rest of `design_system`'s former custom visual identity — see
+`docs/DESIGN_LANGUAGE.md`'s archive note.)
 
 ---
 

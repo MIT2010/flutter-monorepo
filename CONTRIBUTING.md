@@ -77,31 +77,15 @@ exported unless they're genuinely public. The `XView` half of a page stays
   `exception.toString()` in a SnackBar** (§36).
 - **Comments explain *why*, not *what*.** Match the density and voice of the
   surrounding code; a comment should state a constraint the code can't.
-- **`design_system` widget maturity (`VERDANT_DESIGN_SYSTEM.md` §15).**
-  Every widget class gets `@verdantStable` or `@verdantPreview` from
-  `package:design_system/design_system.dart`'s `verdant_maturity.dart`,
-  placed directly above the class declaration. Adding a new widget from
-  the §10.7–§10.23 specification (or any component with no real consumer
-  yet)? Use `@verdantPreview`. Only move a widget to `@verdantStable` once
-  a real screen actually consumes it and any gap that use surfaced has
-  been fixed — not on a timer, not because the spec "looks done."
-- **Widgetbook use-cases: write knobs by hand, don't reach for an
-  auto-generator.** Checked while building the §10.7–§10.23
-  proof-of-concept (`AppTag`/`AppCalendar`): the only knob-auto-generation
-  tool in the Widgetbook ecosystem
-  ([widgetbook-entries-generator](https://github.com/leancodepl/widgetbook-entries-generator))
-  is a third-party VS Code extension, not a `pub.dev`/`build_runner`
-  package — it doesn't fit this repo's `melos run gen` pipeline, doesn't
-  work from any editor or CI the way every other generator here does, and
-  its naive type→knob mapping doesn't know which properties are actually
-  worth exposing per component. Every real use-case in this repo — static
-  and interactive — is hand-written; per-instance knobs
-  (`context.knobs.*`) go in the same file as the static ones, following
-  `app_tag_use_cases.dart`/`app_calendar_use_cases.dart`'s pattern
-  (radius/color/motion knobs reuse `AppTheme.light(...)`'s own override
-  parameters, wrapped in a local `Theme(...)` — same mechanism
-  `ThemeStudioAddon` is built on, just scoped to one catalog entry instead
-  of the whole app).
+- **`design_system` stays a plain, unbranded component library.** It's a
+  `ColorScheme.fromSeed`-driven theme plus a set of generic Material-ish
+  widgets (`AppButton`, `AppCard`, `AppTextField`, ...) built on the same
+  `ThemeExtension` mechanism (`context.spacing`/`.shape`/`.elevation`/
+  `.motion`/`.semanticColors`). Component code should never reach for a
+  literal hex value or `Colors.*` swatch directly — always through
+  `Theme.of(context).colorScheme`/`context.spacing`/etc., so the whole
+  theme stays "cheap to retheme" (swap `AppTheme.light()`'s seed color,
+  every consumer picks it up automatically).
 
 ---
 

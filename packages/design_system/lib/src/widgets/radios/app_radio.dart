@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// A single, mutually-exclusive choice among a visible set of options
@@ -17,9 +16,8 @@ import '../../theme/app_theme_context.dart';
 ///
 /// Hand-built rather than wrapping stock [Radio] for the same reason as
 /// [AppCheckbox]: full control over the inner dot's fade/scale entrance
-/// (`motion.micro`, Verdant Enter, no scale-bounce) that stock Flutter's
+/// (`motion.micro`, Enter, no scale-bounce) that stock Flutter's
 /// radio painter doesn't expose a way to configure.
-@verdantPreview
 class AppRadio<T> extends StatefulWidget {
   final T value;
   final T? groupValue;

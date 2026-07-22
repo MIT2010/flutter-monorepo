@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../icons/verdant_icons.dart';
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// Where you are in a fixed, linear, multi-step flow — step 2 of 4 (§10.25).
@@ -15,7 +13,7 @@ import '../../theme/app_theme_context.dart';
 /// the whole strip.
 ///
 /// **Color**: a completed step fills `colorScheme.primary` with a
-/// checkmark ([VerdantGlyph.check]); the current step is an outlined
+/// checkmark ([Icons.check]); the current step is an outlined
 /// `colorScheme.primary` ring around its own number; a future step is a
 /// flat `colorScheme.outlineVariant` circle with a muted number. The
 /// connecting line recolors to `primary` behind completed steps and stays
@@ -23,7 +21,7 @@ import '../../theme/app_theme_context.dart';
 /// decorative.
 ///
 /// **Motion**: a step transitioning current → completed animates its
-/// fill/checkmark via `motion.micro` + Verdant Enter; the connecting
+/// fill/checkmark via `motion.micro` + Enter; the connecting
 /// line's color sweeps over the same duration rather than snapping.
 /// Respects `disableAnimations` (§8.7) by jumping to final state instead.
 ///
@@ -32,7 +30,6 @@ import '../../theme/app_theme_context.dart';
 /// consuming flow allows jumping steps out of order. A consumer that
 /// wants that wraps each marker in its own `GestureDetector`/`InkWell`
 /// rather than this component assuming it's always safe.
-@verdantPreview
 class AppStepper extends StatelessWidget {
   /// 0-indexed — `0` means "on step 1 of [stepCount]".
   final int currentStep;
@@ -171,12 +168,11 @@ class _StepMarker extends StatelessWidget {
         duration: duration,
         switchInCurve: curve,
         child: completed
-            ? VerdantIcon(
-                VerdantGlyph.check,
+            ? Icon(
+                Icons.check,
                 key: const ValueKey('completed'),
                 size: 14,
                 color: content,
-                strokeWidth: 2,
               )
             : Text(
                 '${index + 1}',

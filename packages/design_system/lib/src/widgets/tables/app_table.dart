@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../icons/verdant_icons.dart';
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// One column definition for [AppTable] — label plus a flex weight
@@ -44,7 +42,6 @@ class AppTableColumn {
 /// static geometric arrow (never an animated icon-swap between ascending
 /// and descending); only its *color* eases in on `motion.micro` when its
 /// column becomes the active sort.
-@verdantPreview
 class AppTable extends StatelessWidget {
   final List<AppTableColumn> columns;
   final int rowCount;
@@ -172,8 +169,8 @@ class _SortIndicator extends StatelessWidget {
     return TweenAnimationBuilder<Color?>(
       tween: ColorTween(end: targetColor),
       duration: motion.durationMicro,
-      builder: (context, color, _) => VerdantIcon(
-        ascending ? VerdantGlyph.arrowUp : VerdantGlyph.arrowDown,
+      builder: (context, color, _) => Icon(
+        ascending ? Icons.arrow_upward : Icons.arrow_downward,
         size: 14,
         color: color ?? Colors.transparent,
       ),

@@ -1,27 +1,23 @@
 import 'package:flutter/material.dart';
 
-import '../../icons/verdant_icons.dart';
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
-/// A binary, independent choice — one of possibly several selected at once,
-/// as opposed to [AppRadio]'s mutually-exclusive single choice (§10.7).
+/// A binary, independent choice — one of possibly several selected at
+/// once, as opposed to [AppRadio]'s mutually-exclusive single choice.
 ///
 /// `radius.xs` square — the deliberate shape distinction from Radio's
 /// circle, so the two are never shape-ambiguous at a glance. Unselected:
-/// Level 1 `stone.30`/`outlineVariant` border, no fill (same "stone.30 ==
-/// outlineVariant" mapping [AppTag] already established). Checked/
-/// indeterminate: filled `moss.60`/`primary`, no border — filled color
-/// alone carries enough weight, the same rule as a primary Button (§10.1).
-/// Hover darkens the border one Stone step: `outlineVariant` → `outline`,
-/// the standard M3 role pairing for "subtle" vs. "prominent" border.
+/// Level 1 `colorScheme.outlineVariant` border, no fill. Checked/
+/// indeterminate: filled `colorScheme.primary`, no border — filled color
+/// alone carries enough weight, the same rule as a primary Button. Hover
+/// darkens the border one step: `outlineVariant` → `outline`, the
+/// standard M3 role pairing for "subtle" vs. "prominent" border.
 ///
-/// The glyph appears via a quick fade/scale (`motion.micro`, Verdant
-/// Enter) through [AnimatedSwitcher] — never an animated stroke-draw-in,
-/// which is why this is hand-built rather than wrapping stock [Checkbox]:
-/// Flutter's own `_CheckboxPainter` bakes in exactly the stroke-draw
-/// animation §10.7 explicitly rejects, with no public API to swap it out.
-@verdantPreview
+/// The glyph appears via a quick fade/scale (`motion.micro`, Enter)
+/// through [AnimatedSwitcher] — never an animated stroke-draw-in, which
+/// is why this is hand-built rather than wrapping stock [Checkbox]:
+/// Flutter's own `_CheckboxPainter` bakes in exactly that stroke-draw
+/// animation, with no public API to swap it out.
 class AppCheckbox extends StatefulWidget {
   final bool? value;
   final ValueChanged<bool?>? onChanged;
@@ -120,16 +116,13 @@ class _AppCheckboxState extends State<AppCheckbox> {
                   child: FadeTransition(opacity: animation, child: child),
                 ),
                 child: selected
-                    ? VerdantIcon(
-                        indeterminate
-                            ? VerdantGlyph.remove
-                            : VerdantGlyph.check,
+                    ? Icon(
+                        indeterminate ? Icons.remove : Icons.check,
                         key: ValueKey(
                           indeterminate ? 'indeterminate' : 'checked',
                         ),
                         size: 14,
                         color: glyphColor,
-                        strokeWidth: 2,
                       )
                     : const SizedBox.shrink(key: ValueKey('empty')),
               ),

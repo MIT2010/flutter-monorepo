@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
 /// An instant, no-confirmation-needed on/off toggle (§10.9) — for settings
@@ -8,28 +7,24 @@ import '../../theme/app_theme_context.dart';
 /// form, submitted later" context.
 ///
 /// Track: `radius.pill`, the one other legitimate functional-pill
-/// exception beyond Badge/Tag (§5.3) — modeled directly on a physical
-/// sliding mechanism. Flush at rest: no border, no shadow on either track
-/// or thumb, so the track's own fill color is the only state signal
-/// needed — off: `stone.30`/`outline`, on: `moss.60`/`primary`. Thumb:
-/// `colorScheme.surface` off (`stone.0`/`stone.98`, mode-appropriate) and
-/// `colorScheme.onPrimary` on — spec calls the on-thumb literal `stone.0`
-/// in both modes; `onPrimary` is used instead so the thumb stays
-/// retheme-safe rather than hardcoding a `VerdantColors` reference in
-/// component code, a disclosed, deliberately minor simplification (dark
-/// mode's `onPrimary` is `stone.98`, not literal `stone.0`).
+/// exception beyond Badge/Tag — modeled directly on a physical sliding
+/// mechanism. Flush at rest: no border, no shadow on either track or
+/// thumb, so the track's own fill color is the only state signal needed —
+/// off: `colorScheme.outline`, on: `colorScheme.primary`. Thumb:
+/// `colorScheme.surface` off, `colorScheme.onPrimary` on — always reached
+/// through the theme rather than a hardcoded hex value, so the thumb
+/// stays retheme-safe.
 ///
 /// No hover state — §10.9 only lists off/on/disabled, unlike Checkbox and
 /// Radio's explicit hover-darkens-the-border state — so this is a plain
 /// [StatelessWidget], and deliberately has no ink/ripple overlay: "flush"
 /// means the fill color alone carries every state signal.
 ///
-/// Thumb slides via [AnimatedAlign] on `motion.micro` + Verdant Enter —
+/// Thumb slides via [AnimatedAlign] on `motion.micro` + Enter —
 /// no spring, no overshoot, unlike Material's and iOS's own default
 /// switch animation, which is why this is hand-built rather than
 /// wrapping stock [Switch] (its default thumb-drag physics aren't
 /// swappable for a flat slide via public API).
-@verdantPreview
 class AppSwitch extends StatelessWidget {
   final bool value;
   final ValueChanged<bool>? onChanged;

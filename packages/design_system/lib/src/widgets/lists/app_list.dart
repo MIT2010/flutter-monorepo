@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
-import '../accents/verdant_edge_accent.dart';
+import '../accents/app_edge_accent.dart';
 import '../cards/app_card.dart';
 
 /// The base scrollable unit almost every content screen is built from
@@ -37,7 +36,6 @@ import '../cards/app_card.dart';
 /// (closer to a purpose-built package than a `Dismissible` variant), and
 /// the spec's own "where used" phrasing already treats it as optional,
 /// not a baseline requirement every list needs.
-@verdantPreview
 class AppList extends StatelessWidget {
   final int itemCount;
   final IndexedWidgetBuilder itemBuilder;
@@ -89,7 +87,6 @@ class AppList extends StatelessWidget {
 /// row is edge-to-edge by design (the divider *is* the border language
 /// here), so adding a boxed border on hover would read as a card, not a
 /// list row.
-@verdantPreview
 class AppListRow extends StatefulWidget {
   final Widget child;
   final bool selected;
@@ -124,7 +121,7 @@ class _AppListRowState extends State<AppListRow> {
         onHover: widget.onTap == null
             ? null
             : (hovering) => setState(() => _hovering = hovering),
-        child: VerdantEdgeAccent(
+        child: AppEdgeAccent(
           selected: widget.selected,
           color: colorScheme.primary,
           fill: colorScheme.primaryContainer,

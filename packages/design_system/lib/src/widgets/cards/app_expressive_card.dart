@@ -1,28 +1,25 @@
 import 'package:flutter/material.dart';
 
-import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
-/// A card that expresses confidence through color, not motion (§5.4).
+/// A card that expresses confidence through color, not motion.
 ///
-/// The previous design morphed [AppShapeExtension.expressive]'s asymmetric
-/// corners and lifted elevation via [AppMotionExtension.spring] on tap —
-/// under Verdant's own anti-pattern critic pass, that mechanic is
-/// unmistakably M3-Expressive-derived and was retired entirely, not
-/// retuned. The replacement is deliberately quiet: the same fixed
-/// `radius.sm` geometry every Verdant card uses (§10.2 — "no
-/// asymmetric/expressive variant survives as a default"), with only its
-/// hairline border shifting from `stone.20`/`outlineVariant` to
-/// `moss.60`/`primary` on press. No shape change, no elevation change, no
-/// spring — `motion.micro` with Verdant Enter, the same restrained
-/// vocabulary every other Verdant interaction uses.
+/// An earlier design morphed asymmetric corners and lifted elevation via
+/// a spring physics simulation on tap — unmistakably a heavy, decorative
+/// mechanic, retired entirely rather than retuned. The replacement is
+/// deliberately quiet: the same fixed `radius.sm` geometry every card in
+/// this system uses (no asymmetric/expressive variant survives as a
+/// default), with only its hairline border shifting from
+/// `colorScheme.outlineVariant` to `colorScheme.primary` on press. No
+/// shape change, no elevation change, no spring — `motion.micro` with
+/// Enter, the same restrained vocabulary every other interaction in this
+/// system uses.
 ///
 /// Respects the OS "reduce motion" accessibility setting
 /// (`MediaQuery.disableAnimations`): the border color still changes on
 /// press when set, just instantly rather than animated — the same
 /// jump-not-animate precedent the original component established (§8.7),
 /// carried forward here rather than dropped with the spring mechanic.
-@verdantStable
 class AppExpressiveCard extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;

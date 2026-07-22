@@ -16,15 +16,11 @@ double _contrastRatio(Color a, Color b) {
 
 const _wcagAA = 4.5;
 
-/// Every `on-X`/`X` role pair in `AppTheme`'s hand-authored `ColorScheme`
-/// (docs/VERDANT_DESIGN_SYSTEM.md §3.4), checked against the REAL runtime
-/// theme output, not the hex tables in the spec document — the whole
-/// point of this file is proving the spec's numbers actually clear WCAG
-/// AA once assembled into a real `ColorScheme`, not assuming it from the
-/// document. A future edit that breaks contrast fails this suite instead
-/// of shipping unnoticed.
+/// Every `on-X`/`X` role pair in `AppTheme`'s `ColorScheme`, checked
+/// against the REAL runtime theme output. A future edit that breaks
+/// contrast fails this suite instead of shipping unnoticed.
 void main() {
-  group('AppTheme hand-authored ColorScheme WCAG AA contrast', () {
+  group('AppTheme ColorScheme WCAG AA contrast', () {
     final light = AppTheme.light().colorScheme;
     final dark = AppTheme.dark().colorScheme;
 
@@ -108,13 +104,8 @@ void main() {
       );
     });
 
-    test('surfaceTint is fully transparent (no M3 elevation auto-tinting)', () {
-      expect(light.surfaceTint, Colors.transparent);
-      expect(dark.surfaceTint, Colors.transparent);
-    });
-
     test('light()/dark() primaryColor override keeps onPrimary readable for an '
-        'arbitrary chosen color (Theme Studio live preview)', () {
+        'arbitrary chosen color', () {
       // A bright, light color -- needs dark onPrimary text.
       final withBrightOverride = AppTheme.light(
         primaryColor: const Color(0xFFEFEFE0),
