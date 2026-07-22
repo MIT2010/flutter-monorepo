@@ -58,7 +58,7 @@ void main() {
 
       final colorScheme = AppTheme.light().colorScheme;
       final tooltipWidget = tester.widget<Tooltip>(find.byType(Tooltip));
-      final decoration = tooltipWidget.decoration as ShapeDecoration;
+      final decoration = tooltipWidget.decoration as BoxDecoration;
       expect(decoration.color, colorScheme.onSurface);
       expect(tooltipWidget.textStyle!.color, colorScheme.surface);
     });

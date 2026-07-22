@@ -1,4 +1,4 @@
-# Verdant — Design System Specification v1.6
+# Verdant — Design System Specification v1.7
 
 *Chief Design Officer's specification. This document is the source of truth for Verdant's visual identity.*
 
@@ -15,6 +15,8 @@
 **v1.5 revision note**: records completion, not a further decision. The v1.4 proof-of-concept (Tag, Calendar/Date Picker) was approved, and the remaining fifteen §10.7–§10.23 components were then delivered across five batches (Checkbox/Radio/Switch; Search/Password/OTP; Tabs/Sidebar/Dropdown; List/Table/Chart; Avatar/Tooltip/Menu), each with a golden test (light/dark), an interaction test, and a Widgetbook use-case with real per-instance knobs, verified against CI-rendered goldens rather than trusted green alone. All seventeen now carry `@verdantPreview`. §15.4 is updated from a forward-looking rollout plan to a completion record with the actual per-component table; §13 point 6 gets a short pointer to it. No maturity label changes as a result of this revision — `@verdantStable`'s eleven classes (§15.2) are untouched, and none of the seventeen graduate to stable here, since graduation is real usage, not batch completion (§15.3).
 
 **v1.6 revision note**: a correction, not a completion record — the first one this document has needed. A full visual audit of the running app (all 28 components, both maturity tiers, requested directly rather than assumed) found that Verdant, despite every component individually matching this document's own written spec, still read as generic on sight: "would someone mistake this for Material Design" came back yes, component after component. The root cause wasn't a spec violation — §5's radius scale, §6's depth levels, §7's motion curves were all being followed correctly. It's that "smaller, more precise corner radius than Material's default" stopped being a distinctive signal on its own; by 2026 it's the *baseline* vocabulary of minimalist SaaS design generally, not a Verdant-specific tell. A shared, restrained geometric language needs one asymmetric, unshared move to actually be recognizable, not just a quieter version of everyone else's rounded rectangle. §16 ("Visual identity: the Verdant Corner") is the new section this revision adds — a chamfered top-right corner on every rectangle-family surface (never on circles/pills, where it would cost usability for no identity gain), a hand-drawn icon set replacing every stock `Icons.*` glyph the system drew internally, the existing ad hoc edge-bar selection language formalized into one shared widget and applied more broadly, and one additional motion curve for the moments the corner itself marks — all still bound by §1's restraint and §7's "never bouncy" rule; nothing here is decoration layered on top of the existing system, it's one addition to what §5 already started. §5 itself is left as-is (its reasoning was correct, just insufficient alone) with a pointer added at the end. Also fixes one real bug the same audit surfaced: `AppButton`'s loading spinner fell back to the disabled-palette background (Flutter's `ElevatedButton` treats `onPressed: null` as disabled regardless of *why* it's null), leaving the `onPrimary`-colored spinner nearly invisible — unrelated to visual identity, but found by the same close look.
+
+**v1.7 revision note**: a direct design-authority call, not a bug fix or a re-audit finding — §16.1's chamfered corner is reverted. Every rectangle-family surface goes back to a plain, uniformly-rounded rect at the same `radius.xs`/`.sm`/`.md` tier §5 already specifies on all four corners, not three-plus-a-cut. §17 ("Visual identity, corrected: the corner reverted") is the new section recording this and what stays. §16.2–16.4 (the hand-drawn icon set, the formalized edge-accent selection widget, `curveEmphasis`) are **not** reverted here — only §16.1's corner geometry is in scope for this call. `AppSemanticColors.accent`/`.onAccent` (the Brass fill §16.1 introduced for the cut corner) had no other consumer once the corner is gone and are removed rather than left dead. §16 itself is left as-is below (it was accurate when written, and the icon/edge-accent/motion parts of it still apply) with a pointer added at its end, per this document's own established practice of not silently rewriting settled history.
 
 ## 0.1 Token-cheap vs. code-required — the boundary a downstream project needs
 
@@ -226,6 +228,8 @@ This is the single fastest visual "is this Material" tell, and the one most wort
 **5.4 `AppExpressiveCard`'s shape-morph mechanic was retired in Tahap 3.** Its original design — asymmetric corner morph, spring-physics elevation lift on tap — was explicitly M3-Expressive-derived (the component's own doc comment said so). Under the "would someone mistake this for Material" critic-mode check, the honest answer was yes, immediately. The redesign expresses confidence through a *quieter* mechanism instead: a hairline border that shifts from `stone.20` to `moss.60` on press, no shape change, no spring — consistent with Section 7's motion rules. Implemented and golden-verified as of Tahap 3.
 
 **5.5 This section's radius scale is necessary but not sufficient for the "is this Material" test — see §16.** A v1.6 visual audit found every rule above being followed correctly and the system still read as generic, because a smaller/more precise radius than Material's default isn't a distinctive move by itself anymore. §16 adds the one asymmetric geometric signature ("the Verdant Corner") layered on top of this same scale, not a replacement for it — `radius.xs`/`.sm`/`.md` below are still exactly where each surface's corners come from.
+
+**5.6 §16's asymmetric corner was reverted in v1.7 — see §17.** This section's radius scale is once again the complete shape signature, applied uniformly on all four corners rather than three-plus-a-cut. Nothing above changed as a result — the same `radius.xs`/`.sm`/`.md` values, the same lift-to-round rule (§5.1), the same pill exceptions (§5.3) all still hold; only §16.1's chamfer is gone.
 
 ---
 
@@ -735,5 +739,25 @@ One additional curve on `AppMotionExtension`, reserved for the small set of affi
 ### 16.5 What this revision does not do
 
 No component's maturity label changes (§15.3's real-usage-not-a-timer rule is untouched). No color role is renamed or repurposed — `accent` is new, `colorScheme.secondary` (already hand-authored as neutral Stone elsewhere in this theme) is deliberately left alone rather than bent to a second meaning. §5's radius values, §6's depth levels, and §7's existing two curves are unchanged; this section adds to them, per §5.5's pointer, rather than superseding anything.
+
+### 16.6 §16.1's corner geometry was reverted in v1.7 — see §17
+
+The chamfered top-right corner described in §16.1, and the `AppSemanticColors.accent`/`.onAccent` fill it introduced, no longer exist — every rectangle-family surface uses a plain, uniformly-rounded rect on all four corners again (§5.6). §16.2 (the hand-drawn icon set), §16.3 (`VerdantEdgeAccent`), and §16.4 (`curveEmphasis`) are **unaffected** — this pointer covers §16.1 only. `VerdantNotchedBorder`/`VerdantNotchedInputBorder`, named throughout §16.1, no longer exist in `packages/design_system` — component code now builds shape from a plain `RoundedRectangleBorder`/`OutlineInputBorder` and `BorderRadius.circular(shape.radiusX)` directly.
+
+---
+
+## 17. Visual identity, corrected: the corner reverted
+
+**Added in v1.7.** A direct design-authority call on the running system, made after §16 shipped and was visually verified — not a re-audit finding, not a bug. §16.1's chamfered top-right corner is reverted; every rectangle-family surface (buttons, cards, dialogs, sheets, menus, dropdown panels, tooltips, inputs, OTP cells, snackbars) goes back to a plain rect, uniformly rounded on all four corners at the same `radius.xs`/`.sm`/`.md` tier §5 already specifies (§5.6). This is a reduction in scope, not a replacement design: no new shape vocabulary is introduced here, the system simply stops doing the one asymmetric thing §16.1 added.
+
+### 17.1 What's removed
+
+- `VerdantNotchedBorder` and `VerdantNotchedInputBorder` (`packages/design_system/lib/src/shape/verdant_notched_border.dart`) — deleted, not deprecated. Component code builds its shape directly from `RoundedRectangleBorder`/`OutlineInputBorder` plus `BorderRadius.circular(shape.radiusX)` (or `BorderRadius.only(...)` for the two-corners-only case — `AppBottomSheet`'s top edge).
+- `AppShapeExtension.notchXs`/`.notchSm`/`.notchMd` — removed from the token. They sized §16.1's chamfer specifically and have no meaning once the chamfer is gone.
+- `AppSemanticColors.accent`/`.onAccent` (Brass) — removed. §16.1 introduced this role solely as the cut corner's emphasis fill (§16.1); with the corner reverted it had no other consumer, so it's removed rather than left as dead API surface (§0.1's "code-required, not token-cheap" boundary already treats an unused role as a liability, not a convenience).
+
+### 17.2 What's unchanged
+
+§16.2's hand-drawn icon set, §16.3's `VerdantEdgeAccent` selection widget, and §16.4's `curveEmphasis` motion curve all stay exactly as shipped — none of them depended on the corner geometry, and none were in scope for this call. §5's radius scale, §6's depth levels, and §7's other two motion curves are untouched, same as they were through §16 itself.
 
 ---

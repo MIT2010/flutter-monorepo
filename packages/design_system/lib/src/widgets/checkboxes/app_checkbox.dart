@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../icons/verdant_icons.dart';
 import '../../maturity/verdant_maturity.dart';
-import '../../shape/verdant_notched_border.dart';
 import '../../theme/app_theme_context.dart';
 
 /// A binary, independent choice — one of possibly several selected at once,
@@ -88,11 +87,8 @@ class _AppCheckboxState extends State<AppCheckbox> {
     final glyphColor = disabled
         ? colorScheme.onSurfaceVariant
         : colorScheme.onPrimary;
-    final border = VerdantNotchedBorder(
-      radiusTopLeft: shape.radiusXs,
-      radiusBottomLeft: shape.radiusXs,
-      radiusBottomRight: shape.radiusXs,
-      notch: shape.notchXs,
+    final border = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(shape.radiusXs),
       side: BorderSide(color: borderColor),
     );
 

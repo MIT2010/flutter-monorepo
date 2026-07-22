@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../maturity/verdant_maturity.dart';
-import '../../shape/verdant_notched_border.dart';
 import '../../theme/app_theme_context.dart';
 
 /// Supplementary, non-essential context on hover/long-press (§10.21) —
@@ -45,15 +44,10 @@ class AppTooltip extends StatelessWidget {
     return Tooltip(
       message: message,
       exitDuration: motion.durationMicro,
-      decoration: ShapeDecoration(
+      decoration: BoxDecoration(
         color: colorScheme.onSurface,
-        shape: VerdantNotchedBorder(
-          radiusTopLeft: shape.radiusXs,
-          radiusBottomLeft: shape.radiusXs,
-          radiusBottomRight: shape.radiusXs,
-          notch: shape.notchXs,
-        ),
-        shadows: depth.shadow,
+        borderRadius: BorderRadius.circular(shape.radiusXs),
+        boxShadow: depth.shadow,
       ),
       // Derived from the theme's own text theme rather than a bare
       // TextStyle(color:, fontSize:) -- Tooltip's overlay doesn't merge

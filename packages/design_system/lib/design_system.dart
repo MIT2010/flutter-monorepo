@@ -6,7 +6,6 @@ export 'src/icons/verdant_icons.dart';
 export 'src/layout/adaptive_layout.dart';
 export 'src/layout/breakpoints.dart';
 export 'src/maturity/verdant_maturity.dart';
-export 'src/shape/verdant_notched_border.dart';
 export 'src/theme/app_theme.dart';
 export 'src/theme/app_theme_context.dart';
 export 'src/tokens/app_elevation_extension.dart';

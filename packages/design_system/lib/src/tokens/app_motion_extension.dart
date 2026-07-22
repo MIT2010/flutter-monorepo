@@ -10,18 +10,16 @@ import 'package:flutter/material.dart';
 /// faster than it arrived. Four duration tiers instead of three, adding a
 /// distinct `page` tier for full-screen/route transitions.
 ///
-/// [curveEmphasis] is the system's one deliberately-distinct third curve,
-/// added alongside "the Verdant Corner" shape signature — reserved for
-/// the small set of affirmative moments the notch itself marks (primary
-/// button press-feedback, a selection confirming). **Still zero
-/// overshoot** — the "never bouncy" rule above is not being relaxed, an
-/// overshoot/spring curve was considered and rejected as a signature
-/// specifically because it would contradict this file's own established
-/// philosophy. What makes it feel distinct instead is pace, not shape:
-/// almost all deceleration happens in the first fraction of the curve
-/// (steeper front-load than even [curveExit]), reading as a crisp "snap
-/// to attention" rather than [curveEnter]'s gentle settle — the motion
-/// equivalent of a precise cut corner instead of a soft round one.
+/// [curveEmphasis] is the system's one deliberately-distinct third curve —
+/// reserved for a small set of affirmative moments (primary button
+/// press-feedback, a selection confirming). **Still zero overshoot** — the
+/// "never bouncy" rule above is not being relaxed, an overshoot/spring
+/// curve was considered and rejected as a signature specifically because
+/// it would contradict this file's own established philosophy. What makes
+/// it feel distinct instead is pace, not shape: almost all deceleration
+/// happens in the first fraction of the curve (steeper front-load than
+/// even [curveExit]), reading as a crisp "snap to attention" rather than
+/// [curveEnter]'s gentle settle.
 ///
 /// [spring] is kept as reusable Flutter physics infrastructure
 /// (`SpringDescription`/`SpringSimulation` from `package:flutter/physics.dart`)

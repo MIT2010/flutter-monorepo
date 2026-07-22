@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../maturity/verdant_maturity.dart';
-import '../../shape/verdant_notched_border.dart';
 import '../../theme/app_theme_context.dart';
 
 /// Wraps [showModalBottomSheet] with a consistent rounded-top shape (§16).
@@ -16,12 +15,9 @@ import '../../theme/app_theme_context.dart';
 /// Enter/Exit via [AnimationStyle], same single-duration caveat as
 /// [AppDialog.confirm].
 ///
-/// Top-left carries the normal `radius.md` rounding, top-right carries
-/// "the Verdant Corner" notch instead — the bottom two corners stay
-/// perfectly square (`radiusBottomLeft`/`radiusBottomRight: 0`), since a
-/// sheet anchored to the bottom of the screen has to stay flush with its
-/// edges there; the shape signature only shows up where the sheet is
-/// actually free to have one.
+/// Both top corners carry the normal `radius.md` rounding — the bottom two
+/// stay perfectly square, since a sheet anchored to the bottom of the
+/// screen has to stay flush with its edges there.
 @verdantStable
 class AppBottomSheet {
   const AppBottomSheet._();
@@ -37,9 +33,11 @@ class AppBottomSheet {
       context: context,
       isScrollControlled: isScrollControlled,
       elevation: 8,
-      shape: VerdantNotchedBorder(
-        radiusTopLeft: shape.radiusMd,
-        notch: shape.notchMd,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(shape.radiusMd),
+          topRight: Radius.circular(shape.radiusMd),
+        ),
       ),
       sheetAnimationStyle: AnimationStyle(
         duration: motion.durationPanel,

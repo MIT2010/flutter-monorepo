@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../maturity/verdant_maturity.dart';
-import '../../shape/verdant_notched_border.dart';
 import '../../theme/app_theme_context.dart';
 
 /// One choice in an [AppMenu] — a value, a label, and an optional
@@ -134,24 +133,19 @@ class _AppMenuContent<T> extends StatelessWidget {
     final shape = context.shape;
     final depth = context.elevation.floating;
 
-    final border = VerdantNotchedBorder(
-      radiusTopLeft: shape.radiusMd,
-      radiusBottomLeft: shape.radiusMd,
-      radiusBottomRight: shape.radiusMd,
-      notch: shape.notchMd,
-    );
+    final radius = BorderRadius.circular(shape.radiusMd);
 
     return Material(
       type: MaterialType.transparency,
       child: Container(
         constraints: const BoxConstraints(maxHeight: 320),
-        decoration: ShapeDecoration(
+        decoration: BoxDecoration(
           color: depth.surfaceColor ?? colorScheme.surface,
-          shape: border,
-          shadows: depth.shadow,
+          borderRadius: radius,
+          boxShadow: depth.shadow,
         ),
-        child: ClipPath(
-          clipper: VerdantShapeClipper(border),
+        child: ClipRRect(
+          borderRadius: radius,
           child: ListView(
             shrinkWrap: true,
             padding: EdgeInsets.symmetric(vertical: context.spacing.xxs),

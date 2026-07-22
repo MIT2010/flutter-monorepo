@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../icons/verdant_icons.dart';
 import '../../maturity/verdant_maturity.dart';
-import '../../shape/verdant_notched_border.dart';
 import '../../theme/app_theme_context.dart';
 
 const _monthNames = [
@@ -368,16 +367,11 @@ class AppDatePicker {
             return Container(
               clipBehavior: Clip.antiAlias,
               padding: EdgeInsets.all(context.spacing.sm),
-              decoration: ShapeDecoration(
+              decoration: BoxDecoration(
                 color:
                     depth.surfaceColor ?? Theme.of(context).colorScheme.surface,
-                shape: VerdantNotchedBorder(
-                  radiusTopLeft: shape.radiusMd,
-                  radiusBottomLeft: shape.radiusMd,
-                  radiusBottomRight: shape.radiusMd,
-                  notch: shape.notchMd,
-                ),
-                shadows: depth.shadow,
+                borderRadius: BorderRadius.circular(shape.radiusMd),
+                boxShadow: depth.shadow,
               ),
               child: AppCalendar(
                 selectedDate: initialDate,

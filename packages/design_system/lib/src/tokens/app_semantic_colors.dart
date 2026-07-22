@@ -23,23 +23,6 @@ import 'verdant_colors.dart';
 /// own role as a fill — in both light and dark, enforced by
 /// `test/tokens/app_semantic_colors_test.dart` so a future edit that
 /// breaks contrast fails the suite instead of shipping unnoticed.
-///
-/// [accent]/[onAccent] are the one exception to "every role is a status
-/// signal" above — added alongside "the Verdant Corner" shape signature
-/// (docs/VERDANT_DESIGN_SYSTEM.md's visual-identity revision) as the
-/// fill for [VerdantNotchedBorder]'s cut corner on emphasis surfaces
-/// (primary buttons, selected tags, active menu/dropdown items).
-/// Deliberately **not** `colorScheme.secondary` — that role is already
-/// hand-authored as a neutral Stone tone elsewhere in this theme, and
-/// repurposing it would be a breaking semantic change for any existing
-/// consumer; deliberately **not** reusing [warning] outright either, even
-/// though both happen to be Brass — a decorative brand accent and a
-/// warning signal sharing one hue is a coincidence of this palette having
-/// only one warm secondary scale, not a claim that a notch means
-/// "warning." Same brass50/brass40 tier [warning] itself uses, since
-/// there's no separate spec-authored value to draw from and no reason to
-/// invent one — but named and documented as its own role so the two
-/// meanings don't get tangled later.
 @immutable
 class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   const AppSemanticColors({
@@ -49,8 +32,6 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.onWarning,
     required this.info,
     required this.onInfo,
-    required this.accent,
-    required this.onAccent,
     required this.chartSeries,
   });
 
@@ -69,10 +50,6 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     onWarning: VerdantColors.stone0,
     info: VerdantColors.mist60,
     onInfo: VerdantColors.stone0,
-    // A small decorative fill, not text -- see class doc for why this
-    // isn't just `warning` reused directly.
-    accent: VerdantColors.brass50,
-    onAccent: VerdantColors.stone0,
     // §10.14's literal five-series order. Unlike warning/success/info
     // above, these are decorative bar/line *fills*, not text -- held to
     // WCAG's looser 3:1 non-text ("meaningful graphical object") contrast
@@ -95,8 +72,6 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     onWarning: VerdantColors.stone98,
     info: VerdantColors.mist40,
     onInfo: VerdantColors.stone98,
-    accent: VerdantColors.brass40,
-    onAccent: VerdantColors.stone98,
     // Same *40 tier every other dark-mode saturated role already uses
     // (colorScheme.primary/error/tertiary) for consistency across modes.
     chartSeries: [
@@ -114,8 +89,6 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   final Color onWarning;
   final Color info;
   final Color onInfo;
-  final Color accent;
-  final Color onAccent;
   final List<Color> chartSeries;
 
   @override
@@ -126,8 +99,6 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? onWarning,
     Color? info,
     Color? onInfo,
-    Color? accent,
-    Color? onAccent,
     List<Color>? chartSeries,
   }) {
     return AppSemanticColors(
@@ -137,8 +108,6 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       onWarning: onWarning ?? this.onWarning,
       info: info ?? this.info,
       onInfo: onInfo ?? this.onInfo,
-      accent: accent ?? this.accent,
-      onAccent: onAccent ?? this.onAccent,
       chartSeries: chartSeries ?? this.chartSeries,
     );
   }
@@ -153,8 +122,6 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       onWarning: Color.lerp(onWarning, other.onWarning, t)!,
       info: Color.lerp(info, other.info, t)!,
       onInfo: Color.lerp(onInfo, other.onInfo, t)!,
-      accent: Color.lerp(accent, other.accent, t)!,
-      onAccent: Color.lerp(onAccent, other.onAccent, t)!,
       // A fixed 5-color sequence, not a smoothly-interpolatable scalar --
       // snapped at the midpoint, the same treatment this package already
       // gives other non-trivial fields (AppElevationExtension's borders/

@@ -54,7 +54,7 @@ void main() {
           ),
         );
 
-        VerdantNotchedBorder shapeOf() {
+        RoundedRectangleBorder shapeOf() {
           final container = tester.widget<AnimatedContainer>(
             find.descendant(
               of: find.byKey(cardKey),
@@ -62,7 +62,7 @@ void main() {
             ),
           );
           final decoration = container.decoration as ShapeDecoration;
-          return decoration.shape as VerdantNotchedBorder;
+          return decoration.shape as RoundedRectangleBorder;
         }
 
         expect(shapeOf().side.color, theme.colorScheme.outlineVariant);
@@ -105,7 +105,7 @@ void main() {
           ),
         );
 
-        VerdantNotchedBorder shapeOf() {
+        RoundedRectangleBorder shapeOf() {
           final container = tester.widget<AnimatedContainer>(
             find.descendant(
               of: find.byKey(cardKey),
@@ -113,7 +113,7 @@ void main() {
             ),
           );
           final decoration = container.decoration as ShapeDecoration;
-          return decoration.shape as VerdantNotchedBorder;
+          return decoration.shape as RoundedRectangleBorder;
         }
 
         final gesture = await tester.startGesture(

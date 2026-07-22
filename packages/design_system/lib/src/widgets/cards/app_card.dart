@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../maturity/verdant_maturity.dart';
-import '../../shape/verdant_notched_border.dart';
 import '../../theme/app_theme_context.dart';
 
 /// A container for related content, not a design flourish (§10.2). Level 1
@@ -13,12 +12,9 @@ import '../../theme/app_theme_context.dart';
 /// Builds its own [ShapeDecoration] from [AppElevationExtension]'s named
 /// depth levels rather than wrapping [Card] — [Card]'s `elevation` produces
 /// Material's own drop-shadow curve, which can't express Verdant's literal
-/// border/shadow-list spec (§6). [ShapeDecoration] (not [BoxDecoration]) is
-/// what makes [VerdantNotchedBorder] ("the Verdant Corner") paintable here
-/// — [BoxDecoration] only accepts a uniform [BorderRadius], not an
-/// arbitrary [ShapeBorder]. [InkWell] still supplies real tap/hover
+/// border/shadow-list spec (§6). [InkWell] still supplies real tap/hover
 /// feedback and ripple, via `customBorder` rather than `borderRadius` so
-/// the ripple itself is clipped to the notched silhouette too.
+/// the ripple itself is clipped to the same rounded silhouette too.
 @verdantStable
 class AppCard extends StatefulWidget {
   final Widget child;
@@ -48,11 +44,8 @@ class _AppCardState extends State<AppCard> {
     final side = depth.border is Border
         ? (depth.border as Border).top
         : BorderSide.none;
-    final border = VerdantNotchedBorder(
-      radiusTopLeft: shape.radiusSm,
-      radiusBottomLeft: shape.radiusSm,
-      radiusBottomRight: shape.radiusSm,
-      notch: shape.notchSm,
+    final border = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(shape.radiusSm),
       side: side,
     );
 

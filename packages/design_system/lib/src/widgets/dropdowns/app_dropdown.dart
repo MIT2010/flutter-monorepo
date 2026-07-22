@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../icons/verdant_icons.dart';
 import '../../maturity/verdant_maturity.dart';
-import '../../shape/verdant_notched_border.dart';
 import '../../theme/app_theme_context.dart';
 import '../accents/verdant_edge_accent.dart';
 import '../inputs/app_text_field.dart';
@@ -225,21 +224,16 @@ class _DropdownMenu<T> extends StatelessWidget {
         type: MaterialType.transparency,
         child: Builder(
           builder: (context) {
-            final border = VerdantNotchedBorder(
-              radiusTopLeft: shape.radiusMd,
-              radiusBottomLeft: shape.radiusMd,
-              radiusBottomRight: shape.radiusMd,
-              notch: shape.notchMd,
-            );
+            final radius = BorderRadius.circular(shape.radiusMd);
             return Container(
               constraints: const BoxConstraints(maxHeight: 300),
-              decoration: ShapeDecoration(
+              decoration: BoxDecoration(
                 color: depth.surfaceColor ?? colorScheme.surface,
-                shape: border,
-                shadows: depth.shadow,
+                borderRadius: radius,
+                boxShadow: depth.shadow,
               ),
-              child: ClipPath(
-                clipper: VerdantShapeClipper(border),
+              child: ClipRRect(
+                borderRadius: radius,
                 child: ListView(
                   shrinkWrap: true,
                   padding: EdgeInsets.symmetric(vertical: context.spacing.xxs),
