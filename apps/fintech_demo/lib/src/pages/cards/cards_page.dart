@@ -86,55 +86,32 @@ class _CardTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final progress = (card.spentThisMonth / card.spendingLimit).clamp(0.0, 1.0);
+    final networkLabel = card.network == CardNetwork.verdantVisa
+        ? 'VISA'
+        : 'MC';
 
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: colorScheme.primary,
-                  borderRadius: BorderRadius.circular(context.shape.radiusXs),
-                ),
-                child: Center(
-                  child: Text(
-                    card.network == CardNetwork.verdantVisa ? 'VISA' : 'MC',
-                    style: TextStyle(
-                      color: colorScheme.onPrimary,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(width: context.spacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '•••• •••• •••• ${card.last4}',
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    Text(
-                      card.holderName,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Builder(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Stack(
+          children: [
+            AppPaymentCard(
+              maskedNumber: '•••• •••• •••• ${card.last4}',
+              holderName: card.holderName,
+              networkLabel: networkLabel,
+              frozen: card.frozen,
+              color: card.network == CardNetwork.verdantVisa
+                  ? null
+                  : colorScheme.tertiary,
+            ),
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Builder(
                 builder: (iconContext) => IconButton(
                   icon: VerdantIcon(
                     VerdantGlyph.chevronDown,
-                    color: colorScheme.onSurfaceVariant,
+                    color: colorScheme.onPrimary,
                   ),
                   onPressed: () {
                     final box = iconContext.findRenderObject() as RenderBox;
@@ -145,40 +122,53 @@ class _CardTile extends StatelessWidget {
                   },
                 ),
               ),
-            ],
-          ),
-          SizedBox(height: context.spacing.md),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            ),
+          ],
+        ),
+        SizedBox(height: context.spacing.md),
+        AppCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    card.frozen ? 'Card frozen' : 'Card active',
+                    style: TextStyle(
+                      color: card.frozen
+                          ? colorScheme.error
+                          : colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  AppSwitch(
+                    value: card.frozen,
+                    onChanged: (_) => onToggleFrozen(),
+                  ),
+                ],
+              ),
+              SizedBox(height: context.spacing.sm),
               Text(
-                card.frozen ? 'Card frozen' : 'Card active',
+                '${Format.rupiah(card.spentThisMonth)} of ${Format.rupiah(card.spendingLimit)} spent',
                 style: TextStyle(
-                  color: card.frozen
-                      ? colorScheme.error
-                      : colorScheme.onSurfaceVariant,
+                  fontSize: 12,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
-              AppSwitch(value: card.frozen, onChanged: (_) => onToggleFrozen()),
+              SizedBox(height: context.spacing.xxs),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 6,
+                  backgroundColor: colorScheme.surfaceContainerHigh,
+                  color: colorScheme.primary,
+                ),
+              ),
             ],
           ),
-          SizedBox(height: context.spacing.sm),
-          Text(
-            '${Format.rupiah(card.spentThisMonth)} of ${Format.rupiah(card.spendingLimit)} spent',
-            style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
-          ),
-          SizedBox(height: context.spacing.xxs),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 6,
-              backgroundColor: colorScheme.surfaceContainerHigh,
-              color: colorScheme.primary,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

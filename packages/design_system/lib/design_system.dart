@@ -21,6 +21,7 @@ export 'src/widgets/buttons/app_button.dart';
 export 'src/widgets/calendar/app_calendar.dart';
 export 'src/widgets/cards/app_card.dart';
 export 'src/widgets/cards/app_expressive_card.dart';
+export 'src/widgets/cards/app_payment_card.dart';
 export 'src/widgets/charts/app_bar_chart.dart';
 export 'src/widgets/charts/app_line_chart.dart';
 export 'src/widgets/checkboxes/app_checkbox.dart';

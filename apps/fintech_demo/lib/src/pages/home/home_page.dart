@@ -110,6 +110,14 @@ class HomePage extends StatelessWidget {
   }
 }
 
+/// A filled hero treatment, not [AppExpressiveCard]'s bordered/quiet
+/// register (§5.4) -- the account balance is this page's single most
+/// important number and reads better with real visual weight than a
+/// hairline-bordered box indistinguishable from every other resting
+/// surface on the page. Solid `colorScheme.primary` fill, no gradient
+/// (§5.4's anti-pattern ruling), no shadow (§6 -- still page content, not
+/// a floating surface) -- the same treatment `AppPaymentCard` (§10.26)
+/// uses for the same reason.
 class _BalanceCard extends StatelessWidget {
   final BankAccount account;
 
@@ -119,20 +127,28 @@ class _BalanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return AppExpressiveCard(
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.primary,
+        borderRadius: BorderRadius.circular(context.shape.radiusSm),
+      ),
       child: Padding(
-        padding: EdgeInsets.all(context.spacing.md),
+        padding: EdgeInsets.all(context.spacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               '${account.name} ${account.maskedNumber}',
-              style: TextStyle(color: colorScheme.onSurfaceVariant),
+              style: TextStyle(
+                color: colorScheme.onPrimary.withValues(alpha: 0.8),
+              ),
             ),
             SizedBox(height: context.spacing.xxs),
             Text(
               Format.rupiah(account.balance),
-              style: Theme.of(context).textTheme.headlineMedium,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                color: colorScheme.onPrimary,
+              ),
             ),
           ],
         ),
