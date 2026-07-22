@@ -13,6 +13,7 @@ dev_dependencies:
   melos: ^7.0.0
 
 workspace:
+  - apps/fintech_demo
   - apps/mobile
   - apps/widgetbook
   - packages/core

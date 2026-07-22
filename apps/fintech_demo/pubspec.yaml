@@ -1,0 +1,30 @@
+name: fintech_demo
+description: >
+  "Verdant Bank" -- a template digital-banking UI built to exercise every
+  packages/design_system component in real, navigable screens (not just
+  Widgetbook's isolated use-cases). Static mock data only, no backend --
+  a UI showcase, not a shippable app (contrast with apps/mobile, the real
+  composition root).
+publish_to: "none"
+
+resolution: workspace
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  design_system:
+    path: ../../packages/design_system
+  flutter:
+    sdk: flutter
+
+  go_router: ^17.3.0
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
