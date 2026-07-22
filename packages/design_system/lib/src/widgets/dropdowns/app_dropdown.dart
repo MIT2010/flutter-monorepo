@@ -120,6 +120,17 @@ class _AppDropdownState<T> extends State<AppDropdown<T>> {
   void _showOverlay() {
     final renderBox = _fieldKey.currentContext!.findRenderObject() as RenderBox;
     final width = renderBox.size.width;
+    // Captured explicitly rather than relying on ambient inheritance --
+    // `Overlay.of(context)` finds the nearest ancestor Overlay, which in
+    // a plain single-theme app happens to already sit inside the one
+    // theme everything uses, but isn't guaranteed to if this widget is
+    // rendered under a *nested* Theme override (Widgetbook's Theme
+    // Studio color knob does exactly this). Without this, the overlay's
+    // own BuildContext resolves against whatever theme sits at the
+    // Overlay's actual position in the tree, not this widget's — same
+    // class of bug AppMenu.show's own doc comment explains in more
+    // detail.
+    final theme = Theme.of(context);
 
     _overlayEntry = OverlayEntry(
       builder: (overlayContext) => Positioned(
@@ -128,13 +139,16 @@ class _AppDropdownState<T> extends State<AppDropdown<T>> {
           link: _layerLink,
           showWhenUnlinked: false,
           offset: Offset(0, renderBox.size.height + 4),
-          child: _DropdownMenu<T>(
-            items: widget.items,
-            selectedValue: widget.value,
-            onSelected: (item) {
-              widget.onChanged?.call(item.value);
-              _removeOverlay();
-            },
+          child: Theme(
+            data: theme,
+            child: _DropdownMenu<T>(
+              items: widget.items,
+              selectedValue: widget.value,
+              onSelected: (item) {
+                widget.onChanged?.call(item.value);
+                _removeOverlay();
+              },
+            ),
           ),
         ),
       ),

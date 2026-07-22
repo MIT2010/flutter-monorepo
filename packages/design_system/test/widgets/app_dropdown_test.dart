@@ -182,5 +182,45 @@ void main() {
       await tester.pumpWidget(const SizedBox());
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets(
+      'opens correctly when the calling context sits under a nested Theme '
+      'override, not just the root MaterialApp theme -- regression test: '
+      '`Overlay.of(context)` finds the nearest ancestor Overlay, which '
+      'isn\'t guaranteed to sit inside a *nested* Theme override the way '
+      'it does in a plain single-theme app (Widgetbook\'s Theme Studio '
+      'color knob does exactly this), previously crashing with '
+      '"AppMotionExtension not found in ThemeData.extensions" -- caught '
+      'by actually opening this in a running app, not from any golden '
+      'test, which only ever exercises a single flat '
+      'MaterialApp(theme: AppTheme.light())',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            // Deliberately not AppTheme.light() -- the root has none of
+            // design_system's extensions, simulating an app shell (or
+            // Widgetbook's own chrome) that isn't itself Verdant-themed.
+            theme: ThemeData(useMaterial3: true),
+            home: Scaffold(
+              body: Theme(
+                data: AppTheme.light(),
+                child: const AppDropdown<String>(
+                  label: 'Country',
+                  value: null,
+                  items: _items,
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.byType(TextField));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 350));
+
+        expect(tester.takeException(), isNull);
+        expect(find.text('Indonesia'), findsOneWidget);
+      },
+    );
   });
 }

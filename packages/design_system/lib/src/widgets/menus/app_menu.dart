@@ -59,6 +59,19 @@ class AppMenu {
     double width = 240,
   }) {
     final motion = context.motion;
+    // Captured explicitly rather than relying on ambient inheritance --
+    // unlike showDialog/showModalBottomSheet, showGeneralDialog does not
+    // automatically replay the calling context's InheritedTheme data into
+    // its new route. That's invisible in a plain single-theme app (the
+    // route's own Navigator/Overlay already sits inside the one theme
+    // everything uses), but breaks the instant a caller sits under a
+    // *nested* Theme override -- exactly what Widgetbook's Theme Studio
+    // color knob does, and a real app could do too (a themed section of
+    // a screen). Caught by actually opening this in a running app rather
+    // than trusting golden tests, which only ever exercise a single flat
+    // MaterialApp(theme: AppTheme.light()) and can't see this class of
+    // bug at all.
+    final theme = Theme.of(context);
 
     return showGeneralDialog<T>(
       context: context,
@@ -74,15 +87,18 @@ class AppMenu {
         );
         final top = position.dy.clamp(0.0, screenSize.height - 48);
 
-        return Stack(
-          children: [
-            Positioned(
-              left: left,
-              top: top,
-              width: width,
-              child: _AppMenuContent<T>(items: items),
-            ),
-          ],
+        return Theme(
+          data: theme,
+          child: Stack(
+            children: [
+              Positioned(
+                left: left,
+                top: top,
+                width: width,
+                child: _AppMenuContent<T>(items: items),
+              ),
+            ],
+          ),
         );
       },
       transitionBuilder: (dialogContext, animation, secondaryAnimation, child) {
