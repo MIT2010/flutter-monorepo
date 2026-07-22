@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
+import '../accents/verdant_edge_accent.dart';
 
 /// One destination in an [AppSidebar] — icon + label only, no business
 /// logic (design_system is a leaf package, §16), the same shape as
@@ -106,41 +107,38 @@ class _SidebarRow extends StatelessWidget {
       type: MaterialType.transparency,
       child: InkWell(
         onTap: onTap,
-        child: AnimatedContainer(
+        child: VerdantEdgeAccent(
+          selected: selected,
+          color: colorScheme.primary,
+          fill: colorScheme.primaryContainer,
+          width: 2,
           duration: duration,
           curve: motion.curveEnter,
-          height: 48,
-          decoration: BoxDecoration(
-            color: selected ? colorScheme.primaryContainer : null,
-            border: Border(
-              left: BorderSide(
-                color: selected ? colorScheme.primary : Colors.transparent,
-                width: 2,
-              ),
-            ),
-          ),
-          child: Row(
-            children: [
-              SizedBox(width: context.spacing.md),
-              Icon(destination.icon, color: tone, size: 24),
-              SizedBox(width: context.spacing.sm),
-              Expanded(
-                child: ClipRect(
-                  child: AnimatedOpacity(
-                    opacity: extended ? 1 : 0,
-                    duration: duration,
-                    curve: extended ? motion.curveEnter : motion.curveExit,
-                    child: Text(
-                      destination.label,
-                      maxLines: 1,
-                      softWrap: false,
-                      overflow: TextOverflow.clip,
-                      style: TextStyle(color: tone),
+          child: SizedBox(
+            height: 48,
+            child: Row(
+              children: [
+                SizedBox(width: context.spacing.md),
+                Icon(destination.icon, color: tone, size: 24),
+                SizedBox(width: context.spacing.sm),
+                Expanded(
+                  child: ClipRect(
+                    child: AnimatedOpacity(
+                      opacity: extended ? 1 : 0,
+                      duration: duration,
+                      curve: extended ? motion.curveEnter : motion.curveExit,
+                      child: Text(
+                        destination.label,
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.clip,
+                        style: TextStyle(color: tone),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

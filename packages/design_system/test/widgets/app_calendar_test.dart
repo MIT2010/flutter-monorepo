@@ -23,13 +23,20 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byIcon(Icons.chevron_right));
+      final chevronRight = find.byWidgetPredicate(
+        (w) => w is VerdantIcon && w.glyph == VerdantGlyph.chevronRight,
+      );
+      final chevronLeft = find.byWidgetPredicate(
+        (w) => w is VerdantIcon && w.glyph == VerdantGlyph.chevronLeft,
+      );
+
+      await tester.tap(chevronRight);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 250));
       expect(find.text('August 2026'), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.chevron_left));
-      await tester.tap(find.byIcon(Icons.chevron_left));
+      await tester.tap(chevronLeft);
+      await tester.tap(chevronLeft);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 250));
       expect(find.text('June 2026'), findsOneWidget);

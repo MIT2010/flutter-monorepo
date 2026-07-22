@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../icons/verdant_icons.dart';
 import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 import '../inputs/app_text_field.dart';
@@ -68,7 +69,10 @@ class _AppSearchFieldState extends State<AppSearchField> {
       controller: _controller,
       onChanged: widget.onChanged,
       hintText: widget.hintText,
-      prefixIcon: const Icon(Icons.search_outlined),
+      prefixIcon: VerdantIcon(
+        VerdantGlyph.search,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
       suffixIcon: AnimatedSwitcher(
         duration: motion.durationMicro,
         switchInCurve: motion.curveEnter,
@@ -78,7 +82,10 @@ class _AppSearchFieldState extends State<AppSearchField> {
         child: hasText
             ? IconButton(
                 key: const ValueKey('clear'),
-                icon: const Icon(Icons.close),
+                icon: VerdantIcon(
+                  VerdantGlyph.close,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
                 tooltip: 'Clear',
                 onPressed: _controller.clear,
               )

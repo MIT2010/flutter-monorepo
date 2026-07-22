@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../icons/verdant_icons.dart';
 import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 import '../inputs/app_text_field.dart';
@@ -68,15 +69,15 @@ class _AppPasswordFieldState extends State<AppPasswordField> {
           tween: Tween(begin: 1, end: 0),
           duration: motion.durationMicro,
           curve: motion.curveExit,
-          builder: (context, t, _) => Icon(
-            _obscured
-                ? Icons.visibility_outlined
-                : Icons.visibility_off_outlined,
-            color: Color.lerp(
-              colorScheme.onSurfaceVariant,
-              colorScheme.primary,
-              t,
-            ),
+          builder: (context, t, _) => VerdantIcon(
+            _obscured ? VerdantGlyph.eye : VerdantGlyph.eyeOff,
+            color:
+                Color.lerp(
+                  colorScheme.onSurfaceVariant,
+                  colorScheme.primary,
+                  t,
+                ) ??
+                colorScheme.onSurfaceVariant,
           ),
         ),
       ),

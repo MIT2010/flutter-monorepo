@@ -24,8 +24,25 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return ElevatedButton(
       onPressed: loading ? null : onPressed,
+      // `onPressed: null` above makes ElevatedButton report itself
+      // disabled, which by default also repaints the whole button in the
+      // theme's disabled palette (a pale Stone fill) -- fine for a truly
+      // unavailable action, wrong for "processing," which should still
+      // read as the same active, branded surface. This override pins
+      // background/foreground back to the primary-filled look
+      // specifically while loading, so the spinner's onPrimary color
+      // (chosen for legibility against that surface, see below) is never
+      // painted against the low-contrast disabled fill it was found
+      // silently falling back to.
+      style: loading
+          ? ButtonStyle(
+              backgroundColor: WidgetStatePropertyAll(colorScheme.primary),
+              foregroundColor: WidgetStatePropertyAll(colorScheme.onPrimary),
+            )
+          : null,
       child: loading
           ? SizedBox(
               height: 18,
@@ -35,7 +52,7 @@ class AppButton extends StatelessWidget {
               // Verdant's filled-moss button surface (Section 10.1).
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: Theme.of(context).colorScheme.onPrimary,
+                color: colorScheme.onPrimary,
               ),
             )
           : icon == null

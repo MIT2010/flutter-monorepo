@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
+import '../accents/verdant_edge_accent.dart';
 import '../cards/app_card.dart';
 
 /// The base scrollable unit almost every content screen is built from
@@ -123,26 +124,21 @@ class _AppListRowState extends State<AppListRow> {
         onHover: widget.onTap == null
             ? null
             : (hovering) => setState(() => _hovering = hovering),
-        child: AnimatedContainer(
+        child: VerdantEdgeAccent(
+          selected: widget.selected,
+          color: colorScheme.primary,
+          fill: colorScheme.primaryContainer,
+          width: 2,
+          shadow: depth.shadow,
           duration: motion.durationMicro,
           curve: motion.curveEnter,
-          decoration: BoxDecoration(
-            color: widget.selected ? colorScheme.primaryContainer : null,
-            border: Border(
-              left: BorderSide(
-                color: widget.selected
-                    ? colorScheme.primary
-                    : Colors.transparent,
-                width: 2,
-              ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: context.spacing.md,
+              vertical: context.spacing.sm,
             ),
-            boxShadow: depth.shadow,
+            child: widget.child,
           ),
-          padding: EdgeInsets.symmetric(
-            horizontal: context.spacing.md,
-            vertical: context.spacing.sm,
-          ),
-          child: widget.child,
         ),
       ),
     );

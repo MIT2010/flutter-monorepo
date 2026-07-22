@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../maturity/verdant_maturity.dart';
+import '../../shape/verdant_notched_border.dart';
 import '../../theme/app_theme_context.dart';
 
 /// A fixed-length numeric code, one digit per cell (§10.17) — the most
@@ -141,9 +142,12 @@ class _OtpCell extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final shape = context.shape;
 
-    OutlineInputBorder border(Color color, {double width = 1}) =>
-        OutlineInputBorder(
-          borderRadius: BorderRadius.circular(shape.radiusXs),
+    VerdantNotchedInputBorder border(Color color, {double width = 1}) =>
+        VerdantNotchedInputBorder(
+          radiusTopLeft: shape.radiusXs,
+          radiusBottomLeft: shape.radiusXs,
+          radiusBottomRight: shape.radiusXs,
+          notch: shape.notchXs,
           borderSide: BorderSide(color: color, width: width),
         );
 

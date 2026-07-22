@@ -1,4 +1,4 @@
-# Verdant — Design System Specification v1.4
+# Verdant — Design System Specification v1.5
 
 *Chief Design Officer's specification. This document is the source of truth for Verdant's visual identity.*
 
@@ -11,6 +11,8 @@
 **v1.3 revision note**: closes v1.2's one self-acknowledged gap — §14.3 now reports a real, executed 200% `textScaler` verification (`test/accessibility/text_scaling_test.dart`) instead of an unverified claim. Five of the six Tahap 2 components passed outright; `AppNavigationBar` genuinely overflowed under a realistic-but-narrower adversarial case (four longer destination labels on a small-phone width) and has been fixed (fixed `SizedBox` height replaced with a `ConstrainedBox` minimum), golden-reverified, and is now guarded by a permanent regression test. This is code + test work, not documentation-only like v1.1/v1.2 — flagged here since this document's own status line otherwise implies everything below it is settled prose.
 
 **v1.4 revision note**: a deliberate philosophy change, approved explicitly, not a correction of a previous mistake. §13 point 5 and §10.24 both stated a real, considered decision at the time they were written — "build-on-demand only, per real screen need" — and that decision is not being retracted as *wrong*; it's being superseded because the cost/benefit changed. §15 ("Maturity levels") is the new section this revision adds: all seventeen §10.7–§10.23 components move from specification-only to fully implemented, but gated by two concrete risk mitigations instead of the evidence-of-need gate they were previously held to — an explicit maturity label (`@verdantStable`/`@verdantPreview`) so nobody mistakes a spec-only-derived component for one proven under real use, and a proof-of-concept phase (two components, one simple/one complex, built and reported on before the remaining fifteen) rather than one large batch. See §15 for the full mechanism and what "preview" means for a project consuming this kit. §13 gains a sixth decision recording this change; §10.24's own text is left as-is (it was accurate when written) with an editorial note appended pointing here, matching this document's own established practice of not silently rewriting settled history (§13's intro already states this, borrowed from how ARCHITECTURE.md's ADR log works).
+
+**v1.5 revision note**: records completion, not a further decision. The v1.4 proof-of-concept (Tag, Calendar/Date Picker) was approved, and the remaining fifteen §10.7–§10.23 components were then delivered across five batches (Checkbox/Radio/Switch; Search/Password/OTP; Tabs/Sidebar/Dropdown; List/Table/Chart; Avatar/Tooltip/Menu), each with a golden test (light/dark), an interaction test, and a Widgetbook use-case with real per-instance knobs, verified against CI-rendered goldens rather than trusted green alone. All seventeen now carry `@verdantPreview`. §15.4 is updated from a forward-looking rollout plan to a completion record with the actual per-component table; §13 point 6 gets a short pointer to it. No maturity label changes as a result of this revision — `@verdantStable`'s eleven classes (§15.2) are untouched, and none of the seventeen graduate to stable here, since graduation is real usage, not batch completion (§15.3).
 
 ## 0.1 Token-cheap vs. code-required — the boundary a downstream project needs
 
@@ -569,7 +571,7 @@ All five original open decisions are now resolved; kept here as a record, matchi
 3. **`docs/DESIGN_LANGUAGE.md`** — ~~archive or remove?~~ **Resolved**: archived as historical record, not deleted.
 4. **Rollout scope** — ~~tokens + 6 detailed components first, or something else?~~ **Resolved**: tokens (Tahap 1) + 6 components (Tahap 2) + `AppExpressiveCard` (Tahap 3), all now implemented.
 5. **Component anatomy for the remaining components list** — ~~build ahead, or build-on-demand?~~ **Resolved as of v1.3**: build-on-demand only, per real screen need. **Superseded in v1.4** — see point 6.
-6. **Whether to keep gating §10.7–§10.23 on real, evidenced demand** — ~~keep the build-on-demand gate, or build all seventeen now?~~ **Resolved (v1.4)**: build all seventeen now, gated instead by an explicit maturity label (`@verdantStable`/`@verdantPreview`, §15) and a proof-of-concept phase (two components built and reported on before the remaining fifteen) rather than by per-component evidence of need. Point 5's original reasoning — don't build ahead of real need — is not wrong, it's outweighed here by the value of a complete, consistent UI kit *combined with* the risk mitigations §15 describes; a project consuming this kit can now reach for any of the seventeen, with an honest, checkable signal for how much real-world proof stands behind each one.
+6. **Whether to keep gating §10.7–§10.23 on real, evidenced demand** — ~~keep the build-on-demand gate, or build all seventeen now?~~ **Resolved (v1.4)**: build all seventeen now, gated instead by an explicit maturity label (`@verdantStable`/`@verdantPreview`, §15) and a proof-of-concept phase (two components built and reported on before the remaining fifteen) rather than by per-component evidence of need. Point 5's original reasoning — don't build ahead of real need — is not wrong, it's outweighed here by the value of a complete, consistent UI kit *combined with* the risk mitigations §15 describes; a project consuming this kit can now reach for any of the seventeen, with an honest, checkable signal for how much real-world proof stands behind each one. **The proof-of-concept and all five follow-up batches are complete as of v1.5** — see §15.4 for the per-component table.
 
 **What this revision does not do**: it does not change §10.1–§10.6's or `AppExpressiveCard`/`AppLoadingIndicator`/`AppStateView`'s status — those already carry real evidence (Tahap 2's build, or the component-gap audits ADR-016/017 cite) and are marked `@verdantStable`, unaffected by this decision either way.
 
@@ -670,8 +672,34 @@ Read this before depending on a `@verdantPreview` widget in a real screen:
 - **The path from preview to stable is real usage, not a timer.** A `@verdantPreview` widget graduates to `@verdantStable` the same way Tahap 2's did originally — a real screen consumes it, any gap that surfaces gets fixed, and the annotation is updated once that's happened. There's no fixed "N releases and it's stable" rule; the criterion is evidence, same as §0.1's retheme/redesign boundary is a checkable test, not a vibe.
 - **Check the annotation before treating any `design_system` widget as risk-free to ship behind.** `grep -rn '@verdantPreview' packages/design_system/lib` (or an IDE search) lists the current set.
 
-### 15.4 Rollout: proof-of-concept before scaling to all seventeen
+### 15.4 Rollout: complete — all seventeen are `@verdantPreview`
 
-Per the explicit instruction behind v1.4: rather than implementing all seventeen §10.7–§10.23 components in one pass, two are built first — one simple (§10.15 Tag), one complex (§10.19 Calendar/Date Picker) — each with a golden test and a Widgetbook use-case that exposes **per-instance knobs** (`context.knobs.*`, adjustable live per catalog entry), not just Theme Studio's existing global addon (§0, "what survives" — Theme Studio stays for whole-catalog retheming; knobs are the complementary per-component tool). The proof-of-concept also answers a tooling question: whether a knob-auto-generation tool is worth adopting for the remaining fifteen, or whether hand-written knobs are the better bar for this kit's own quality standard. Findings, including any real obstacle discovered while implementing (the same "found while actually building it" pattern that caught the font-loading regression in Tahap 2 and the `AppNavigationBar` overflow in §14.3 — golden-green is necessary, not sufficient, proof), are reported before the remaining fifteen components are scheduled into batches.
+Per the explicit instruction behind v1.4: rather than implementing all seventeen §10.7–§10.23 components in one pass, two were built first as a proof-of-concept — one simple (§10.15 Tag), one complex (§10.19 Calendar/Date Picker) — each with a golden test and a Widgetbook use-case exposing **per-instance knobs** (`context.knobs.*`, adjustable live per catalog entry), not just Theme Studio's existing global addon (§0, "what survives" — Theme Studio stays for whole-catalog retheming; knobs are the complementary per-component tool). That proof-of-concept was accepted, including its answer on the tooling question it was meant to settle: hand-written knobs, not a knob-auto-generation tool, are this kit's bar. The remaining fifteen were then delivered across five batches, each reported separately and confirmed before the next began, following the same recipe — implementation + golden test (light/dark) + interaction test + Widgetbook use-case with real knobs + manual visual inspection of CI-rendered PNGs (not just trusted-green; see below) + a green CI run.
+
+All seventeen §10.7–§10.23 components are now implemented and carry `@verdantPreview`:
+
+| § | Component | Widget class(es) | Delivered in |
+|---|---|---|---|
+| §10.7 | Checkbox | `AppCheckbox` | Batch 1 |
+| §10.8 | Radio | `AppRadio<T>` | Batch 1 |
+| §10.9 | Switch | `AppSwitch` | Batch 1 |
+| §10.10 | Tabs | `AppTabs` | Batch 3 |
+| §10.11 | Sidebar | `AppSidebar` | Batch 3 |
+| §10.12 | List | `AppList`, `AppListRow` | Batch 4 |
+| §10.13 | Table | `AppTable` | Batch 4 |
+| §10.14 | Chart | `AppBarChart` | Batch 4 |
+| §10.15 | Tag | `AppTag` | Proof-of-concept |
+| §10.16 | Search field | `AppSearchField` | Batch 2 |
+| §10.17 | OTP field | `AppOtpField` | Batch 2 |
+| §10.18 | Password field | `AppPasswordField` | Batch 2 |
+| §10.19 | Calendar / Date picker | `AppCalendar`, `AppDatePicker` | Proof-of-concept |
+| §10.20 | Avatar | `AppAvatar` | Batch 5 |
+| §10.21 | Tooltip | `AppTooltip` | Batch 5 |
+| §10.22 | Dropdown / Select | `AppDropdown<T>` | Batch 3 |
+| §10.23 | Menu | `AppMenu` | Batch 5 |
+
+Every row is `@verdantPreview` — none have graduated to `@verdantStable` as part of this rollout; per §15.3, graduation happens only when a real screen consumes one and any gap it surfaces gets fixed, not on a batch-completion timer. Verify the live set at any time with `grep -rn '@verdantPreview' packages/design_system/lib`.
+
+Manual PNG inspection (not automated assertions alone) caught a real bug in three of the five batches: a lingering focused-input border in Batch 2's OTP field, an invisible selected-row wash in Batch 4's table (`Material(type: MaterialType.transparency)` silently drops its `color`), and tofu text in Batch 5's tooltip (`Tooltip.textStyle` doesn't inherit the ambient `DefaultTextStyle`, unlike a plain `Text.style`). All three were fixed, golden-reverified, and are now guarded by the corresponding test.
 
 ---

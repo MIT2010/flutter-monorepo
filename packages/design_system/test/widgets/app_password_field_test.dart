@@ -14,7 +14,12 @@ void main() {
 
       final field = tester.widget<TextField>(find.byType(TextField));
       expect(field.obscureText, isTrue);
-      expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is VerdantIcon && w.glyph == VerdantGlyph.eye,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('tapping the toggle reveals text and swaps the glyph', (
@@ -32,7 +37,12 @@ void main() {
 
       final field = tester.widget<TextField>(find.byType(TextField));
       expect(field.obscureText, isFalse);
-      expect(find.byIcon(Icons.visibility_off_outlined), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is VerdantIcon && w.glyph == VerdantGlyph.eyeOff,
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('tapping again re-obscures', (tester) async {
@@ -67,11 +77,11 @@ void main() {
 
         await tester.tap(find.byType(IconButton));
         await tester.pump();
-        final flashed = tester.widget<Icon>(find.byType(Icon));
+        final flashed = tester.widget<VerdantIcon>(find.byType(VerdantIcon));
         expect(flashed.color, colorScheme.primary);
 
         await tester.pump(const Duration(milliseconds: 120));
-        final settled = tester.widget<Icon>(find.byType(Icon));
+        final settled = tester.widget<VerdantIcon>(find.byType(VerdantIcon));
         expect(settled.color, colorScheme.onSurfaceVariant);
       },
     );

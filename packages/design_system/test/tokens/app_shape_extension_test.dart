@@ -25,6 +25,15 @@ void main() {
       expect(copy.radiusPill, shape.radiusPill);
     });
 
+    test(
+      'notch scale (xs/sm/md) is strictly increasing, paired with radius tiers',
+      () {
+        const shape = AppShapeExtension.standard;
+        expect(shape.notchXs, lessThan(shape.notchSm));
+        expect(shape.notchSm, lessThan(shape.notchMd));
+      },
+    );
+
     test('lerp interpolates radii', () {
       const a = AppShapeExtension(
         radiusNone: 0,
@@ -32,6 +41,9 @@ void main() {
         radiusSm: 0,
         radiusMd: 0,
         radiusPill: 0,
+        notchXs: 0,
+        notchSm: 0,
+        notchMd: 0,
       );
       const b = AppShapeExtension(
         radiusNone: 10,
@@ -39,10 +51,14 @@ void main() {
         radiusSm: 10,
         radiusMd: 10,
         radiusPill: 10,
+        notchXs: 10,
+        notchSm: 10,
+        notchMd: 10,
       );
 
       final mid = a.lerp(b, 0.5);
       expect(mid.radiusMd, 5.0);
+      expect(mid.notchMd, 5.0);
     });
 
     test('lerp returns this unchanged when other is a different type', () {

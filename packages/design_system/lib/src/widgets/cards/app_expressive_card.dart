@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../maturity/verdant_maturity.dart';
+import '../../shape/verdant_notched_border.dart';
 import '../../theme/app_theme_context.dart';
 
 /// A card that expresses confidence through color, not motion (§5.4).
@@ -45,8 +46,9 @@ class _AppExpressiveCardState extends State<AppExpressiveCard> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final motion = context.motion;
+    final semanticColors = context.semanticColors;
     final reduceMotion = MediaQuery.of(context).disableAnimations;
-    final radius = BorderRadius.circular(context.shape.radiusSm);
+    final shape = context.shape;
     final borderColor = _pressed
         ? colorScheme.primary
         : colorScheme.outlineVariant;
@@ -60,10 +62,21 @@ class _AppExpressiveCardState extends State<AppExpressiveCard> {
         duration: reduceMotion ? Duration.zero : motion.durationMicro,
         curve: motion.curveEnter,
         clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
+        decoration: ShapeDecoration(
           color: colorScheme.surface,
-          border: Border.all(color: borderColor),
-          borderRadius: radius,
+          shape: VerdantNotchedBorder(
+            radiusTopLeft: shape.radiusSm,
+            radiusBottomLeft: shape.radiusSm,
+            radiusBottomRight: shape.radiusSm,
+            notch: shape.notchSm,
+            side: BorderSide(color: borderColor),
+            // The one moment this card leans into its own name: pressed
+            // is this component's single expressive beat, so the notch
+            // picks up the accent fill only then, echoing the border's
+            // own press-only recolor instead of running independently of
+            // it.
+            notchFill: _pressed ? semanticColors.accent : null,
+          ),
         ),
         child: Padding(
           padding: EdgeInsets.all(context.spacing.md),

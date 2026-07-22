@@ -2,6 +2,10 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+final _closeIcon = find.byWidgetPredicate(
+  (w) => w is VerdantIcon && w.glyph == VerdantGlyph.close,
+);
+
 void main() {
   group('AppTag', () {
     testWidgets('renders the label', (tester) async {
@@ -25,7 +29,7 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.close), findsNothing);
+      expect(_closeIcon, findsNothing);
     });
 
     testWidgets('tapping the tag body calls onTap', (tester) async {
@@ -62,7 +66,7 @@ void main() {
           ),
         );
 
-        await tester.tap(find.byIcon(Icons.close));
+        await tester.tap(_closeIcon);
         expect(removed, isTrue);
         expect(tapped, isFalse);
       },

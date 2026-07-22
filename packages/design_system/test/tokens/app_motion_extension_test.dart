@@ -40,6 +40,7 @@ void main() {
         durationPage: Duration.zero,
         curveEnter: Curves.linear,
         curveExit: Curves.linear,
+        curveEmphasis: Curves.linear,
         spring: SpringDescription(mass: 0, stiffness: 0, damping: 0),
       );
       const b = AppMotionExtension(
@@ -49,6 +50,7 @@ void main() {
         durationPage: Duration(milliseconds: 100),
         curveEnter: Curves.ease,
         curveExit: Curves.ease,
+        curveEmphasis: Curves.ease,
         spring: SpringDescription(mass: 10, stiffness: 10, damping: 10),
       );
 

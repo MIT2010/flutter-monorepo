@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../icons/verdant_icons.dart';
 import '../../maturity/verdant_maturity.dart';
+import '../../shape/verdant_notched_border.dart';
 import '../../theme/app_theme_context.dart';
 
 const _monthNames = [
@@ -116,7 +118,10 @@ class _AppCalendarState extends State<AppCalendar> {
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.chevron_left),
+                  icon: VerdantIcon(
+                    VerdantGlyph.chevronLeft,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                   tooltip: 'Previous month',
                   onPressed: _goToPreviousMonth,
                 ),
@@ -137,7 +142,10 @@ class _AppCalendarState extends State<AppCalendar> {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.chevron_right),
+                  icon: VerdantIcon(
+                    VerdantGlyph.chevronRight,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                   tooltip: 'Next month',
                   onPressed: _goToNextMonth,
                 ),
@@ -356,14 +364,20 @@ class AppDatePicker {
         child: Builder(
           builder: (context) {
             final depth = context.elevation.floating;
+            final shape = context.shape;
             return Container(
               clipBehavior: Clip.antiAlias,
               padding: EdgeInsets.all(context.spacing.sm),
-              decoration: BoxDecoration(
+              decoration: ShapeDecoration(
                 color:
                     depth.surfaceColor ?? Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(context.shape.radiusMd),
-                boxShadow: depth.shadow,
+                shape: VerdantNotchedBorder(
+                  radiusTopLeft: shape.radiusMd,
+                  radiusBottomLeft: shape.radiusMd,
+                  radiusBottomRight: shape.radiusMd,
+                  notch: shape.notchMd,
+                ),
+                shadows: depth.shadow,
               ),
               child: AppCalendar(
                 selectedDate: initialDate,

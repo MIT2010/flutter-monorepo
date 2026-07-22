@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../maturity/verdant_maturity.dart';
+import '../../shape/verdant_notched_border.dart';
 import '../../theme/app_theme_context.dart';
 
 /// A container for related content, not a design flourish (§10.2). Level 1
@@ -9,11 +10,15 @@ import '../../theme/app_theme_context.dart';
 /// feedback* on a tappable card, never as permanent decoration on a static
 /// one, per §6's "depth as feedback, not decoration" rule for Level 2.
 ///
-/// Builds its own [BoxDecoration] from [AppElevationExtension]'s named
+/// Builds its own [ShapeDecoration] from [AppElevationExtension]'s named
 /// depth levels rather than wrapping [Card] — [Card]'s `elevation` produces
 /// Material's own drop-shadow curve, which can't express Verdant's literal
-/// border/shadow-list spec (§6). [InkWell] still supplies real tap/hover
-/// feedback and ripple.
+/// border/shadow-list spec (§6). [ShapeDecoration] (not [BoxDecoration]) is
+/// what makes [VerdantNotchedBorder] ("the Verdant Corner") paintable here
+/// — [BoxDecoration] only accepts a uniform [BorderRadius], not an
+/// arbitrary [ShapeBorder]. [InkWell] still supplies real tap/hover
+/// feedback and ripple, via `customBorder` rather than `borderRadius` so
+/// the ripple itself is clipped to the notched silhouette too.
 @verdantStable
 class AppCard extends StatefulWidget {
   final Widget child;
@@ -39,17 +44,26 @@ class _AppCardState extends State<AppCard> {
     final depth = widget.onTap != null && _hovering
         ? context.elevation.lifted
         : context.elevation.resting;
-    final radius = BorderRadius.circular(context.shape.radiusSm);
+    final shape = context.shape;
+    final side = depth.border is Border
+        ? (depth.border as Border).top
+        : BorderSide.none;
+    final border = VerdantNotchedBorder(
+      radiusTopLeft: shape.radiusSm,
+      radiusBottomLeft: shape.radiusSm,
+      radiusBottomRight: shape.radiusSm,
+      notch: shape.notchSm,
+      side: side,
+    );
 
     return AnimatedContainer(
       duration: context.motion.durationMicro,
       curve: context.motion.curveEnter,
       clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
+      decoration: ShapeDecoration(
         color: Theme.of(context).colorScheme.surface,
-        border: depth.border,
-        borderRadius: radius,
-        boxShadow: depth.shadow,
+        shape: border,
+        shadows: depth.shadow,
       ),
       child: Material(
         type: MaterialType.transparency,
@@ -58,7 +72,7 @@ class _AppCardState extends State<AppCard> {
           onHover: widget.onTap == null
               ? null
               : (hovering) => setState(() => _hovering = hovering),
-          borderRadius: radius,
+          customBorder: border,
           child: Padding(
             padding: widget.padding ?? EdgeInsets.all(context.spacing.md),
             child: widget.child,

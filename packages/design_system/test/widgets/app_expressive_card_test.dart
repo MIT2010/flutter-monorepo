@@ -54,18 +54,18 @@ void main() {
           ),
         );
 
-        BoxDecoration decorationOf() {
+        VerdantNotchedBorder shapeOf() {
           final container = tester.widget<AnimatedContainer>(
             find.descendant(
               of: find.byKey(cardKey),
               matching: find.byType(AnimatedContainer),
             ),
           );
-          return container.decoration as BoxDecoration;
+          final decoration = container.decoration as ShapeDecoration;
+          return decoration.shape as VerdantNotchedBorder;
         }
 
-        final restBorder = decorationOf().border as Border;
-        expect(restBorder.top.color, theme.colorScheme.outlineVariant);
+        expect(shapeOf().side.color, theme.colorScheme.outlineVariant);
 
         final gesture = await tester.startGesture(
           tester.getCenter(find.byKey(cardKey)),
@@ -73,15 +73,13 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 150));
 
-        final pressedBorder = decorationOf().border as Border;
-        expect(pressedBorder.top.color, theme.colorScheme.primary);
+        expect(shapeOf().side.color, theme.colorScheme.primary);
 
         await gesture.up();
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 150));
 
-        final releasedBorder = decorationOf().border as Border;
-        expect(releasedBorder.top.color, theme.colorScheme.outlineVariant);
+        expect(shapeOf().side.color, theme.colorScheme.outlineVariant);
       },
     );
 
@@ -107,14 +105,15 @@ void main() {
           ),
         );
 
-        BoxDecoration decorationOf() {
+        VerdantNotchedBorder shapeOf() {
           final container = tester.widget<AnimatedContainer>(
             find.descendant(
               of: find.byKey(cardKey),
               matching: find.byType(AnimatedContainer),
             ),
           );
-          return container.decoration as BoxDecoration;
+          final decoration = container.decoration as ShapeDecoration;
+          return decoration.shape as VerdantNotchedBorder;
         }
 
         final gesture = await tester.startGesture(
@@ -122,14 +121,12 @@ void main() {
         );
         await tester.pump();
 
-        final pressedBorder = decorationOf().border as Border;
-        expect(pressedBorder.top.color, theme.colorScheme.primary);
+        expect(shapeOf().side.color, theme.colorScheme.primary);
 
         await gesture.up();
         await tester.pump();
 
-        final releasedBorder = decorationOf().border as Border;
-        expect(releasedBorder.top.color, theme.colorScheme.outlineVariant);
+        expect(shapeOf().side.color, theme.colorScheme.outlineVariant);
       },
     );
   });

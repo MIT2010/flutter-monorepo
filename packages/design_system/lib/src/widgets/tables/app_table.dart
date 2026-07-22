@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../icons/verdant_icons.dart';
 import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
@@ -171,10 +172,10 @@ class _SortIndicator extends StatelessWidget {
     return TweenAnimationBuilder<Color?>(
       tween: ColorTween(end: targetColor),
       duration: motion.durationMicro,
-      builder: (context, color, _) => Icon(
-        ascending ? Icons.arrow_upward : Icons.arrow_downward,
+      builder: (context, color, _) => VerdantIcon(
+        ascending ? VerdantGlyph.arrowUp : VerdantGlyph.arrowDown,
         size: 14,
-        color: color,
+        color: color ?? Colors.transparent,
       ),
     );
   }

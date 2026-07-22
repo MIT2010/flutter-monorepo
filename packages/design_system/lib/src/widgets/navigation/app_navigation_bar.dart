@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
+import '../accents/verdant_edge_accent.dart';
 
 /// One tab in an [AppNavigationBar] — icon + label only, no business logic
 /// (design_system is a leaf package, §16). Consumers (e.g.
@@ -108,18 +109,14 @@ class _Destination extends StatelessWidget {
       type: MaterialType.transparency,
       child: InkWell(
         onTap: onTap,
-        child: AnimatedContainer(
+        child: VerdantEdgeAccent(
+          selected: selected,
+          color: colorScheme.primary,
+          fill: colorScheme.primaryContainer,
+          side: VerdantEdgeSide.top,
+          width: 2,
           duration: duration,
           curve: curve,
-          decoration: BoxDecoration(
-            color: selected ? colorScheme.primaryContainer : null,
-            border: Border(
-              top: BorderSide(
-                color: selected ? colorScheme.primary : Colors.transparent,
-                width: 2,
-              ),
-            ),
-          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,

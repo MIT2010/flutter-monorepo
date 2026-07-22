@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../icons/verdant_icons.dart';
 import '../../maturity/verdant_maturity.dart';
+import '../../shape/verdant_notched_border.dart';
 import '../../theme/app_theme_context.dart';
 
 /// A binary, independent choice — one of possibly several selected at once,
@@ -67,7 +69,7 @@ class _AppCheckboxState extends State<AppCheckbox> {
     final checked = widget.value == true;
     final indeterminate = widget.value == null;
     final selected = checked || indeterminate;
-    final radius = BorderRadius.circular(context.shape.radiusXs);
+    final shape = context.shape;
 
     final Color? fill;
     final Color borderColor;
@@ -86,13 +88,20 @@ class _AppCheckboxState extends State<AppCheckbox> {
     final glyphColor = disabled
         ? colorScheme.onSurfaceVariant
         : colorScheme.onPrimary;
+    final border = VerdantNotchedBorder(
+      radiusTopLeft: shape.radiusXs,
+      radiusBottomLeft: shape.radiusXs,
+      radiusBottomRight: shape.radiusXs,
+      notch: shape.notchXs,
+      side: BorderSide(color: borderColor),
+    );
 
     return Semantics(
       checked: checked,
       mixed: indeterminate,
       child: Material(
         type: MaterialType.transparency,
-        shape: RoundedRectangleBorder(borderRadius: radius),
+        shape: border,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: disabled ? null : _handleTap,
@@ -104,30 +113,30 @@ class _AppCheckboxState extends State<AppCheckbox> {
             curve: motion.curveEnter,
             width: 20,
             height: 20,
-            decoration: BoxDecoration(
-              color: fill,
-              borderRadius: radius,
-              border: Border.all(color: borderColor),
-            ),
-            alignment: Alignment.center,
-            child: AnimatedSwitcher(
-              duration: motion.durationMicro,
-              switchInCurve: motion.curveEnter,
-              switchOutCurve: motion.curveExit,
-              transitionBuilder: (child, animation) => ScaleTransition(
-                scale: animation,
-                child: FadeTransition(opacity: animation, child: child),
+            decoration: ShapeDecoration(color: fill, shape: border),
+            child: Center(
+              child: AnimatedSwitcher(
+                duration: motion.durationMicro,
+                switchInCurve: motion.curveEnter,
+                switchOutCurve: motion.curveExit,
+                transitionBuilder: (child, animation) => ScaleTransition(
+                  scale: animation,
+                  child: FadeTransition(opacity: animation, child: child),
+                ),
+                child: selected
+                    ? VerdantIcon(
+                        indeterminate
+                            ? VerdantGlyph.remove
+                            : VerdantGlyph.check,
+                        key: ValueKey(
+                          indeterminate ? 'indeterminate' : 'checked',
+                        ),
+                        size: 14,
+                        color: glyphColor,
+                        strokeWidth: 2,
+                      )
+                    : const SizedBox.shrink(key: ValueKey('empty')),
               ),
-              child: selected
-                  ? Icon(
-                      indeterminate ? Icons.remove : Icons.check,
-                      key: ValueKey(
-                        indeterminate ? 'indeterminate' : 'checked',
-                      ),
-                      size: 14,
-                      color: glyphColor,
-                    )
-                  : const SizedBox.shrink(key: ValueKey('empty')),
             ),
           ),
         ),

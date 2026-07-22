@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../shape/verdant_notched_border.dart';
 import '../tokens/app_elevation_extension.dart';
 import '../tokens/app_motion_extension.dart';
 import '../tokens/app_semantic_colors.dart';
@@ -180,6 +181,14 @@ class AppTheme {
   /// outlined mode) — §10.1's secondary-button note documents the
   /// available treatment for when a screen actually needs it, not a
   /// mandate to build it unused.
+  ///
+  /// Shape is [VerdantNotchedBorder] ("the Verdant Corner") rather than a
+  /// plain rounded rect — the button is the single highest-traffic
+  /// surface in the kit, so it's the one place the shape signature has to
+  /// be unmissable. The cut corner's fill is [AppSemanticColors.accent]
+  /// (Brass) only while the button reads as an active commitment point
+  /// (rest/hover/pressed) — `null` (transparent) when disabled, since a
+  /// disabled control has nothing to draw emphasis toward.
   static ElevatedButtonThemeData _elevatedButtonTheme({
     required ColorScheme colorScheme,
     required AppShapeExtension shape,
@@ -193,15 +202,24 @@ class AppTheme {
     final disabledText = isLight
         ? VerdantColors.stone50
         : VerdantColors.stone50;
+    final accentColor = isLight
+        ? AppSemanticColors.light.accent
+        : AppSemanticColors.dark.accent;
 
     return ElevatedButtonThemeData(
       style: ButtonStyle(
         elevation: const WidgetStatePropertyAll(0),
         shadowColor: const WidgetStatePropertyAll(Colors.transparent),
         overlayColor: const WidgetStatePropertyAll(Colors.transparent),
-        shape: WidgetStatePropertyAll(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(shape.radiusXs),
+        shape: WidgetStateProperty.resolveWith(
+          (states) => VerdantNotchedBorder(
+            radiusTopLeft: shape.radiusXs,
+            radiusBottomLeft: shape.radiusXs,
+            radiusBottomRight: shape.radiusXs,
+            notch: shape.notchXs,
+            notchFill: states.contains(WidgetState.disabled)
+                ? null
+                : accentColor,
           ),
         ),
         // No textStyle override -- ElevatedButton's own default already
@@ -233,20 +251,42 @@ class AppTheme {
   /// itself renders the label as a static `Text` above the field (never
   /// `InputDecoration.labelText`, which would float) — this theme only
   /// owns the field's own chrome.
+  ///
+  /// Border is [VerdantNotchedInputBorder] ("the Verdant Corner"), not
+  /// [OutlineInputBorder] — inputs are the highest-traffic surface after
+  /// the button, so this is the second place the shape signature has to
+  /// be unmissable. Only [focusedBorder] fills the cut corner with
+  /// [AppSemanticColors.accent] — "you're actively here, in good
+  /// standing" reads as the one moment worth the extra emphasis; the
+  /// error borders deliberately don't also carry it; a red border already
+  /// signals hard enough, and adding a second, unrelated accent color on
+  /// top would blur rather than sharpen the signal.
   static InputDecorationTheme _inputDecorationTheme({
     required ColorScheme colorScheme,
     required AppShapeExtension shape,
+    required bool isLight,
   }) {
-    OutlineInputBorder border(Color color, {double width = 1}) =>
-        OutlineInputBorder(
-          borderRadius: BorderRadius.circular(shape.radiusXs),
-          borderSide: BorderSide(color: color, width: width),
-        );
+    final accentColor = isLight
+        ? AppSemanticColors.light.accent
+        : AppSemanticColors.dark.accent;
+
+    VerdantNotchedInputBorder border(
+      Color color, {
+      double width = 1,
+      bool emphasis = false,
+    }) => VerdantNotchedInputBorder(
+      radiusTopLeft: shape.radiusXs,
+      radiusBottomLeft: shape.radiusXs,
+      radiusBottomRight: shape.radiusXs,
+      notch: shape.notchXs,
+      notchFill: emphasis ? accentColor : null,
+      borderSide: BorderSide(color: color, width: width),
+    );
 
     return InputDecorationTheme(
       border: border(colorScheme.outlineVariant),
       enabledBorder: border(colorScheme.outlineVariant),
-      focusedBorder: border(colorScheme.primary, width: 2),
+      focusedBorder: border(colorScheme.primary, width: 2, emphasis: true),
       errorBorder: border(colorScheme.error),
       focusedErrorBorder: border(colorScheme.error, width: 2),
       errorStyle: TextStyle(color: colorScheme.error),
@@ -278,8 +318,11 @@ class AppTheme {
   }) {
     return DialogThemeData(
       elevation: 8,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(shape.radiusMd),
+      shape: VerdantNotchedBorder(
+        radiusTopLeft: shape.radiusMd,
+        radiusBottomLeft: shape.radiusMd,
+        radiusBottomRight: shape.radiusMd,
+        notch: shape.notchMd,
       ),
     );
   }
@@ -306,8 +349,11 @@ class AppTheme {
     return SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(shape.radiusSm),
+      shape: VerdantNotchedBorder(
+        radiusTopLeft: shape.radiusSm,
+        radiusBottomLeft: shape.radiusSm,
+        radiusBottomRight: shape.radiusSm,
+        notch: shape.notchSm,
       ),
     );
   }
@@ -420,6 +466,7 @@ class AppTheme {
       inputDecorationTheme: _inputDecorationTheme(
         colorScheme: colorScheme,
         shape: shape,
+        isLight: true,
       ),
       dialogTheme: _dialogTheme(colorScheme: colorScheme, shape: shape),
       snackBarTheme: _snackBarTheme(shape: shape),
@@ -473,6 +520,7 @@ class AppTheme {
       inputDecorationTheme: _inputDecorationTheme(
         colorScheme: colorScheme,
         shape: shape,
+        isLight: false,
       ),
       dialogTheme: _dialogTheme(colorScheme: colorScheme, shape: shape),
       snackBarTheme: _snackBarTheme(shape: shape),

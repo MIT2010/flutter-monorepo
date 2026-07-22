@@ -10,6 +10,19 @@ import 'package:flutter/material.dart';
 /// faster than it arrived. Four duration tiers instead of three, adding a
 /// distinct `page` tier for full-screen/route transitions.
 ///
+/// [curveEmphasis] is the system's one deliberately-distinct third curve,
+/// added alongside "the Verdant Corner" shape signature — reserved for
+/// the small set of affirmative moments the notch itself marks (primary
+/// button press-feedback, a selection confirming). **Still zero
+/// overshoot** — the "never bouncy" rule above is not being relaxed, an
+/// overshoot/spring curve was considered and rejected as a signature
+/// specifically because it would contradict this file's own established
+/// philosophy. What makes it feel distinct instead is pace, not shape:
+/// almost all deceleration happens in the first fraction of the curve
+/// (steeper front-load than even [curveExit]), reading as a crisp "snap
+/// to attention" rather than [curveEnter]'s gentle settle — the motion
+/// equivalent of a precise cut corner instead of a soft round one.
+///
 /// [spring] is kept as reusable Flutter physics infrastructure
 /// (`SpringDescription`/`SpringSimulation` from `package:flutter/physics.dart`)
 /// but is **not** part of Verdant's default motion vocabulary — no
@@ -26,6 +39,7 @@ class AppMotionExtension extends ThemeExtension<AppMotionExtension> {
     required this.durationPage,
     required this.curveEnter,
     required this.curveExit,
+    required this.curveEmphasis,
     required this.spring,
   });
 
@@ -42,6 +56,11 @@ class AppMotionExtension extends ThemeExtension<AppMotionExtension> {
     // Quick, front-loaded departure — attention leaves faster than it
     // arrives.
     curveExit: Cubic(0.4, 0.0, 0.8, 1.0),
+    // Nearly all deceleration in the first fraction, zero overshoot —
+    // "snap to attention," not a bounce. See class doc for why this
+    // exists as a third curve instead of reaching for an overshoot/spring
+    // treatment.
+    curveEmphasis: Cubic(0.05, 0.9, 0.1, 1.0),
     // Retained capability, unused by any component by default post-Tahap
     // 3 — see class doc.
     spring: SpringDescription(mass: 1, stiffness: 300, damping: 20),
@@ -62,6 +81,7 @@ class AppMotionExtension extends ThemeExtension<AppMotionExtension> {
 
   final Curve curveEnter;
   final Curve curveExit;
+  final Curve curveEmphasis;
   final SpringDescription spring;
 
   @override
@@ -72,6 +92,7 @@ class AppMotionExtension extends ThemeExtension<AppMotionExtension> {
     Duration? durationPage,
     Curve? curveEnter,
     Curve? curveExit,
+    Curve? curveEmphasis,
     SpringDescription? spring,
   }) {
     return AppMotionExtension(
@@ -81,6 +102,7 @@ class AppMotionExtension extends ThemeExtension<AppMotionExtension> {
       durationPage: durationPage ?? this.durationPage,
       curveEnter: curveEnter ?? this.curveEnter,
       curveExit: curveExit ?? this.curveExit,
+      curveEmphasis: curveEmphasis ?? this.curveEmphasis,
       spring: spring ?? this.spring,
     );
   }
@@ -101,6 +123,7 @@ class AppMotionExtension extends ThemeExtension<AppMotionExtension> {
       // midpoint like most non-numeric ThemeExtension fields do.
       curveEnter: t < 0.5 ? curveEnter : other.curveEnter,
       curveExit: t < 0.5 ? curveExit : other.curveExit,
+      curveEmphasis: t < 0.5 ? curveEmphasis : other.curveEmphasis,
       spring: SpringDescription(
         mass: _lerpDouble(spring.mass, other.spring.mass, t),
         stiffness: _lerpDouble(spring.stiffness, other.spring.stiffness, t),

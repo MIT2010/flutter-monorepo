@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../icons/verdant_icons.dart';
 import '../../maturity/verdant_maturity.dart';
+import '../../shape/verdant_notched_border.dart';
 import '../../theme/app_theme_context.dart';
+import '../accents/verdant_edge_accent.dart';
 import '../inputs/app_text_field.dart';
 
 /// One choice in an [AppDropdown]'s option list.
@@ -164,7 +167,10 @@ class _AppDropdownState<T> extends State<AppDropdown<T>> {
           turns: _open ? 0.5 : 0,
           duration: motion.durationMicro,
           curve: _open ? motion.curveEnter : motion.curveExit,
-          child: const Icon(Icons.expand_more_outlined),
+          child: VerdantIcon(
+            VerdantGlyph.chevronDown,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       ),
     );
@@ -203,28 +209,38 @@ class _DropdownMenu<T> extends StatelessWidget {
       ),
       child: Material(
         type: MaterialType.transparency,
-        child: Container(
-          constraints: const BoxConstraints(maxHeight: 300),
-          decoration: BoxDecoration(
-            color: depth.surfaceColor ?? colorScheme.surface,
-            borderRadius: BorderRadius.circular(shape.radiusMd),
-            boxShadow: depth.shadow,
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(shape.radiusMd),
-            child: ListView(
-              shrinkWrap: true,
-              padding: EdgeInsets.symmetric(vertical: context.spacing.xxs),
-              children: [
-                for (final item in items)
-                  _DropdownOptionRow(
-                    label: item.label,
-                    selected: item.value == selectedValue,
-                    onTap: () => onSelected(item),
-                  ),
-              ],
-            ),
-          ),
+        child: Builder(
+          builder: (context) {
+            final border = VerdantNotchedBorder(
+              radiusTopLeft: shape.radiusMd,
+              radiusBottomLeft: shape.radiusMd,
+              radiusBottomRight: shape.radiusMd,
+              notch: shape.notchMd,
+            );
+            return Container(
+              constraints: const BoxConstraints(maxHeight: 300),
+              decoration: ShapeDecoration(
+                color: depth.surfaceColor ?? colorScheme.surface,
+                shape: border,
+                shadows: depth.shadow,
+              ),
+              child: ClipPath(
+                clipper: VerdantShapeClipper(border),
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.symmetric(vertical: context.spacing.xxs),
+                  children: [
+                    for (final item in items)
+                      _DropdownOptionRow(
+                        label: item.label,
+                        selected: item.value == selectedValue,
+                        onTap: () => onSelected(item),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -258,19 +274,24 @@ class _DropdownOptionRowState extends State<_DropdownOptionRow> {
       child: InkWell(
         onTap: widget.onTap,
         onHover: (hovering) => setState(() => _hovering = hovering),
-        child: Container(
-          color: _hovering ? colorScheme.surfaceContainerHighest : null,
-          padding: EdgeInsets.symmetric(
-            horizontal: context.spacing.sm,
-            vertical: context.spacing.xs,
-          ),
-          child: Text(
-            widget.label,
-            style: TextStyle(
-              color: widget.selected
-                  ? colorScheme.primary
-                  : colorScheme.onSurface,
-              fontWeight: widget.selected ? FontWeight.w600 : FontWeight.w400,
+        child: VerdantEdgeAccent(
+          selected: widget.selected,
+          color: colorScheme.primary,
+          width: 3,
+          child: Container(
+            color: _hovering ? colorScheme.surfaceContainerHighest : null,
+            padding: EdgeInsets.symmetric(
+              horizontal: context.spacing.sm,
+              vertical: context.spacing.xs,
+            ),
+            child: Text(
+              widget.label,
+              style: TextStyle(
+                color: widget.selected
+                    ? colorScheme.primary
+                    : colorScheme.onSurface,
+                fontWeight: widget.selected ? FontWeight.w600 : FontWeight.w400,
+              ),
             ),
           ),
         ),

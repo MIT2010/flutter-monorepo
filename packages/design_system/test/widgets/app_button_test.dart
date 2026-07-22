@@ -60,5 +60,36 @@ void main() {
       await tester.pump();
       expect(tapped, isFalse);
     });
+
+    testWidgets(
+      'stays on the primary-filled surface while loading, not the disabled '
+      'palette -- regression test: onPressed:null previously made '
+      'ElevatedButton fall back to its disabled fill, leaving the '
+      'onPrimary-colored spinner nearly invisible against it',
+      (tester) async {
+        final theme = AppTheme.light();
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: theme,
+            home: Scaffold(
+              body: AppButton(label: 'Login', onPressed: () {}, loading: true),
+            ),
+          ),
+        );
+
+        final button = tester.widget<ElevatedButton>(
+          find.byType(ElevatedButton),
+        );
+        final resolvedBackground = button.style!.backgroundColor!.resolve({
+          WidgetState.disabled,
+        });
+        final resolvedForeground = button.style!.foregroundColor!.resolve({
+          WidgetState.disabled,
+        });
+
+        expect(resolvedBackground, theme.colorScheme.primary);
+        expect(resolvedForeground, theme.colorScheme.onPrimary);
+      },
+    );
   });
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../icons/verdant_icons.dart';
 import '../../maturity/verdant_maturity.dart';
 import '../../theme/app_theme_context.dart';
 
@@ -106,7 +107,7 @@ class _RemoveButton extends StatelessWidget {
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(2),
-          child: Icon(Icons.close, size: 14, color: color),
+          child: VerdantIcon(VerdantGlyph.close, size: 14, color: color),
         ),
       ),
     );
