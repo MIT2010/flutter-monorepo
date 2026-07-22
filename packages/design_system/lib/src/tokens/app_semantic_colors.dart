@@ -32,6 +32,7 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.onWarning,
     required this.info,
     required this.onInfo,
+    required this.chartSeries,
   });
 
   static const AppSemanticColors light = AppSemanticColors(
@@ -49,6 +50,19 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     onWarning: VerdantColors.stone0,
     info: VerdantColors.mist60,
     onInfo: VerdantColors.stone0,
+    // §10.14's literal five-series order. Unlike warning/success/info
+    // above, these are decorative bar/line *fills*, not text -- held to
+    // WCAG's looser 3:1 non-text ("meaningful graphical object") contrast
+    // bar rather than 4.5:1 text contrast, so brass60 (which failed the
+    // stricter bar for `warning` above) is fine reused here at its
+    // originally-spec'd tier.
+    chartSeries: [
+      VerdantColors.moss60,
+      VerdantColors.mist60,
+      VerdantColors.brass60,
+      VerdantColors.ember60,
+      VerdantColors.stone60,
+    ],
   );
 
   static const AppSemanticColors dark = AppSemanticColors(
@@ -58,6 +72,15 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     onWarning: VerdantColors.stone98,
     info: VerdantColors.mist40,
     onInfo: VerdantColors.stone98,
+    // Same *40 tier every other dark-mode saturated role already uses
+    // (colorScheme.primary/error/tertiary) for consistency across modes.
+    chartSeries: [
+      VerdantColors.moss40,
+      VerdantColors.mist40,
+      VerdantColors.brass40,
+      VerdantColors.ember40,
+      VerdantColors.stone40,
+    ],
   );
 
   final Color success;
@@ -66,6 +89,7 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   final Color onWarning;
   final Color info;
   final Color onInfo;
+  final List<Color> chartSeries;
 
   @override
   AppSemanticColors copyWith({
@@ -75,6 +99,7 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? onWarning,
     Color? info,
     Color? onInfo,
+    List<Color>? chartSeries,
   }) {
     return AppSemanticColors(
       success: success ?? this.success,
@@ -83,6 +108,7 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       onWarning: onWarning ?? this.onWarning,
       info: info ?? this.info,
       onInfo: onInfo ?? this.onInfo,
+      chartSeries: chartSeries ?? this.chartSeries,
     );
   }
 
@@ -96,6 +122,11 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       onWarning: Color.lerp(onWarning, other.onWarning, t)!,
       info: Color.lerp(info, other.info, t)!,
       onInfo: Color.lerp(onInfo, other.onInfo, t)!,
+      // A fixed 5-color sequence, not a smoothly-interpolatable scalar --
+      // snapped at the midpoint, the same treatment this package already
+      // gives other non-trivial fields (AppElevationExtension's borders/
+      // shadows, AppMotionExtension's curves).
+      chartSeries: t < 0.5 ? chartSeries : other.chartSeries,
     );
   }
 }
